@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, User, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { blogAPI } from '../Utils/api';
 
 function BlogWrapper() {
@@ -14,7 +14,29 @@ function BlogWrapper() {
         enabled: !!slug,
     });
 
+    // First, get the total count of blogs with a minimal request
+    const { data: countData } = useQuery({
+        queryKey: ['blogsCount'],
+        queryFn: () => blogAPI.getAll(1, 1), // Fetch just 1 blog to get total count
+        staleTime: 5 * 60 * 1000,
+        cacheTime: 10 * 60 * 1000,
+    });
+
+    const totalBlogs = countData?.totalBlogs || countData?.total || 1000; // Fallback to 1000 if structure is different
+
+    // Fetch all blogs dynamically based on total count (with caching to prevent multiple fetches)
+    const { data: allBlogsData } = useQuery({
+        queryKey: ['allBlogs', totalBlogs],
+        queryFn: () => blogAPI.getAll(1, totalBlogs), // Fetch all blogs dynamically
+        enabled: !!totalBlogs, // Only run when we know the total count
+        staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+        cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+        refetchOnWindowFocus: false, // Don't refetch when window regains focus
+        refetchOnMount: false, // Don't refetch on component mount if data exists
+    });
+
     const blog = data?.blog;
+    const allBlogs = allBlogsData?.blogs || [];
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     const getImageSrc = (imgObj) => {
@@ -30,6 +52,12 @@ function BlogWrapper() {
             year: 'numeric',
         });
     };
+
+    // Determine prev/next blogs
+    const currentIndex = allBlogs.findIndex(b => b.slug === slug);
+    const prevBlog = currentIndex > 0 ? allBlogs[currentIndex - 1] : null;
+    const nextBlog = currentIndex >= 0 && currentIndex < allBlogs.length - 1 ? allBlogs[currentIndex + 1] : null;
+
 
     // Loading State
     if (isLoading) {
@@ -87,43 +115,12 @@ function BlogWrapper() {
                     />
                 )}
 
-                {/* Gradient Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a1a]/50 to-transparent" />
 
-                {/* Back Button */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="absolute top-32 md:top-36 left-4 md:left-8"
-                >
-                    <Link
-                        to="/blog"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 backdrop-blur-sm"
-                        style={{
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            color: 'white',
-                            border: '1px solid rgba(255,255,255,0.15)',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(215,183,94,0.2)';
-                            e.currentTarget.style.borderColor = 'var(--color-primary)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-                        }}
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        All Blog Posts
-                    </Link>
-                </motion.div>
 
                 {/* Title & Meta on Image */}
-                <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8">
+                <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8 xl:px-10 xl:mx-10 2xl:mx-20 2xl:px-20">
                     <div className="max-w-7xl mx-auto">
-                        {blog.category && (
+                        {/* {blog.category && (
                             <motion.span
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -137,12 +134,12 @@ function BlogWrapper() {
                             >
                                 {blog.category}
                             </motion.span>
-                        )}
+                        )} */}
                         <motion.h1
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4"
+                            className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 "
                         >
                             {blog.title}
                         </motion.h1>
@@ -367,6 +364,93 @@ function BlogWrapper() {
                     </motion.div>
                 </div>
             </div>
+
+            {/* Prev/Next Blog Navigation */}
+            {(prevBlog || nextBlog) && (
+                <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+                    <div
+                        className="rounded-2xl p-6 md:p-8  "
+                        style={{
+                            backgroundColor: 'rgba(255,255,255,0.03) ',
+                            border: '1px solid rgba(255,255,255,0.06)',
+                        }}
+                    >
+                        <div className={`flex flex-col md:flex-row gap-6 ${prevBlog && nextBlog ? 'justify-between' : 'justify-center '}`}>
+                            {/* Previous Blog */}
+                            {prevBlog && (
+                                <Link
+                                    to={`/blog/${prevBlog.slug}`}
+                                    className={`group flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${prevBlog && nextBlog ? 'md:w-[48%]' : 'md:w-content'
+                                        }`}
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.02)',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(215,183,94,0.05)';
+                                        e.currentTarget.style.borderColor = 'rgba(215,183,94,0.2)';
+                                        e.currentTarget.style.transform = 'translateX(-4px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                                        e.currentTarget.style.transform = 'translateX(0)';
+                                    }}
+                                >
+                                    <div
+                                        className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300"
+                                        style={{ backgroundColor: 'rgba(215,183,94,0.1)' }}
+                                    >
+                                        <ChevronLeft className="w-6 h-6" style={{ color: 'var(--color-primary)' }} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs text-white/40 mb-1 uppercase tracking-wider">Previous</p>
+                                        <h4 className="text-white font-semibold text-sm md:text-base line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+                                            {prevBlog.title}
+                                        </h4>
+                                    </div>
+                                </Link>
+                            )}
+
+                            {/* Next Blog */}
+                            {nextBlog && (
+                                <Link
+                                    to={`/blog/${nextBlog.slug}`}
+                                    className={`group flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${prevBlog && nextBlog ? 'md:w-[48%]' : 'md:w-auto'
+                                        }`}
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.02)',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(215,183,94,0.05)';
+                                        e.currentTarget.style.borderColor = 'rgba(215,183,94,0.2)';
+                                        e.currentTarget.style.transform = 'translateX(4px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                                        e.currentTarget.style.transform = 'translateX(0)';
+                                    }}
+                                >
+                                    <div className="flex-1 min-w-0 text-right">
+                                        <p className="text-xs text-white/40 mb-1 uppercase tracking-wider">Next</p>
+                                        <h4 className="text-white font-semibold text-sm md:text-base line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+                                            {nextBlog.title}
+                                        </h4>
+                                    </div>
+                                    <div
+                                        className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300"
+                                        style={{ backgroundColor: 'rgba(215,183,94,0.1)' }}
+                                    >
+                                        <ChevronRight className="w-6 h-6" style={{ color: 'var(--color-primary)' }} />
+                                    </div>
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom CTA */}
             <div

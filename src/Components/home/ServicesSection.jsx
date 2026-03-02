@@ -1,71 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-
-// Services data - all your chauffeur services
-const SERVICES = [
-    {
-        id: 1,
-        title: 'Airport Transfers',
-        subtitle: 'Meet and Greet',
-        description: 'Expect high-flying service and style with our all inclusive airport meet and greet service.',
-        image: 'https://images.unsplash.com/photo-1540962351504-03099e0a754b?w=800&q=80',
-    },
-    {
-        id: 2,
-        title: 'Corporate Service',
-        subtitle: 'Business Travel',
-        description: 'The perfect choice for business clients. Whether you have an important meeting or a special outing, our chauffeurs make travel stress-free.',
-        image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
-    },
-    {
-        id: 3,
-        title: 'Hourly Hire',
-        subtitle: 'As Directed',
-        description: 'Transparent hourly pricing with no hidden extras keeps you in control. Available for an entire day or hourly basis.',
-        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
-    },
-    {
-        id: 4,
-        title: 'Wedding Service',
-        subtitle: 'Special Occasions',
-        description: 'We have classy, well-designed, and elegant cars for your wedding day. Our chauffeurs are professional, licensed and fully trained.',
-        image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80',
-    },
-    {
-        id: 5,
-        title: 'Events Service',
-        subtitle: 'Corporate & Private',
-        description: 'Reputed and reliable chauffeur hire for events. We have a team of 120 chauffeurs along with premium vehicles.',
-        image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80',
-    },
-    {
-        id: 6,
-        title: 'School Transfers',
-        subtitle: 'Safe & Reliable',
-        description: 'Safe transportation for your children to and from school. Safety is our prime concern with professional chauffeurs.',
-        image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=80',
-    },
-    {
-        id: 7,
-        title: 'Intercity Travel',
-        subtitle: 'Long Distance',
-        description: 'Book in advance and save on intercity rides. Prioritizing safety, comfort, and privacy at competitive rates.',
-        image: 'https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=800&q=80',
-    },
-    {
-        id: 8,
-        title: 'Private Aviation',
-        subtitle: 'VIP Service',
-        description: 'Working closely with private airline operators for providing VIP chauffeur service with the highest levels of reliability.',
-        image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
-    },
-];
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, ArrowRight, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { serviceAPI } from '../../Utils/api';
+import ServiceCardSkeleton from '../extras/ServiceCardSkeleton';
+import ServicesGhostCard from '../extras/ServicesGhostCard';
 
 function ServicesSection() {
     const scrollRef = useRef(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
+
+    // Fetch real services from the DB
+    const { data, isLoading } = useQuery({
+        queryKey: ['home-services'],
+        queryFn: () => serviceAPI.getAllServices(1, 5),
+        staleTime: 10 * 60 * 1000,
+    });
+
+    const services = data?.services || [];
 
     // Check scroll position
     const checkScroll = () => {
@@ -83,14 +37,13 @@ function ServicesSection() {
             scrollEl.addEventListener('scroll', checkScroll);
             return () => scrollEl.removeEventListener('scroll', checkScroll);
         }
-    }, []);
+    }, [services.length]);
 
-    // Scroll by cards - original smooth behavior
+    // Scroll by cards
     const scroll = (direction) => {
         if (scrollRef.current) {
             const cardWidth = scrollRef.current.querySelector('.service-card')?.offsetWidth || 400;
-            const gap = 24; // gap-6 = 24px
-            // Scroll 2 cards at a time on desktop
+            const gap = 24;
             const scrollAmount = (cardWidth + gap) * 2;
             scrollRef.current.scrollBy({
                 left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -135,7 +88,7 @@ function ServicesSection() {
                         </motion.p>
                     </div>
 
-                    {/* Navigation Arrows - Desktop Only - Circle buttons with yellow color */}
+                    {/* Navigation Arrows - Desktop Only */}
                     <div className="hidden md:flex items-center gap-3">
                         <button
                             onClick={() => scroll('left')}
@@ -146,14 +99,6 @@ function ServicesSection() {
                                 color: canScrollLeft ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)',
                                 cursor: canScrollLeft ? 'pointer' : 'not-allowed',
                                 backgroundColor: 'transparent'
-                            }}
-                            onMouseEnter={(e) => {
-                                if (canScrollLeft) {
-                                    e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.1)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent';
                             }}
                             aria-label="Previous services"
                         >
@@ -169,14 +114,6 @@ function ServicesSection() {
                                 cursor: canScrollRight ? 'pointer' : 'not-allowed',
                                 backgroundColor: 'transparent'
                             }}
-                            onMouseEnter={(e) => {
-                                if (canScrollRight) {
-                                    e.currentTarget.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.1)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
                             aria-label="Next services"
                         >
                             <ChevronRight className="w-5 h-5" />
@@ -184,76 +121,86 @@ function ServicesSection() {
                     </div>
                 </div>
 
+                {/* Skeleton Loading State - 3 Cards */}
+                {isLoading && (
+                    <div className="flex gap-6 overflow-x-hidden pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+                        {[0, 1, 2].map((i) => (
+                            <ServiceCardSkeleton key={i} />
+                        ))}
+                    </div>
+                )}
+
                 {/* Services Carousel */}
-                <div
-                    ref={scrollRef}
-                    className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
-                    style={{
-                        scrollbarWidth: 'none',
-                        msOverflowStyle: 'none',
-                    }}
-                >
-                    {SERVICES.map((service, index) => (
-                        <motion.div
-                            key={service.id}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="service-card flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(33.333%-16px)] snap-center"
-                        >
-                            {/* Card with image on top, text content with bg on bottom - lifts up on hover */}
-                            <div className="group cursor-pointer h-full transition-transform duration-500 hover:-translate-y-2">
-                                {/* Image Container - no background */}
-                                <div className="relative aspect-[16/10] rounded-t-xl overflow-hidden">
-                                    <img
-                                        src={service.image}
-                                        alt={service.title}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    />
-                                    {/* Overlay on hover */}
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
-                                </div>
+                {!isLoading && services.length > 0 && (
+                    <div
+                        ref={scrollRef}
+                        className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
+                        style={{
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none',
+                        }}
+                    >
+                        {services.map((service, index) => (
+                            <motion.div
+                                key={service._id}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="service-card flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(33.333%-16px)] snap-center"
+                            >
+                                <Link to={`/services/${service.slug}`} className="block h-full">
+                                    <div className="group cursor-pointer h-full flex flex-col transition-transform duration-500 hover:-translate-y-2">
+                                        {/* Image Container */}
+                                        <div className="relative aspect-[16/10] rounded-t-xl overflow-hidden flex-shrink-0">
+                                            <img
+                                                src={service.image?.url}
+                                                alt={service.title}
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                loading="lazy"
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
+                                        </div>
 
-                                {/* Content with background - bottom half */}
-                                <div
-                                    className="p-4 rounded-b-xl space-y-2"
-                                    style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                                >
-                                    <p
-                                        className="text-sm font-medium uppercase tracking-wider"
-                                        style={{ color: 'var(--color-primary)' }}
-                                    >
-                                        {service.subtitle}
-                                    </p>
-                                    <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors">
-                                        {service.title}
-                                    </h3>
-                                    <p className="text-white/60 text-sm leading-relaxed line-clamp-2">
-                                        {service.description}
-                                    </p>
-
-                                    {/* Learn More Link */}
-                                    <a
-                                        href="#"
-                                        className="inline-flex items-center gap-2 text-sm font-medium pt-2 group/link"
-                                    >
-                                        <span
-                                            className="group-hover/link:underline transition-all"
-                                            style={{ color: 'var(--color-primary)' }}
+                                        {/* Content */}
+                                        <div
+                                            className="p-4 rounded-b-xl flex flex-col flex-grow"
+                                            style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
                                         >
-                                            VIEW SERVICE
-                                        </span>
-                                        <ArrowRight
-                                            className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
-                                            style={{ color: 'var(--color-primary)' }}
-                                        />
-                                    </a>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                                            <p
+                                                className="text-xs font-medium uppercase tracking-wider mb-1"
+                                                style={{ color: 'var(--color-primary)' }}
+                                            >
+                                                {service.category || service.subtitle}
+                                            </p>
+                                            <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors mb-2 line-clamp-1">
+                                                {service.title}
+                                            </h3>
+                                            <p className="text-white/60 text-sm leading-relaxed line-clamp-2 flex-grow">
+                                                {service.description}
+                                            </p>
+
+                                            {/* Learn More Link */}
+                                            <div className="inline-flex items-center gap-2 text-sm font-medium pt-3 mt-auto group/link">
+                                                <span
+                                                    className="group-hover/link:underline transition-all"
+                                                    style={{ color: 'var(--color-primary)' }}
+                                                >
+                                                    VIEW SERVICE
+                                                </span>
+                                                <ArrowRight
+                                                    className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
+                                                    style={{ color: 'var(--color-primary)' }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            </motion.div>
+                        ))}
+                        <ServicesGhostCard delay={services.length * 0.1} />
+                    </div>
+                )}
 
                 {/* Mobile Scroll Indicator */}
 
@@ -266,7 +213,7 @@ function ServicesSection() {
                 }
             `}</style>
 
-            {/* Bottom Border - gradient fade (Desktop only, brighter in center) */}
+            {/* Bottom Border */}
             <div className="hidden md:flex justify-center mt-8">
                 <div className="w-[80%] h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>

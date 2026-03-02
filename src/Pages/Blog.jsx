@@ -4,6 +4,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Loader2, Calendar, User, ArrowRight } from 'lucide-react';
 import { blogAPI } from '../Utils/api';
+import BlogCardSkeleton from '../Components/extras/BlogCardSkeleton';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -115,8 +116,10 @@ function Blog() {
                 <div className="max-w-6xl mx-auto">
                     {/* Initial Loading State */}
                     {isLoading && (
-                        <div className="flex items-center justify-center py-20">
-                            <Loader2 className="w-10 h-10 animate-spin" style={{ color: 'var(--color-primary)' }} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                            {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
+                                <BlogCardSkeleton key={i} />
+                            ))}
                         </div>
                     )}
 
@@ -222,15 +225,19 @@ function Blog() {
                             </div>
 
                             {/* Infinite Scroll Sentinel + Loading Indicator */}
-                            <div ref={sentinelRef} className="flex items-center justify-center py-12">
+                            <div className="py-12">
+                                {/* Sentinel is hidden but triggers loading */}
+                                <div ref={sentinelRef} className="h-px w-full" />
+
                                 {isFetchingNextPage && (
-                                    <div className="flex flex-col items-center gap-3">
-                                        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
-                                        <p className="text-white/40 text-sm">Loading more blogs...</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mt-6">
+                                        <BlogCardSkeleton />
+                                        <BlogCardSkeleton />
+                                        <BlogCardSkeleton />
                                     </div>
                                 )}
                                 {!hasNextPage && blogs.length > ITEMS_PER_PAGE && (
-                                    <p className="text-white/30 text-sm">You've reached the end — all blogs loaded.</p>
+                                    <p className="text-center text-white/30 text-sm pt-8">You've reached the end — all blogs loaded.</p>
                                 )}
                             </div>
                         </>

@@ -81,7 +81,7 @@ function App() {
       <Routes>
         {/* Public Routes with Layout */}
         <Route path="/" element={<Layout isHeroPage={true}><Home /></Layout>} />
-        <Route path="/booking" element={<Layout isHeroPage={false}><Booking /></Layout>} />
+        <Route path="/booking" element={<Layout isHeroPage={false} showContactForm={false}><Booking /></Layout>} />
         <Route path="/services" element={<Layout isHeroPage={false}><Services /></Layout>} />
         <Route path="/services/:slug" element={<Layout isHeroPage={false}><ServiceWrapper /></Layout>} />
         <Route path="/fleet" element={<Layout isHeroPage={false}><Fleet /></Layout>} />
@@ -90,7 +90,7 @@ function App() {
         <Route path="/blog" element={<Layout isHeroPage={false}><Blog /></Layout>} />
         <Route path="/blog/:slug" element={<Layout isHeroPage={false}><BlogWrapper /></Layout>} />
         <Route path="/about" element={<Layout isHeroPage={false}><AboutUs /></Layout>} />
-        <Route path="/contact" element={<Layout isHeroPage={false}><ContactUs /></Layout>} />
+        <Route path="/contact" element={<Layout isHeroPage={false} showContactForm={false}><ContactUs /></Layout>} />
         <Route path="/terms-and-conditions" element={<Layout isHeroPage={false}><TermsAndConditions /></Layout>} />
         <Route path="/privacy-policy" element={<Layout isHeroPage={false}><PrivacyPolicy /></Layout>} />
         <Route path="/gdpr-policy" element={<Layout isHeroPage={false}><GDPRPolicy /></Layout>} />

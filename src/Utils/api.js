@@ -306,6 +306,12 @@ export const fleetAPI = {
 
 // Event APIs
 export const eventAPI = {
+    // Get all events
+    getAll: async () => {
+        const response = await api.get("/api/events", { params: { limit: 100 } });
+        return response.data;
+    },
+
     // Get event by slug
     getBySlug: async (slug) => {
         const response = await api.get(`/api/events/${slug}`);
@@ -324,6 +330,30 @@ export const blogAPI = {
     // Get blog by slug (full body with HTML)
     getBySlug: async (slug) => {
         const response = await api.get(`/api/blogs/${slug}`);
+        return response.data;
+    },
+};
+
+// Contact / Inquiry API
+export const contactAPI = {
+    // Submit contact form inquiry — sends email to admin
+    submitInquiry: async (data) => {
+        const response = await api.post("/api/contact", data);
+        return response.data;
+    },
+
+    // Submit bulk / corporate quote request — sends email to admin
+    submitBulkQuote: async (data) => {
+        const response = await api.post("/api/contact/quote", data);
+        return response.data;
+    },
+};
+
+// FAQ APIs
+export const faqAPI = {
+    // Get all active FAQs
+    getFAQs: async () => {
+        const response = await api.get("/api/faqs");
         return response.data;
     },
 };

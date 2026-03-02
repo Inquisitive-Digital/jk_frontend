@@ -95,21 +95,13 @@ function ServiceWrapper() {
 
                 {/* Title Overlay on Image */}
                 <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8">
-                    <div className="max-w-5xl mx-auto">
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3"
-                            style={{ color: 'var(--color-primary)' }}
-                        >
-                            {service.subtitle}
-                        </motion.p>
+                    <div className="max-w-7xl mx-auto  xl:px-5">
+
                         <motion.h1
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white"
+                            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white  xl:ml-2"
                         >
                             {service.title}
                         </motion.h1>
@@ -118,7 +110,7 @@ function ServiceWrapper() {
             </div>
 
             {/* Content Section */}
-            <div className="max-w-5xl mx-auto px-4 md:px-8 py-12 md:py-20">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
                 <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
                     {/* Main Content — 2/3 */}
                     <div className="lg:col-span-2 space-y-8">

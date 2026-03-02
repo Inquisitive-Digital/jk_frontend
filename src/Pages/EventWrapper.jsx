@@ -1,18 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, ArrowRight } from 'lucide-react';
 import { eventAPI } from '../Utils/api';
 
 function EventWrapper() {
     const { slug } = useParams();
+    const [allEvents, setAllEvents] = useState([]);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['event', slug],
         queryFn: () => eventAPI.getBySlug(slug),
         enabled: !!slug,
     });
+
+    // Fetch all events for the "Sports Collection" page
+    const isSportsCollection = slug === 'chauffeur-service-for-sports-event';
+    useEffect(() => {
+        if (isSportsCollection) {
+            eventAPI.getAll().then(res => {
+                setAllEvents(res.events || []);
+            });
+        }
+    }, [isSportsCollection]);
 
     const event = data?.event;
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -22,6 +33,24 @@ function EventWrapper() {
         if (imgObj.url.startsWith('http')) return imgObj.url;
         return `${API_BASE}${imgObj.url}`;
     };
+
+    // Filter sports events for the collection
+    const sportsEvents = allEvents.filter(e =>
+        e.slug !== 'chauffeur-service-for-sports-event' && // Exclude self
+        e.slug !== 'event-calendar' &&
+        e.slug !== 'event-chauffeur-service-in-london' &&
+        (e.title.toLowerCase().includes('wimbledon') ||
+            e.title.toLowerCase().includes('ascot') ||
+            e.title.toLowerCase().includes('silverstone') ||
+            e.title.toLowerCase().includes('farnborough') ||
+            e.title.toLowerCase().includes('o2') ||
+            e.title.toLowerCase().includes('excel') ||
+            e.title.toLowerCase().includes('twickenham') ||
+            e.title.toLowerCase().includes('cheltenham') ||
+            e.title.toLowerCase().includes('goodwood') ||
+            e.title.toLowerCase().includes('stadium') ||
+            e.title.toLowerCase().includes('racecourse'))
+    );
 
     // Loading State
     if (isLoading) {
@@ -57,7 +86,7 @@ function EventWrapper() {
     const heroSrc = getImageSrc(event.heroImage);
 
     return (
-        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
             {/* Hero Image Section */}
             <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
                 {heroSrc ? (
@@ -116,7 +145,7 @@ function EventWrapper() {
 
                 {/* Title Overlay on Image */}
                 <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8">
-                    <div className="max-w-5xl mx-auto">
+                    <div className="max-w-7xl mx-auto">
                         {event.subtitle && (
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
@@ -132,7 +161,7 @@ function EventWrapper() {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white"
+                            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white relative z-10"
                         >
                             {event.title}
                         </motion.h1>
@@ -140,7 +169,72 @@ function EventWrapper() {
                 </div>
             </div>
 
-            {/* Content Section */}
+            {/* SPECIAL SPORTS COLLECTION VIEW */}
+            {isSportsCollection && (
+                <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+                    <div className="mb-12 text-center">
+                        <h2 className="text-2xl md:text-3xl font-semibold text-white mb-4">
+                            Sports Event Chauffeur Services
+                        </h2>
+                        <div className="w-20 h-1 mx-auto rounded-full" style={{ backgroundColor: 'var(--color-primary)' }} />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {sportsEvents.map((sportEvent, idx) => (
+                            <motion.div
+                                key={sportEvent._id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="group rounded-xl overflow-hidden flex flex-col h-full"
+                                style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+                            >
+                                {/* Card Image */}
+                                <div className="relative h-48 overflow-hidden">
+                                    <img
+                                        src={getImageSrc(sportEvent.heroImage) || 'https://via.placeholder.com/800x600?text=Event'}
+                                        alt={sportEvent.title}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                                </div>
+
+                                {/* Card Content */}
+                                <div className="p-6 flex flex-col flex-grow">
+                                    <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-[var(--color-primary)] transition-colors">
+                                        {sportEvent.title}
+                                    </h3>
+
+                                    {/* Features (limit to 3) */}
+                                    <div className="space-y-2 mb-6 flex-grow">
+                                        {(sportEvent.features || []).slice(0, 3).map((feat, i) => (
+                                            <div key={i} className="flex items-start gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: 'var(--color-primary)' }} />
+                                                <span className="text-white/60 text-sm">{feat}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <Link
+                                        to={`/events/${sportEvent.slug}`}
+                                        className="w-full py-3 rounded-lg font-semibold text-sm text-center transition-all duration-300 flex items-center justify-center gap-2"
+                                        style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
+                                    >
+                                        Book Now <ArrowRight className="w-4 h-4" />
+                                    </Link>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* STANDARD EVENT CONTENT (Filtered out if Sports Collection to avoid duplication, or kept below?) 
+                The user wants "Categorized". So the sports page should MAINLY be the grid. 
+                But it might also have intro text. Let's keep the content section but maybe simplify it if it's the collection page.
+                Actually, let's keep it below the grid or above. Above is better for intro.
+            */}
+
             <div className="max-w-5xl mx-auto px-4 md:px-8 py-12 md:py-20">
                 <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
                     {/* Main Content — 2/3 */}
@@ -151,18 +245,22 @@ function EventWrapper() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}
                         >
-                            <h2
-                                className="text-xl md:text-2xl font-semibold mb-4"
-                                style={{ color: 'var(--color-primary)' }}
-                            >
-                                About This Event Service
-                            </h2>
-                            <p className="text-white/70 text-base md:text-lg leading-relaxed">
-                                {event.description}
-                            </p>
+                            {!isSportsCollection && (
+                                <h2
+                                    className="text-xl md:text-2xl font-semibold mb-4"
+                                    style={{ color: 'var(--color-primary)' }}
+                                >
+                                    About This Event Service
+                                </h2>
+                            )}
+                            {/* Render HTML content safely */}
+                            <div
+                                className="text-white/70 text-base md:text-lg leading-relaxed event-content"
+                                dangerouslySetInnerHTML={{ __html: event.description }}
+                            />
                         </motion.div>
 
-                        {/* Long Description */}
+                        {/* Long Description (HTML) */}
                         {event.longDescription && (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -174,14 +272,15 @@ function EventWrapper() {
                                     className="w-full h-px"
                                     style={{ background: 'linear-gradient(90deg, var(--color-primary), transparent)' }}
                                 />
-                                <div className="text-white/60 text-base leading-relaxed whitespace-pre-line">
-                                    {event.longDescription}
-                                </div>
+                                <div
+                                    className="text-white/60 text-base leading-relaxed event-content"
+                                    dangerouslySetInnerHTML={{ __html: event.longDescription }}
+                                />
                             </motion.div>
                         )}
 
-                        {/* Features List */}
-                        {event.features && event.features.length > 0 && (
+                        {/* Features List (Hide on sports collection as it's redundant or generic) */}
+                        {!isSportsCollection && event.features && event.features.length > 0 && (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}

@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
-  ArrowUpRight,
+  ArrowRight,
   Loader2,
+  Users,
+  Briefcase,
 } from "lucide-react";
-import { vehicleAPI, pricingAPI } from "../../Utils/api";
+import { fleetAPI } from "../../Utils/api";
 
 function FleetSection() {
   const navigate = useNavigate();
@@ -16,48 +18,14 @@ function FleetSection() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Fetch all vehicles
-  const { data: vehicleResponse, isLoading: vehiclesLoading } = useQuery({
-    queryKey: ["fleet-vehicles"],
-    queryFn: () => vehicleAPI.getAllVehicles({ isActive: true }),
+  // Fetch all fleet entries from the fleet collection
+  const { data: fleetResponse, isLoading } = useQuery({
+    queryKey: ["home-fleet"],
+    queryFn: () => fleetAPI.getAll(1, 20),
     staleTime: 10 * 60 * 1000,
   });
 
-  // Fetch all pricing configs to get P2P pricing
-  const { data: pricingResponse, isLoading: pricingLoading } = useQuery({
-    queryKey: ["fleet-pricing"],
-    queryFn: () => pricingAPI.getAllPricing(),
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const vehicles = vehicleResponse?.data || [];
-  const pricingData = pricingResponse?.data || [];
-
-  // Map pricing to vehicles - get the base price from P2P distanceTiers
-  const vehiclesWithPricing = vehicles.map((vehicle) => {
-    // Find P2P pricing for this vehicle
-    const pricing = pricingData.find(
-      (p) =>
-        (p.vehicle?._id === vehicle._id || p.vehicle === vehicle._id) &&
-        p.pricingType === "p2p"
-    );
-
-    // Get the first tier (base price) from distanceTiers
-    let basePrice = null;
-    if (pricing?.pointToPoint?.distanceTiers?.length > 0) {
-      const firstTier = pricing.pointToPoint.distanceTiers[0];
-      if (firstTier.type === "fixed") {
-        basePrice = firstTier.price;
-      }
-    }
-
-    return {
-      ...vehicle,
-      basePrice: basePrice,
-    };
-  });
-
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const fleetItems = fleetResponse?.fleet || [];
 
   // Check scroll position
   const checkScroll = () => {
@@ -75,7 +43,7 @@ function FleetSection() {
       scrollEl.addEventListener("scroll", checkScroll);
       return () => scrollEl.removeEventListener("scroll", checkScroll);
     }
-  }, [vehiclesWithPricing]);
+  }, [fleetItems.length]);
 
   // Scroll by cards
   const scroll = (direction) => {
@@ -90,12 +58,6 @@ function FleetSection() {
       });
     }
   };
-
-  const handleBookNow = () => {
-    navigate("/booking");
-  };
-
-  const isLoading = vehiclesLoading || pricingLoading;
 
   return (
     <section
@@ -158,15 +120,6 @@ function FleetSection() {
                 cursor: canScrollLeft ? "pointer" : "not-allowed",
                 backgroundColor: "transparent",
               }}
-              onMouseEnter={(e) => {
-                if (canScrollLeft) {
-                  e.currentTarget.style.backgroundColor =
-                    "rgba(var(--color-primary-rgb), 0.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
               aria-label="Previous vehicles"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -184,15 +137,6 @@ function FleetSection() {
                   : "rgba(255,255,255,0.3)",
                 cursor: canScrollRight ? "pointer" : "not-allowed",
                 backgroundColor: "transparent",
-              }}
-              onMouseEnter={(e) => {
-                if (canScrollRight) {
-                  e.currentTarget.style.backgroundColor =
-                    "rgba(var(--color-primary-rgb), 0.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
               }}
               aria-label="Next vehicles"
             >
@@ -213,7 +157,7 @@ function FleetSection() {
         )}
 
         {/* Fleet Carousel */}
-        {!isLoading && vehiclesWithPricing.length > 0 && (
+        {!isLoading && fleetItems.length > 0 && (
           <div
             ref={scrollRef}
             className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
@@ -222,10 +166,8 @@ function FleetSection() {
               msOverflowStyle: "none",
             }}
           >
-            {vehiclesWithPricing.map((vehicle, index) => {
-              const imageUrl = vehicle.image?.url
-                ? `${API_BASE}/${vehicle.image.url.replace(/\\/g, "/")}`
-                : "https://via.placeholder.com/400x250?text=Vehicle";
+            {fleetItems.map((vehicle, index) => {
+              const imageUrl = vehicle.heroImage?.url || "";
 
               return (
                 <motion.div
@@ -236,71 +178,94 @@ function FleetSection() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="fleet-card flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(33.333%-16px)] snap-center"
                 >
-                  <div className="group cursor-pointer h-full transition-transform duration-500 hover:-translate-y-2">
-                    {/* Card Container - Dark themed like ServicesSection */}
-                    <div
-                      className="relative rounded-2xl overflow-hidden h-full"
-                      style={{
-                        backgroundColor: "rgba(255,255,255,0.05)",
-                      }}
-                    >
-                      {/* Image Container */}
-                      <div className="relative aspect-[16/10] overflow-hidden">
-                        <img
-                          src={imageUrl}
-                          alt={vehicle.categoryName}
-                          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
-                          onError={(e) => {
-                            e.target.src =
-                              "https://via.placeholder.com/400x250?text=Vehicle";
-                          }}
-                        />
-                        {/* Overlay on hover */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
-                      </div>
-
-                      {/* Content - Bottom section */}
-                      <div className="p-4 space-y-2">
-                        {/* Price Tag */}
-                        <p
-                          className="text-sm font-medium uppercase tracking-wider"
-                          style={{ color: "var(--color-primary)" }}
-                        >
-                          {vehicle.basePrice
-                            ? `From £${vehicle.basePrice.toFixed(0)}`
-                            : "Quote on booking"}
-                        </p>
-
-                        {/* Vehicle Name */}
-                        <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors">
-                          {vehicle.categoryName}
-                        </h3>
-
-                        {/* Book Now Link */}
-                        <div className="flex items-center justify-between pt-2">
-                          <a
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleBookNow();
+                  <Link to={`/fleet/${vehicle.slug}`} className="block h-full">
+                    <div className="group cursor-pointer h-full flex flex-col transition-transform duration-500 hover:-translate-y-2">
+                      {/* Card Container */}
+                      <div
+                        className="relative rounded-2xl overflow-hidden h-full flex flex-col"
+                        style={{
+                          backgroundColor: "rgba(255,255,255,0.05)",
+                        }}
+                      >
+                        {/* Image Container */}
+                        <div className="relative aspect-[16/10] overflow-hidden flex-shrink-0">
+                          <img
+                            src={imageUrl}
+                            alt={vehicle.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.src =
+                                "https://via.placeholder.com/400x250?text=Vehicle";
                             }}
-                            className="inline-flex items-center gap-2 text-sm font-medium group/link"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
+                        </div>
+
+                        {/* Content - Bottom section */}
+                        <div className="p-4 space-y-2 flex flex-col flex-grow">
+                          {/* Subtitle */}
+                          <p
+                            className="text-xs font-medium uppercase tracking-wider"
+                            style={{ color: "var(--color-primary)" }}
                           >
-                            <span
-                              className="group-hover/link:underline transition-all"
-                              style={{ color: "var(--color-primary)" }}
+                            {vehicle.subtitle || "Luxury Vehicle"}
+                          </p>
+
+                          {/* Vehicle Name */}
+                          <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors">
+                            {vehicle.title}
+                          </h3>
+
+                          {/* Capacity badges */}
+                          <div className="flex items-center gap-4 text-white/50 text-sm">
+                            {vehicle.passengers > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <Users className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }} />
+                                <span>{vehicle.passengers}</span>
+                              </div>
+                            )}
+                            {vehicle.luggage > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <Briefcase className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }} />
+                                <span>{vehicle.luggage}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* View / Book Link */}
+                          <div className="flex items-center justify-between pt-2 mt-auto">
+                            <div className="inline-flex items-center gap-2 text-sm font-medium group/link">
+                              <span
+                                className="group-hover/link:underline transition-all"
+                                style={{ color: "var(--color-primary)" }}
+                              >
+                                VIEW DETAILS
+                              </span>
+                              <ArrowRight
+                                className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
+                                style={{ color: "var(--color-primary)" }}
+                              />
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navigate("/booking");
+                              }}
+                              className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300"
+                              style={{
+                                backgroundColor: "var(--color-primary)",
+                                color: "var(--color-dark)",
+                              }}
                             >
-                              BOOK NOW
-                            </span>
-                            <ArrowUpRight
-                              className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
-                              style={{ color: "var(--color-primary)" }}
-                            />
-                          </a>
+                              Book Now
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               );
             })}
@@ -308,7 +273,7 @@ function FleetSection() {
         )}
 
         {/* Empty State */}
-        {!isLoading && vehiclesWithPricing.length === 0 && (
+        {!isLoading && fleetItems.length === 0 && (
           <div className="text-center py-12">
             <p className="text-white/50">
               No vehicles available at the moment.
@@ -316,8 +281,8 @@ function FleetSection() {
           </div>
         )}
 
-        {/* Mobile Navigation + Vehicle Count */}
-        {!isLoading && vehiclesWithPricing.length > 0 && (
+        {/* Mobile Navigation */}
+        {!isLoading && fleetItems.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -325,7 +290,6 @@ function FleetSection() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex items-center justify-between mt-8"
           >
-            {/* Mobile Navigation */}
             <div className="flex items-center gap-3">
               <div className="flex md:hidden items-center gap-2">
                 <button
@@ -359,29 +323,7 @@ function FleetSection() {
                   <ChevronRight size={18} />
                 </button>
               </div>
-              {/* <span className="text-white/50 text-sm">
-                {vehiclesWithPricing.length} vehicles
-              </span> */}
             </div>
-
-            {/* Open Page Button */}
-            {/* <button
-              onClick={() => navigate("/booking")}
-              className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300"
-              style={{
-                background: "var(--color-primary)",
-                color: "var(--color-dark)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow =
-                  "0 6px 20px rgba(var(--color-primary-rgb), 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              Open page
-            </button> */}
           </motion.div>
         )}
       </div>
