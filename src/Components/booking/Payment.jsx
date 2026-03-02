@@ -22,6 +22,7 @@ import {
   TestTube2,
 } from "lucide-react";
 
+
 // Test mode origins - must match server configuration
 const TEST_MODE_ORIGINS = [
   "http://localhost",
@@ -131,7 +132,7 @@ const PaymentForm = ({ onSuccess, onError, amount }) => {
         type="submit"
         disabled={!stripe || isProcessing}
         className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl
-          font-semibold shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+          font-semibold shadow-lg transition-all duration-200  disabled:opacity-50 disabled:cursor-not-allowed text-lg"
         style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
       >
         {isProcessing ? (

@@ -316,7 +316,7 @@ function BookingSummary({ data, onEdit, onProceed, isLoading = false }) {
                 >
                     <button
                         onClick={onEdit}
-                        className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 border rounded-xl font-semibold transition-all duration-200 text-sm"
+                        className="flex-1 flex items-center cursor-pointer justify-center gap-2 py-3.5 px-6 border rounded-xl font-semibold transition-all duration-200 text-sm"
                         style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -328,7 +328,7 @@ function BookingSummary({ data, onEdit, onProceed, isLoading = false }) {
                     <button
                         onClick={onProceed}
                         disabled={isLoading}
-                        className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={`flex-1 flex ${!isLoading?"cursor-pointer":""}  items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowe`}
                         style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
                     >
                         {isLoading ? (

@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import StepNavBar from "./StepNavBar";
 
 // Country codes data with flags
 const countryCodes = [
@@ -392,8 +393,8 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
   }));
 
   return (
-    <div className="py-2 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="py-2">
+      <div className="w-full">
         {/* Header - compact, no icon */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -630,46 +631,13 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
         </motion.div>
 
         {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex gap-4 mt-5"
-        >
-          <button
-            onClick={onBack}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 border rounded-xl font-semibold transition-all duration-200 text-sm"
-            style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <ArrowLeft size={18} />
-            Back
-          </button>
-
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 text-sm
-              ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
-          >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style={{ color: 'var(--color-dark)' }}>
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
-              </>
-            ) : (
-              <>
-                Proceed
-                <ArrowRight size={18} />
-              </>
-            )}
-          </button>
-        </motion.div>
+        <StepNavBar
+          onBack={onBack}
+          onContinue={handleSubmit}
+          backLabel="BACK"
+          continueLabel="PROCEED"
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

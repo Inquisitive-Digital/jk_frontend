@@ -6,6 +6,7 @@ import CarsSelection from "../Components/booking/CarsSelection";
 import UserDetails from "../Components/booking/UserDetails";
 import BookingSummary from "../Components/booking/BookingSummary";
 import Payment from "../Components/booking/Payment";
+import StickyBookingSummary from "../Components/booking/StickyBookingSummary";
 import { paymentAPI, bookingAPI } from "../Utils/api";
 
 const LIBRARIES = ["places"];
@@ -271,18 +272,37 @@ function Booking() {
   const currentStepConfig = STEPS.find((s) => s.id === currentStep);
   const displayStep = showSummary ? 3 : currentStep;
 
+  // Build vehicle prop for StickyBookingSummary
+  const stickyVehicle = bookingData.selectedVehicle
+    ? {
+      name: bookingData.selectedVehicle.categoryName,
+      price: bookingData.selectedVehicle.pricing?.totalPrice,
+      class: bookingData.selectedVehicle.categoryDetails,
+      pax: bookingData.selectedVehicle.numberOfPassengers,
+      luggage: bookingData.selectedVehicle.numberOfBigLuggage,
+    }
+    : null;
+
+  const stickyPassengerName = [
+    bookingData.passengerDetails?.firstName,
+    bookingData.passengerDetails?.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className="min-h-screen font-sans pb-20" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
+
       {/* --- STEPS INDICATOR --- */}
       <div className="pt-32 md:pt-36 pb-6" style={{ backgroundColor: 'var(--color-dark)' }}>
-        <div className="max-w-4xl mx-auto px-4">
-          {/* Stepper */}
-          <div className="flex items-center justify-center space-x-1 md:space-x-4 text-sm">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+          {/* Stepper — always centered */}
+          <div className="flex items-center space-x-1 lg:space-x-4 text-sm justify-center">
             {STEPS.map((step, index) => (
               <React.Fragment key={step.id}>
                 {index > 0 && (
                   <div
-                    className="w-8 md:w-16 h-0.5 rounded-full transition-all duration-500"
+                    className="w-8 lg:w-16 h-0.5 rounded-full transition-all duration-500"
                     style={{
                       background: displayStep >= step.id
                         ? 'linear-gradient(to right, var(--color-primary), var(--color-primary))'
@@ -291,14 +311,11 @@ function Booking() {
                   ></div>
                 )}
                 <div
-                  className={`flex items-center gap-1 md:gap-2 transition-all duration-300 ${displayStep >= step.id
-                    ? "font-semibold"
-                    : ""
-                    }`}
+                  className={`flex items-center gap-1 lg:gap-2 transition-all duration-300 ${displayStep >= step.id ? "font-semibold" : ""}`}
                   style={{ color: displayStep >= step.id ? '#fff' : 'rgba(255,255,255,0.35)' }}
                 >
                   <span
-                    className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full text-sm font-bold border-2 transition-all duration-300"
+                    className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full text-sm font-bold border-2 transition-all duration-300"
                     style={
                       displayStep > step.id
                         ? {
@@ -323,7 +340,7 @@ function Booking() {
                   >
                     {displayStep > step.id ? "✓" : step.id}
                   </span>
-                  <span className="hidden md:inline uppercase text-xs tracking-wide">
+                  <span className="hidden lg:inline uppercase text-xs tracking-wide">
                     {step.label}
                   </span>
                 </div>
@@ -333,120 +350,146 @@ function Booking() {
         </div>
       </div>
 
-      {/* --- CONTENT AREA --- */}
-      <div className="max-w-3xl mx-auto mt-8 md:mt-12 px-4 md:px-0">
-        <AnimatePresence mode="wait">
-          {currentStep === 1 && (
-            <motion.div
-              key="step-1"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Locations
-                data={bookingData}
-                updateData={updateBooking}
-                onNext={() => goToStep(2)}
-              />
-            </motion.div>
+      {/* --- TWO-COLUMN LAYOUT (desktop) / SINGLE-COLUMN (mobile) --- */}
+      <div className="max-w-7xl mx-auto mt-0 px-4 lg:px-8">
+        <div className="flex flex-col lg:flex-row lg:gap-8">
+
+          {/* LEFT: Main content — full width on mobile, 60% on desktop (full width on Step 1, review, and payment) */}
+          <div className={`w-full min-w-0 ${showSummary || currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"
+            }`}>
+            <AnimatePresence mode="wait">
+              {currentStep === 1 && (
+                <motion.div
+                  key="step-1"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Locations
+                    data={bookingData}
+                    updateData={updateBooking}
+                    onNext={() => goToStep(2)}
+                  />
+                </motion.div>
+              )}
+
+              {currentStep === 2 && (
+                <motion.div
+                  key="step-2"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CarsSelection
+                    data={bookingData}
+                    updateData={updateBooking}
+                    onNext={() => goToStep(3)}
+                    onBack={() => goToStep(1)}
+                  />
+                </motion.div>
+              )}
+
+              {currentStep === 3 && !showSummary && (
+                <motion.div
+                  key="step-3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <UserDetails
+                    data={bookingData}
+                    updateData={updateBooking}
+                    onNext={handleUserDetailsSubmit}
+                    onBack={() => goToStep(2)}
+                    isLoading={isLoadingLead}
+                  />
+                </motion.div>
+              )}
+
+              {currentStep === 3 && showSummary && (
+                <motion.div
+                  key="step-3-summary"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <BookingSummary
+                    data={bookingData}
+                    onEdit={handleEditFromSummary}
+                    onProceed={handleProceedToPayment}
+                    isLoading={isLoadingPayment}
+                  />
+                </motion.div>
+              )}
+
+              {currentStep === 4 && (
+                <motion.div
+                  key="step-4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Payment
+                    data={bookingData}
+                    clientSecret={clientSecret}
+                    onBack={() => {
+                      setShowSummary(true);
+                      setCurrentStep(3);
+                    }}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    onComplete={() => {
+                      setBookingData({
+                        pickup: null,
+                        dropoff: null,
+                        pickupDate: new Date(),
+                        pickupTime: "12:00 PM",
+                        serviceType: "oneway",
+                        hours: 2,
+                        selectedVehicle: null,
+                        journeyInfo: null,
+                        passengerDetails: null,
+                        flightDetails: null,
+                        specialInstructions: "",
+                        savedBookingId: null,
+                        originalEmail: null,
+                      });
+                      setClientSecret(null);
+                      setShowSummary(false);
+                      setCurrentStep(1);
+                    }}
+                    isLoadingIntent={isLoadingPayment}
+                    isTestMode={isTestMode}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* RIGHT: Sticky summary — hidden on mobile/tablet, Step 1, review step, and payment step */}
+          {!showSummary && currentStep !== 1 && currentStep !== 4 && (
+            <div className="hidden lg:block lg:w-[40%]">
+              <div className="sticky top-32">
+                <StickyBookingSummary
+                  from={bookingData.pickup}
+                  to={bookingData.serviceType === "hourly" ? bookingData.pickup : bookingData.dropoff}
+                  date={bookingData.pickupDate}
+                  time={bookingData.pickupTime}
+                  vehicle={stickyVehicle}
+                  passengerName={stickyPassengerName || null}
+                  extras={[]}
+                  currentStep={currentStep}
+                  onGoBack={() => goToStep(currentStep - 1)}
+                />
+              </div>
+            </div>
           )}
 
-          {currentStep === 2 && (
-            <motion.div
-              key="step-2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CarsSelection
-                data={bookingData}
-                updateData={updateBooking}
-                onNext={() => goToStep(3)}
-                onBack={() => goToStep(1)}
-              />
-            </motion.div>
-          )}
-
-          {currentStep === 3 && !showSummary && (
-            <motion.div
-              key="step-3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <UserDetails
-                data={bookingData}
-                updateData={updateBooking}
-                onNext={handleUserDetailsSubmit}
-                onBack={() => goToStep(2)}
-                isLoading={isLoadingLead}
-              />
-            </motion.div>
-          )}
-
-          {currentStep === 3 && showSummary && (
-            <motion.div
-              key="step-3-summary"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <BookingSummary
-                data={bookingData}
-                onEdit={handleEditFromSummary}
-                onProceed={handleProceedToPayment}
-                isLoading={isLoadingPayment}
-              />
-            </motion.div>
-          )}
-
-          {currentStep === 4 && (
-            <motion.div
-              key="step-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Payment
-                data={bookingData}
-                clientSecret={clientSecret}
-                onBack={() => {
-                  setShowSummary(true);
-                  setCurrentStep(3);
-                }}
-                onPaymentSuccess={handlePaymentSuccess}
-                onComplete={() => {
-                  // Reset everything and go back to Step 1
-                  setBookingData({
-                    pickup: null,
-                    dropoff: null,
-                    pickupDate: new Date(),
-                    pickupTime: "12:00 PM",
-                    serviceType: "oneway",
-                    hours: 2,
-                    selectedVehicle: null,
-                    journeyInfo: null,
-                    passengerDetails: null,
-                    flightDetails: null,
-                    specialInstructions: "",
-                    savedBookingId: null,
-                    originalEmail: null,
-                  });
-                  setClientSecret(null);
-                  setShowSummary(false);
-                  setCurrentStep(1);
-                }}
-                isLoadingIntent={isLoadingPayment}
-                isTestMode={isTestMode}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </div>
       </div>
     </div>
   );

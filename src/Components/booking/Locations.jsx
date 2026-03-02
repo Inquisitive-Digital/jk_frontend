@@ -10,69 +10,76 @@ import {
   ChevronLeft,
   ChevronRight,
   Timer,
+  Phone
 } from "lucide-react";
 
-// --- 1. CSS FOR GOOGLE MAPS AUTOCOMPLETE STYLING (DARK THEME) ---
-const googleMapsStyles = `
+// --- ENHANCED CSS FOR AUTOCOMPLETE & SCROLLBARS ---
+const customStyles = `
   .pac-container {
-    border-radius: 12px;
-    margin-top: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.1);
-    background-color: #1a1a1a !important;
-    font-family: inherit;
+    border-radius: 8px;
+    margin-top: 4px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(215, 183, 94, 0.2);
+    background-color: #121212 !important;
     z-index: 9999 !important;
   }
   .pac-item {
-    padding: 12px 16px;
-    font-size: 16px;
+    padding: 10px 14px;
+    color: #ccc !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: #121212 !important;
     cursor: pointer;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    line-height: 1.5;
-    color: #e5e5e5 !important;
-    background-color: #1a1a1a !important;
   }
-  .pac-item:first-child {
-    border-top: none;
+  .pac-item:hover,
+  .pac-item-selected,
+  .pac-item-selected:hover {
+    background-color: #1e1e1e !important;
+    color: #fff !important;
   }
-  .pac-item:hover {
-    background-color: #2a2a2a !important;
+  .pac-item-selected .pac-item-query {
+    color: var(--color-primary) !important;
   }
-  .pac-item-query {
-    font-size: 16px;
-    color: #ffffff !important;
-    font-weight: 500;
+  .pac-item-query { color: #fff !important; }
+  .pac-matched { color: var(--color-primary) !important; }
+  
+  /* Custom Scrollbar Styles for Pickers */
+  .picker-scrollbar::-webkit-scrollbar {
+    width: 6px;
   }
-  .pac-icon {
-    margin-top: 4px;
-    filter: brightness(2);
+  .picker-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
   }
-  .pac-item-selected {
-    background-color: #2a2a2a !important;
+  .picker-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(215, 183, 94, 0.5);
+    border-radius: 3px;
+  }
+  .picker-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(215, 183, 94, 0.8);
+  }
+  .picker-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(215, 183, 94, 0.5) rgba(255, 255, 255, 0.05);
   }
 `;
 
 // --- HELPER: CLICK OUTSIDE HOOK ---
 function useClickOutside(ref, handler) {
   useEffect(() => {
-    const listener = (event) => {
-      if (!ref.current || ref.current.contains(event.target)) {
-        return;
-      }
-      handler(event);
+    const listener = (e) => {
+      if (!ref.current || ref.current.contains(e.target)) return;
+      handler(e);
     };
     document.addEventListener("mousedown", listener);
-    document.addEventListener("touchstart", listener);
-    return () => {
-      document.removeEventListener("mousedown", listener);
-      document.removeEventListener("touchstart", listener);
-    };
+    return () => document.removeEventListener("mousedown", listener);
   }, [ref, handler]);
 }
 
-// --- CUSTOM TIME PICKER COMPONENT (DARK) ---
+// --- CUSTOM TIME PICKER COMPONENT ---
 const CustomTimePicker = ({ value, onChange, onClose }) => {
   const wrapperRef = useRef(null);
+  const hoursScrollRef = useRef(null);
+  const minutesScrollRef = useRef(null);
   useClickOutside(wrapperRef, onClose);
 
   const [hours, setHours] = useState("12");
@@ -89,9 +96,29 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
     }
   }, [value]);
 
+  // Scroll selected item into view when value changes
+  useEffect(() => {
+    if (hoursScrollRef.current) {
+      const selectedEl = hoursScrollRef.current.querySelector(`[data-hour="${hours}"]`);
+      if (selectedEl) {
+        selectedEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+    if (minutesScrollRef.current) {
+      const selectedEl = minutesScrollRef.current.querySelector(`[data-minute="${minutes}"]`);
+      if (selectedEl) {
+        selectedEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+  }, [hours, minutes]);
+
   const handleConfirm = () => {
     onChange(`${hours}:${minutes} ${ampm}`);
     onClose();
+  };
+
+  const handleWheel = (e) => {
+    e.stopPropagation(); // Prevent background from scrolling
   };
 
   const hoursArr = Array.from({ length: 12 }, (_, i) =>
@@ -104,10 +131,10 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
   return (
     <div
       ref={wrapperRef}
-      className="absolute bottom-full right-0 mb-3 w-80 shadow-2xl rounded-xl z-50 p-5"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-5"
       style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
     >
-      <div className="absolute -bottom-2 right-8 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
+      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
 
       <div className="flex justify-between text-center mb-4 font-semibold text-sm tracking-wide uppercase" style={{ color: 'var(--color-primary)' }}>
         <span className="w-1/3">Hour</span>
@@ -115,14 +142,19 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
         <span className="w-1/3">Session</span>
       </div>
 
-      <div className="flex justify-between h-40 overflow-hidden relative py-2" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <div className="flex justify-between h-40 relative py-2 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         {/* Hours */}
-        <div className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y">
+        <div 
+          ref={hoursScrollRef}
+          className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y snap-mandatory scroll-smooth"
+          onWheel={handleWheel}
+        >
           {hoursArr.map((h) => (
             <div
               key={h}
+              data-hour={h}
               onClick={() => setHours(h)}
-              className={`py-2 cursor-pointer transition-colors snap-center ${hours === h
+              className={`py-3 cursor-pointer transition-colors snap-center ${hours === h
                 ? "font-bold text-2xl"
                 : "text-lg"
                 }`}
@@ -134,12 +166,18 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
         </div>
 
         {/* Minutes */}
-        <div className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+        <div 
+          ref={minutesScrollRef}
+          className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y snap-mandatory scroll-smooth" 
+          style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }}
+          onWheel={handleWheel}
+        >
           {minutesArr.map((m) => (
             <div
               key={m}
+              data-minute={m}
               onClick={() => setMinutes(m)}
-              className={`py-2 cursor-pointer transition-colors snap-center ${minutes === m
+              className={`py-3 cursor-pointer transition-colors snap-center ${minutes === m
                 ? "font-bold text-2xl"
                 : "text-lg"
                 }`}
@@ -180,15 +218,13 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
   );
 };
 
-// --- CUSTOM DATE PICKER COMPONENT (DARK) ---
+// --- CUSTOM DATE PICKER COMPONENT ---
 const CustomDatePicker = ({ value, onChange, onClose }) => {
   const wrapperRef = useRef(null);
   useClickOutside(wrapperRef, onClose);
 
   const [currentDate, setCurrentDate] = useState(new Date(value || new Date()));
   const today = new Date();
-
-  // Normalize today to start of day for comparison
   today.setHours(0, 0, 0, 0);
 
   const year = currentDate.getFullYear();
@@ -197,7 +233,6 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
 
-  // Navigation Logic
   const prevMonth = () => {
     if (year === today.getFullYear() && month === today.getMonth()) return;
     setCurrentDate(new Date(year, month - 1, 1));
@@ -247,10 +282,10 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   return (
     <div
       ref={wrapperRef}
-      className="absolute bottom-full right-0 mb-3 w-[340px] shadow-2xl rounded-xl z-50 p-5"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-5"
       style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
     >
-      <div className="absolute -bottom-2 right-8 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
+      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
 
       {/* Header */}
       <div className="mb-4 flex justify-between items-center">
@@ -292,12 +327,10 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
 
       {/* Days Grid */}
       <div className="grid grid-cols-7 text-center text-sm gap-y-2 gap-x-1">
-        {/* Empty slots for previous month days */}
         {Array.from({ length: firstDayOfMonth }).map((_, i) => (
           <div key={`empty-${i}`} />
         ))}
 
-        {/* Actual Days */}
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1;
           const disabled = isPast(day);
@@ -334,7 +367,7 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   );
 };
 
-// --- CUSTOM DURATION PICKER COMPONENT (DARK) ---
+// --- CUSTOM DURATION PICKER COMPONENT ---
 const CustomDurationPicker = ({ value, onChange, onClose }) => {
   const wrapperRef = useRef(null);
   useClickOutside(wrapperRef, onClose);
@@ -344,10 +377,10 @@ const CustomDurationPicker = ({ value, onChange, onClose }) => {
   return (
     <div
       ref={wrapperRef}
-      className="absolute bottom-full right-0 mb-3 w-64 shadow-2xl rounded-xl z-50 p-4 max-h-80 overflow-hidden"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-4 max-h-80 overflow-hidden"
       style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
     >
-      <div className="absolute -bottom-2 right-8 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
+      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
 
       <h4 className="font-semibold mb-3 text-center" style={{ color: 'var(--color-primary)' }}>Select Duration</h4>
 
@@ -383,12 +416,9 @@ const CustomDurationPicker = ({ value, onChange, onClose }) => {
 // --- MAIN COMPONENT ---
 function Locations({ data, updateData, onNext }) {
   const [serviceType, setServiceType] = useState(data.serviceType || "oneway");
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [showDurationPicker, setShowDurationPicker] = useState(false);
+  const [activePicker, setActivePicker] = useState(null); // 'date', 'time', 'duration' or null
   const [errors, setErrors] = useState({});
 
-  // Refs for Google Autocomplete
   const pickupAutocompleteRef = useRef(null);
   const dropoffAutocompleteRef = useRef(null);
   const pickupInputRef = useRef(null);
@@ -415,7 +445,7 @@ function Locations({ data, updateData, onNext }) {
 
       if (fullAddress) {
         updateData("pickup", fullAddress);
-        clearError("pickup");
+        setErrors((prev) => ({ ...prev, pickup: null }));
         if (pickupInputRef.current) {
           pickupInputRef.current.value = fullAddress;
         }
@@ -444,7 +474,7 @@ function Locations({ data, updateData, onNext }) {
 
       if (fullAddress) {
         updateData("dropoff", fullAddress);
-        clearError("dropoff");
+        setErrors((prev) => ({ ...prev, dropoff: null }));
         if (dropoffInputRef.current) {
           dropoffInputRef.current.value = fullAddress;
         }
@@ -452,120 +482,69 @@ function Locations({ data, updateData, onNext }) {
     }
   };
 
-  // Update service type when tab changes
   const handleServiceTypeChange = (type) => {
     setServiceType(type);
     updateData("serviceType", type);
-
-    if (type === "hourly" && !data.hours) {
-      updateData("hours", 2);
-    }
-
     if (type === "hourly") {
       updateData("dropoff", "");
-      if (dropoffInputRef.current) {
-        dropoffInputRef.current.value = "";
-      }
+      if (dropoffInputRef.current) dropoffInputRef.current.value = "";
+      if (!data.hours) updateData("hours", 2);
     }
   };
 
-  // Formatting Date
-  const formatDateDisplay = (dateObj) => {
-    if (!dateObj) return "";
-    const options = {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    };
-    return dateObj.toLocaleDateString("en-US", options);
-  };
-
-  // Clear error when user types
-  const clearError = (field) => {
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: null }));
-    }
-  };
-
-  // Validate form before proceeding
   const validateAndProceed = () => {
     const newErrors = {};
-
-    if (!data.pickup || !data.pickup.trim()) {
-      newErrors.pickup = "Pickup location is required";
-    }
-
-    if (serviceType === "oneway" && (!data.dropoff || !data.dropoff.trim())) {
-      newErrors.dropoff = "Drop-off location is required";
-    }
-
+    if (!data.pickup?.trim()) newErrors.pickup = "Required";
+    if (serviceType === "oneway" && !data.dropoff?.trim()) newErrors.dropoff = "Required";
     setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      onNext();
-    }
+    if (Object.keys(newErrors).length === 0) onNext();
   };
 
   return (
-    <>
-      <style>{googleMapsStyles}</style>
+    <div className="max-w-3xl mx-auto font-sans text-slate-200">
+      <style>{customStyles}</style>
 
-      <div className="rounded-xl shadow-2xl overflow-hidden relative" style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-        {/* Header */}
-        <div className="px-6 pt-6 pb-2 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xl overflow-hidden shadow-sm" style={{ backgroundColor: 'rgba(215,183,94,0.1)', border: '1px solid rgba(215,183,94,0.2)' }}>
-            🇬🇧
+      <div className="relative rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
+        {/* Top Accent Line */}
+        <div className="h-1 w-full bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-50" />
+
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border-b border-white/5 gap-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-lg shadow-inner border border-[var(--color-primary)]/20">
+              🇬🇧
+            </span>
+            <h2 className="text-lg font-bold tracking-widest uppercase text-white">
+              Reservation <span className="text-[var(--color-primary)]">Details</span>
+            </h2>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
-            Get a Price & Book
-          </h2>
+
+          {/* Service Toggle */}
+          <div className="flex justify-center sm:justify-end p-1 bg-white/5 rounded-lg border border-white/10 w-full sm:w-auto">
+            {["oneway", "hourly"].map((t) => (
+              <button
+                key={t}
+                onClick={() => handleServiceTypeChange(t)}
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-1.5 rounded text-xs font-bold uppercase transition-all duration-300 ${serviceType === t
+                  ? "bg-[var(--color-primary)] text-black shadow-lg"
+                  : "text-slate-400 hover:text-white"
+                  }`}
+              >
+                {t === "oneway" ? "Point to Point" : "Hourly"}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex px-6 mt-4 gap-4">
-          <button
-            onClick={() => handleServiceTypeChange("oneway")}
-            className="flex-1 py-3 text-center font-medium text-sm md:text-base rounded transition-all"
-            style={
-              serviceType === "oneway"
-                ? { border: '1px solid var(--color-primary)', color: 'var(--color-primary)', backgroundColor: 'rgba(215,183,94,0.08)' }
-                : { border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }
-            }
-          >
-            One way
-          </button>
-          <button
-            onClick={() => handleServiceTypeChange("hourly")}
-            className="flex-1 py-3 text-center font-medium text-sm md:text-base rounded transition-all"
-            style={
-              serviceType === "hourly"
-                ? { border: '1px solid var(--color-primary)', color: 'var(--color-primary)', backgroundColor: 'rgba(215,183,94,0.08)' }
-                : { border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }
-            }
-          >
-            By the hour
-          </button>
-        </div>
-
-        <div className="p-6 space-y-4">
-          {/* LOCATIONS */}
-          <div className="relative">
-
-            {/* PICKUP */}
-            <div className="mb-4 relative z-10">
-              <label className="block text-xs font-bold mb-1 ml-1" style={{ color: 'var(--color-primary)' }}>
-                Where from?
-              </label>
-              <div className="relative flex items-center group">
-                <div className="absolute left-4 z-10">
-                  <div className="w-3 h-3 rounded-full border-2 bg-transparent" style={{ borderColor: 'var(--color-primary)' }}></div>
-                </div>
+        <div className="p-5 space-y-5">
+          {/* Main Input Grid */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* Pickup */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-primary)] ml-1">Pickup Location</label>
+              <div className="relative group">
                 <Autocomplete
-                  className="w-full"
-                  onLoad={(autocomplete) => {
-                    pickupAutocompleteRef.current = autocomplete;
-                  }}
+                  onLoad={(a) => (pickupAutocompleteRef.current = a)}
                   onPlaceChanged={handlePickupPlaceChanged}
                   options={{
                     componentRestrictions: { country: "gb" },
@@ -574,40 +553,26 @@ function Locations({ data, updateData, onNext }) {
                 >
                   <input
                     ref={pickupInputRef}
-                    type="text"
-                    placeholder="Enter pick-up location"
-                    className="w-full pl-12 pr-10 py-4 rounded font-medium transition-shadow outline-none"
-                    style={{
-                      backgroundColor: 'rgba(255,255,255,0.05)',
-                      border: errors.pickup ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
-                      color: '#fff',
-                    }}
+                    placeholder="Airport, Hotel, or Address..."
+                    className={`w-full bg-white/5 border ${errors.pickup ? 'border-red-500' : 'border-white/10'} hover:border-[var(--color-primary)]/50 focus:border-[var(--color-primary)] rounded-lg py-3 pl-10 pr-4 outline-none transition-all text-sm text-white placeholder-slate-500`}
                   />
                 </Autocomplete>
-                <div className="absolute right-4" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                  <MapPin size={20} />
-                </div>
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-primary)]/60 group-focus-within:text-[var(--color-primary)]" size={16} />
               </div>
               {errors.pickup && (
-                <p className="text-sm text-red-400 mt-1 ml-1">{errors.pickup}</p>
+                <p className="text-xs text-red-400 ml-1">{errors.pickup}</p>
               )}
             </div>
 
-            {/* DROPOFF - Only show for one-way booking */}
-            {serviceType === "oneway" && (
-              <div className="relative z-10">
-                <label className="block text-xs font-bold mb-1 ml-1" style={{ color: 'var(--color-primary)' }}>
-                  Where to?
-                </label>
-                <div className="relative flex items-center">
-                  <div className="absolute left-4 z-10">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-primary)' }}></div>
-                  </div>
+            {/* Dropoff or Duration */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-primary)] ml-1">
+                {serviceType === "oneway" ? "Destination" : "Duration"}
+              </label>
+              {serviceType === "oneway" ? (
+                <div className="relative group">
                   <Autocomplete
-                    className="w-full"
-                    onLoad={(autocomplete) => {
-                      dropoffAutocompleteRef.current = autocomplete;
-                    }}
+                    onLoad={(a) => (dropoffAutocompleteRef.current = a)}
                     onPlaceChanged={handleDropoffPlaceChanged}
                     options={{
                       componentRestrictions: { country: "gb" },
@@ -616,151 +581,114 @@ function Locations({ data, updateData, onNext }) {
                   >
                     <input
                       ref={dropoffInputRef}
-                      type="text"
-                      placeholder="Enter destination"
-                      className="w-full pl-12 pr-10 py-4 rounded font-medium transition-shadow outline-none"
-                      style={{
-                        backgroundColor: 'rgba(255,255,255,0.05)',
-                        border: errors.dropoff ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
-                        color: '#fff',
-                      }}
+                      placeholder="Enter drop-off point..."
+                      className={`w-full bg-white/5 border ${errors.dropoff ? 'border-red-500' : 'border-white/10'} hover:border-[var(--color-primary)]/50 focus:border-[var(--color-primary)] rounded-lg py-3 pl-10 pr-4 outline-none transition-all text-sm text-white placeholder-slate-500`}
                     />
                   </Autocomplete>
-                  <div className="absolute right-4" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                    <Flag size={20} />
-                  </div>
+                  <Flag className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-primary)]/60 group-focus-within:text-[var(--color-primary)]" size={16} />
                 </div>
-                {errors.dropoff && (
-                  <p className="text-sm text-red-400 mt-1 ml-1">{errors.dropoff}</p>
-                )}
-              </div>
-            )}
-
-            {/* DURATION - Only show for hourly booking */}
-            {serviceType === "hourly" && (
-              <div className="relative z-10">
-                <label className="block text-xs font-bold mb-1 ml-1" style={{ color: 'var(--color-primary)' }}>
-                  Duration
-                </label>
+              ) : (
                 <div
-                  className="relative w-full rounded px-4 py-4 cursor-pointer flex items-center justify-between transition-colors"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDurationPicker(!showDurationPicker);
-                    setShowDatePicker(false);
-                    setShowTimePicker(false);
-                  }}
+                  onClick={() => setActivePicker(activePicker === 'duration' ? null : 'duration')}
+                  className="flex items-center justify-between w-full bg-white/5 border border-white/10 hover:border-[var(--color-primary)]/50 rounded-lg py-3 px-4 cursor-pointer transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Timer size={18} style={{ color: 'var(--color-primary)' }} />
-                    <span className="text-white font-medium">
-                      {data.hours || 2} hours
+                    <Timer size={16} className="text-[var(--color-primary)]" />
+                    <span className="text-sm text-white">{data.hours || 2} Hours</span>
+                  </div>
+                  <ChevronDown size={14} className="opacity-40 text-white" />
+                </div>
+              )}
+              {serviceType === "hourly" && activePicker === 'duration' && (
+                <CustomDurationPicker
+                  value={data.hours || 2}
+                  onChange={(h) => updateData("hours", h)}
+                  onClose={() => setActivePicker(null)}
+                />
+              )}
+              {errors.dropoff && serviceType === "oneway" && (
+                <p className="text-xs text-red-400 ml-1">{errors.dropoff}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Date & Time Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-visible">
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-primary)] ml-1">Date</label>
+              <div className="relative">
+                <div
+                  onClick={() => setActivePicker(activePicker === 'date' ? null : 'date')}
+                  className="flex items-center justify-between bg-white/5 border border-white/10 hover:border-[var(--color-primary)]/50 rounded-lg py-3 px-3 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Calendar size={14} className="text-[var(--color-primary)] shrink-0" />
+                    <span className="text-xs truncate text-white">
+                      {data.pickupDate?.toLocaleDateString("en-GB", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      }) || "Select Date"}
                     </span>
                   </div>
-                  <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
+                  <ChevronDown size={12} className="opacity-40 text-white" />
                 </div>
-
-                {showDurationPicker && (
-                  <CustomDurationPicker
-                    value={data.hours || 2}
-                    onChange={(h) => updateData("hours", h)}
-                    onClose={() => setShowDurationPicker(false)}
+                {activePicker === 'date' && (
+                  <CustomDatePicker
+                    value={data.pickupDate}
+                    onChange={(d) => updateData("pickupDate", d)}
+                    onClose={() => setActivePicker(null)}
                   />
                 )}
               </div>
-            )}
-          </div>
-
-          {/* DATE & TIME */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            {/* DATE */}
-            <div className="relative">
-              <label className="block text-xs font-bold mb-1 ml-1" style={{ color: 'var(--color-primary)' }}>
-                Date
-              </label>
-              <div
-                className="relative w-full rounded px-4 py-3 cursor-pointer flex items-center justify-between transition-colors"
-                style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDatePicker(!showDatePicker);
-                  setShowTimePicker(false);
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <Calendar size={18} style={{ color: 'var(--color-primary)' }} />
-                  <span className="text-white font-medium">
-                    {formatDateDisplay(data.pickupDate)}
-                  </span>
-                </div>
-                <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
-              </div>
-
-              {showDatePicker && (
-                <CustomDatePicker
-                  value={data.pickupDate}
-                  onChange={(d) => updateData("pickupDate", d)}
-                  onClose={() => setShowDatePicker(false)}
-                />
-              )}
             </div>
 
-            {/* TIME */}
-            <div className="relative">
-              <label className="block text-xs font-bold mb-1 ml-1" style={{ color: 'var(--color-primary)' }}>
-                Pickup time
-              </label>
-              <div
-                className="relative w-full rounded px-4 py-3 cursor-pointer flex items-center justify-between transition-colors"
-                style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowTimePicker(!showTimePicker);
-                  setShowDatePicker(false);
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <Clock size={18} style={{ color: 'var(--color-primary)' }} />
-                  <span className="text-white font-medium">{data.pickupTime}</span>
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-primary)] ml-1">Time</label>
+              <div className="relative">
+                <div
+                  onClick={() => setActivePicker(activePicker === 'time' ? null : 'time')}
+                  className="flex items-center justify-between bg-white/5 border border-white/10 hover:border-[var(--color-primary)]/50 rounded-lg py-3 px-3 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Clock size={14} className="text-[var(--color-primary)]" />
+                    <span className="text-xs text-white">{data.pickupTime}</span>
+                  </div>
+                  <ChevronDown size={12} className="opacity-40 text-white" />
                 </div>
-                <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
+                {activePicker === 'time' && (
+                  <CustomTimePicker
+                    value={data.pickupTime}
+                    onChange={(t) => updateData("pickupTime", t)}
+                    onClose={() => setActivePicker(null)}
+                  />
+                )}
               </div>
-
-              {showTimePicker && (
-                <CustomTimePicker
-                  value={data.pickupTime}
-                  onChange={(t) => updateData("pickupTime", t)}
-                  onClose={() => setShowTimePicker(false)}
-                />
-              )}
             </div>
           </div>
 
-          <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            {serviceType === "hourly"
-              ? "Hourly bookings include chauffeur at your disposal for the selected duration."
-              : "Chauffeur will wait 15 minutes free of charge."}
-          </p>
+          {/* CTA Button — full width below date & time on all screen sizes */}
+          <div className="pt-1">
+            <button
+              onClick={validateAndProceed}
+              className="w-full font-medium  cursor-pointer py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl"
+              style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
+            >
+              GET MY PRICES <ArrowRight size={18} />
+            </button>
+          </div>
 
-          <button
-            onClick={validateAndProceed}
-            className="w-full mt-6 font-bold py-4 rounded shadow-lg flex items-center justify-center gap-3 px-6 transition-transform transform active:scale-[0.99]"
-            style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
-          >
-            <span>GET MY PRICES</span>
-            <ArrowRight size={20} />
-          </button>
-
-          <div className="text-center mt-6 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Need more help? Call Us</p>
-            <p className="font-bold flex items-center justify-center gap-2 mt-1" style={{ color: 'var(--color-primary)' }}>
-              🇬🇧 +44 (0) 203 475 9906
-            </p>
+          {/* Footer Assistance */}
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-white/5 text-[11px] text-slate-500 uppercase tracking-tighter">
+            <span>{serviceType === "hourly" ? "Chauffeur at disposal" : "15 Mins free waiting"}</span>
+            <div className="flex items-center gap-2 text-[var(--color-primary)] font-bold mt-2 sm:mt-0">
+              <Phone size={12} /> +44 (0) 203 475 9906
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
