@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -208,6 +208,23 @@ function AdminDashboard() {
     loadDashboard();
   }, [navigate]);
 
+  // Close sidebar on mobile when clicking outside
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+
+    // Set initial state based on screen size
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleLogout = () => {
     adminAPI.logout();
     navigate("/login-admin");
@@ -216,6 +233,11 @@ function AdminDashboard() {
   const handleNavClick = (item) => {
     setActiveNav(item.id);
     navigate(item.path);
+
+    // Close sidebar on mobile after navigation
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
   };
 
   if (isLoading) {
@@ -233,94 +255,131 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Overlay - Only visible on mobile when sidebar is open */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar - Fixed position, overlays on mobile, pushes content on desktop */}
       <motion.aside
-        initial={{ x: -280 }}
-        animate={{ x: isSidebarOpen ? 0 : -280 }}
-        className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 to-slate-800 text-white z-40 shadow-2xl"
+        initial={false}
+        animate={{
+          x: isSidebarOpen ? 0 : -288,
+        }}
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+        className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white z-40 shadow-2xl overflow-y-auto"
       >
-        {/* Logo */}
-        <div className="p-6 border-b border-slate-700">
+        {/* Logo Section */}
+        <div className="p-6 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Car size={20} className="text-white" />
+            <div className="w-11 h-11 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <Car size={22} className="text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg">JK Chauffeur</h1>
-              <p className="text-slate-400 text-xs">Admin Panel</p>
+              <h1 className="font-bold text-lg tracking-tight">JK Chauffeur</h1>
+              <p className="text-slate-400 text-xs font-medium">Admin Panel</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1.5">
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
               onClick={() => handleNavClick(item)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                                ${activeNav === item.id
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                  : "text-slate-300 hover:bg-slate-700 hover:text-white"
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+                ${activeNav === item.id
+                  ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-600/30 scale-[1.02]"
+                  : "text-slate-300 hover:bg-slate-700/50 hover:text-white hover:translate-x-1"
                 }`}
             >
-              <item.icon size={20} />
-              <span className="font-medium">{item.label}</span>
+              <item.icon
+                size={20}
+                className={activeNav === item.id ? "" : "group-hover:scale-110 transition-transform"}
+              />
+              <span className="font-medium text-sm">{item.label}</span>
               {activeNav === item.id && (
-                <ChevronRight size={16} className="ml-auto" />
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="ml-auto"
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <ChevronRight size={18} />
+                </motion.div>
               )}
             </button>
           ))}
         </nav>
 
         {/* Logout Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 group"
           >
-            <LogOut size={20} />
-            <span className="font-medium">Logout</span>
+            <LogOut size={20} className="group-hover:scale-110 transition-transform" />
+            <span className="font-medium text-sm">Logout</span>
           </button>
         </div>
       </motion.aside>
 
-      {/* Main Content */}
+      {/* Main Content - Margin adjusts based on sidebar state on desktop */}
       <main
-        className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-72" : "ml-0"}`}
+        className={`min-h-screen transition-all duration-300 ${isSidebarOpen ? "lg:ml-72" : "lg:ml-0"
+          }`}
       >
         {/* Top Bar */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-30">
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors active:scale-95"
               >
-                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                {isSidebarOpen ? <X size={24} className="text-gray-700" /> : <Menu size={24} className="text-gray-700" />}
               </button>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">
+              <div className="hidden sm:block">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                   Welcome back, {adminInfo?.name || "Admin"}! 👋
                 </h2>
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-500 text-xs sm:text-sm">
                   Here's what's happening with your business today.
                 </p>
+              </div>
+              <div className="block sm:hidden">
+                <h2 className="text-lg font-bold text-gray-900">Dashboard</h2>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors active:scale-95"
             >
               <LogOut size={18} />
-              <span className="font-medium">Logout</span>
+              <span className="font-medium text-sm">Logout</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="sm:hidden p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors active:scale-95"
+            >
+              <LogOut size={20} />
             </button>
           </div>
         </header>
 
         {/* Dashboard Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {error ? (
             <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-xl mb-6">
               <AlertCircle size={20} />
@@ -329,7 +388,7 @@ function AdminDashboard() {
           ) : null}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <StatCard
               icon={Calendar}
               label="Total Bookings"
@@ -357,7 +416,7 @@ function AdminDashboard() {
           </div>
 
           {/* Second Row Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <StatCard
               icon={DollarSign}
               label="Total Earnings"
@@ -383,15 +442,15 @@ function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100 border border-gray-100"
+            className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg shadow-gray-100 border border-gray-100"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900">
                 Recent Bookings
               </h3>
               <button
                 onClick={() => navigate("/admin/bookings")}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all"
               >
                 View All <ChevronRight size={16} />
               </button>
@@ -409,7 +468,7 @@ function AdminDashboard() {
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <Calendar size={40} className="mx-auto mb-3 text-gray-300" />
-                <p>No bookings yet</p>
+                <p className="text-sm">No bookings yet</p>
               </div>
             )}
           </motion.div>
