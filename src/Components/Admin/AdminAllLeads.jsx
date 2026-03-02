@@ -26,8 +26,10 @@ import {
     Briefcase,
     PoundSterling,
     Target,
+    DollarSign,
 } from "lucide-react";
 import { bookingAPI } from "../../Utils/api";
+import CustomDropdown from "./CustomDropdown";
 
 // Status Badge Component
 const StatusBadge = ({ status, type = "booking" }) => {
@@ -891,21 +893,19 @@ function AdminAllLeads() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                                Payment Status
-                            </label>
-                            <select
+                            <CustomDropdown
+                                label="Payment Status"
+                                icon={DollarSign}
                                 value={filters.paymentStatus}
-                                onChange={(e) =>
-                                    handleFilterChange("paymentStatus", e.target.value)
-                                }
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                            >
-                                <option value="">All Payment Status</option>
-                                <option value="pending">Unpaid</option>
-                                <option value="paid">Paid</option>
-                                <option value="failed">Failed</option>
-                            </select>
+                                onChange={(value) => handleFilterChange("paymentStatus", value)}
+                                placeholder="All Payment Status"
+                                options={[
+                                    { value: "", label: "All Payment Status" },
+                                    { value: "pending", label: "Unpaid" },
+                                    { value: "paid", label: "Paid" },
+                                    { value: "failed", label: "Failed" },
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>
