@@ -98,7 +98,7 @@ const StatCard = ({ icon: Icon, label, value, color, trend, bgGradient }) => (
     animate={{ opacity: 1, y: 0 }}
     className={`bg-white rounded-2xl p-6 shadow-lg shadow-gray-100 border border-gray-100 hover:shadow-xl transition-all duration-300`}
   >
-    <div className="flex items-start justify-between mb-4">
+    <div className="flex items-center justify-center mb-4">
       <div className={`p-3 rounded-xl ${bgGradient}`}>
         <Icon size={24} className="text-white" />
       </div>
@@ -111,8 +111,10 @@ const StatCard = ({ icon: Icon, label, value, color, trend, bgGradient }) => (
         </span>
       )}
     </div>
-    <p className="text-gray-500 text-sm mb-1">{label}</p>
-    <p className="text-3xl font-bold text-gray-900">{value}</p>
+    <div className="text-center">
+      <p className="text-gray-500 text-sm mb-1">{label}</p>
+      <p className="text-3xl font-bold text-gray-900">{value}</p>
+    </div>
   </motion.div>
 );
 
@@ -388,7 +390,7 @@ function AdminDashboard() {
           ) : null}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <StatCard
               icon={Calendar}
               label="Total Bookings"
@@ -416,25 +418,36 @@ function AdminDashboard() {
           </div>
 
           {/* Second Row Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <StatCard
-              icon={DollarSign}
-              label="Total Earnings"
-              value={`£${stats?.totalEarnings?.toFixed(2) || "0.00"}`}
-              bgGradient="bg-gradient-to-br from-purple-500 to-indigo-600"
-            />
-            <StatCard
-              icon={Car}
-              label="Active Vehicles"
-              value={stats?.totalVehicles || 0}
-              bgGradient="bg-gradient-to-br from-cyan-500 to-blue-600"
-            />
-            <StatCard
-              icon={Users}
-              label="Confirmed Bookings"
-              value={stats?.bookings?.confirmed || 0}
-              bgGradient="bg-gradient-to-br from-pink-500 to-rose-600"
-            />
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {/* Total Earnings: Full width on mobile (col-span-2), normal on large screens */}
+            <div className="col-span-2 lg:col-span-1">
+              <StatCard
+                icon={DollarSign}
+                label="Total Earnings"
+                value={`£${stats?.totalEarnings?.toFixed(2) || "0.00"}`}
+                bgGradient="bg-gradient-to-br from-purple-500 to-indigo-600"
+              />
+            </div>
+
+            {/* Active Vehicles: Full width on mobile (col-span-2), normal on large screens */}
+            <div className="col-span-2 lg:col-span-1">
+              <StatCard
+                icon={Car}
+                label="Active Vehicles"
+                value={stats?.totalVehicles || 0}
+                bgGradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+              />
+            </div>
+
+            {/* Confirmed Bookings: Full width on mobile (col-span-2), normal on large screens */}
+            <div className="col-span-2 lg:col-span-1">
+              <StatCard
+                icon={Users}
+                label="Confirmed Bookings"
+                value={stats?.bookings?.confirmed || 0}
+                bgGradient="bg-gradient-to-br from-pink-500 to-rose-600"
+              />
+            </div>
           </div>
 
           {/* Recent Bookings */}
