@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -83,9 +83,7 @@ const PaymentForm = ({ onSuccess, onError, amount }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
-      return;
-    }
+    if (!stripe || !elements) return;
 
     setIsProcessing(true);
     setErrorMessage(null);
@@ -101,7 +99,7 @@ const PaymentForm = ({ onSuccess, onError, amount }) => {
 
       if (error) {
         setErrorMessage(error.message);
-        onError(error);
+        onError(error); // triggers payment_failure tracking in Booking.jsx
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
         onSuccess(paymentIntent);
       }
@@ -244,13 +242,38 @@ const SuccessModal = ({ isOpen, onClose }) => {
 };
 
 // Main Payment Step Component
-function Payment({ data, clientSecret, onBack, onPaymentSuccess, onComplete, isLoadingIntent, isTestMode }) {
+function Payment({ data, clientSecret, onBack, onPaymentSuccess, onPaymentFailure, onComplete, isLoadingIntent, isTestMode }) {
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const paymentCompletedRef = useRef(false); // prevents firing abandon event after success
 
   const showTestModeBanner = isTestMode ?? isTestModeOrigin();
 
+  // Track page abandonment — fires if user closes/hides tab without completing payment
+  useEffect(() => {
+    if (!clientSecret) return;
+
+    const handleAbandon = () => {
+      if (!paymentCompletedRef.current) {
+        onPaymentFailure?.("payment_page_abandoned", { reason: "user_closed_or_hid_page" });
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") handleAbandon();
+    };
+
+    window.addEventListener("beforeunload", handleAbandon);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleAbandon);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [clientSecret, onPaymentFailure]);
+
   const handleSuccess = (paymentIntent) => {
+    paymentCompletedRef.current = true; // mark completed so abandon fires won't trigger
     setPaymentStatus("success");
     onPaymentSuccess(paymentIntent);
     setShowSuccessModal(true);
@@ -259,6 +282,11 @@ function Payment({ data, clientSecret, onBack, onPaymentSuccess, onComplete, isL
   const handleError = (error) => {
     console.error("Payment error:", error);
     setPaymentStatus("error");
+    // 🔥 TRACK: Stripe error (card declined, invalid details, etc.)
+    onPaymentFailure?.(error?.message || "stripe_error", {
+      stripe_error_code: error?.code,
+      stripe_error_type: error?.type,
+    });
   };
 
   const handleModalClose = () => {

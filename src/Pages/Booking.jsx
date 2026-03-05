@@ -8,6 +8,7 @@ import BookingSummary from "../Components/booking/BookingSummary";
 import Payment from "../Components/booking/Payment";
 import StickyBookingSummary from "../Components/booking/StickyBookingSummary";
 import { paymentAPI, bookingAPI } from "../Utils/api";
+import Analytics from "../Utils/analytics";
 
 const LIBRARIES = ["places"];
 
@@ -205,6 +206,9 @@ function Booking() {
       return;
     }
 
+    // 🔥 TRACK: Initiate Checkout — user tapped "Proceed to Payment"
+    Analytics.trackInitiateCheckout(bookingData);
+
     setIsLoadingPayment(true);
 
     try {
@@ -235,6 +239,9 @@ function Booking() {
 
   // Handle payment success - UPDATE existing booking (triggers confirmation emails)
   const handlePaymentSuccess = async (paymentIntent) => {
+    // 🔥 TRACK: Purchase — Stripe confirmed payment succeeded
+    Analytics.trackPurchase(paymentIntent, bookingData);
+
     try {
       const bookingId = bookingData.savedBookingId;
 
@@ -438,10 +445,22 @@ function Booking() {
                     data={bookingData}
                     clientSecret={clientSecret}
                     onBack={() => {
+                      // 🔥 TRACK: Payment Failure — user went back from payment page
+                      Analytics.trackPaymentFailure("user_navigated_back", {
+                        amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+                        vehicle: bookingData.selectedVehicle?.categoryName,
+                      });
                       setShowSummary(true);
                       setCurrentStep(3);
                     }}
                     onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentFailure={(reason, extra) =>
+                      Analytics.trackPaymentFailure(reason, {
+                        amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+                        vehicle: bookingData.selectedVehicle?.categoryName,
+                        ...extra,
+                      })
+                    }
                     onComplete={() => {
                       setBookingData({
                         pickup: null,

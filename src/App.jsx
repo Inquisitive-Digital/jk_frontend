@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-
+import Analytics from "./Utils/analytics";
 import Lenis from "lenis";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Layout from "./Layout/Layout";
@@ -53,6 +53,11 @@ function ScrollToTop() {
 function App() {
 
   useEffect(() => {
+    // Initialize Google Analytics / GTM (only fires in production)
+    Analytics.loadTrackingScripts().then(() => {
+      Analytics.initialize();
+    });
+
     // CRITICAL: Disable browser scroll restoration to prevent scroll position being saved on reload
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';

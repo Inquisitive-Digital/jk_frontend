@@ -11,6 +11,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { fleetAPI } from "../../Utils/api";
+import Analytics from "../../Utils/analytics";
 
 function FleetSection() {
   const navigate = useNavigate();
@@ -251,6 +252,7 @@ function FleetSection() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
+                                Analytics.trackBookingClick('fleet_section_book_now', { vehicle_name: vehicle.title });
                                 navigate("/booking");
                               }}
                               className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300"

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, User, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { blogAPI } from '../Utils/api';
+import Analytics from '../Utils/analytics';
 
 function BlogWrapper() {
     const { slug } = useParams();
@@ -308,6 +309,7 @@ function BlogWrapper() {
 
                             <Link
                                 to="/booking"
+                                onClick={() => Analytics.trackBookingClick('blog_sidebar_book_now')}
                                 className="block w-full text-center px-6 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
                                 style={{
                                     backgroundColor: 'var(--color-primary)',
@@ -354,6 +356,7 @@ function BlogWrapper() {
                                 <p className="text-white/40 text-xs mb-1">Or call us directly</p>
                                 <a
                                     href="tel:+442034759906"
+                                    onClick={() => Analytics.trackCallClick('blog_sidebar_phone')}
                                     className="text-sm font-medium transition-colors"
                                     style={{ color: 'var(--color-primary)' }}
                                 >

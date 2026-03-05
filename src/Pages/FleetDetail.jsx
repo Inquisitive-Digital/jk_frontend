@@ -7,6 +7,7 @@ import {
     Loader2, Shield, Star, ArrowRight,
 } from 'lucide-react';
 import { fleetAPI } from '../Utils/api';
+import Analytics from '../Utils/analytics';
 
 function FleetDetail() {
     const { slug } = useParams();
@@ -362,7 +363,10 @@ function FleetDetail() {
 
                             {/* Book Now CTA */}
                             <button
-                                onClick={() => navigate('/booking')}
+                                onClick={() => {
+                                    Analytics.trackBookingClick('fleet_detail_book_now', { vehicle_name: fleet.title });
+                                    navigate('/booking');
+                                }}
                                 className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300"
                                 style={{
                                     backgroundColor: 'var(--color-primary)',
