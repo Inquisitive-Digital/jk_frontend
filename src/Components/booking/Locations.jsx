@@ -76,59 +76,67 @@ function useClickOutside(ref, handler) {
 }
 
 // --- CUSTOM TIME PICKER COMPONENT ---
+
+// Helper: get current GMT (UK) hour and minute via Intl API
+const getUKHourMinute = () => {
+  const now = new Date();
+  // Use Intl.DateTimeFormat to reliably get UK time parts
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const h = parseInt(parts.find((p) => p.type === "hour").value, 10);
+  const m = parseInt(parts.find((p) => p.type === "minute").value, 10);
+  return { h, m };
+};
+
+// Helper: compute default time = GMT now + 30 min, rounded UP to next 30-min slot
+const computeDefaultTime = (val) => {
+  if (val) {
+    const [time, period] = val.split(" ");
+    const [h, m] = time.split(":");
+    return { hours: h, minutes: m, ampm: period };
+  }
+  const { h, m } = getUKHourMinute();
+  const totalMinutes = h * 60 + m + 30;
+  const roundedMinutes = Math.ceil(totalMinutes / 30) * 30;
+  const hour24 = Math.floor(roundedMinutes / 60) % 24;
+  const min = roundedMinutes % 60;
+  return {
+    hours: (hour24 % 12 || 12).toString().padStart(2, "0"),
+    minutes: min.toString().padStart(2, "0"),
+    ampm: hour24 >= 12 ? "PM" : "AM",
+  };
+};
+
 const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValidate }) => {
   const wrapperRef = useRef(null);
   const hoursScrollRef = useRef(null);
   const minutesScrollRef = useRef(null);
   useClickOutside(wrapperRef, onClose);
 
-  const [hours, setHours] = useState("12");
-  const [minutes, setMinutes] = useState("00");
-  const [ampm, setAmpm] = useState("PM");
+  // Lazy initializers — computed IMMEDIATELY on first render, no flicker
+  const [hours, setHours] = useState(() => computeDefaultTime(value).hours);
+  const [minutes, setMinutes] = useState(() => computeDefaultTime(value).minutes);
+  const [ampm, setAmpm] = useState(() => computeDefaultTime(value).ampm);
   const [isTimeValid, setIsTimeValid] = useState(true);
 
   // Get current UK time (GMT/BST)
   const getUKTime = () => {
+    const { h, m } = getUKHourMinute();
     const now = new Date();
-    
-    // Get UK time using Intl.DateTimeFormat for accurate timezone conversion
-    const ukDateStr = now.toLocaleString("en-GB", { 
-      timeZone: "Europe/London",
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
-    
-    // Parse the UK date string and create a Date object
-    const [datePart, timePart] = ukDateStr.split(', ');
-    const [day, month, year] = datePart.split('/');
-    const [hours, minutes, seconds] = timePart.split(':');
-    
-    const ukTime = new Date(year, month - 1, day, hours, minutes, seconds);
-    
-    return ukTime;
+    // Build a local Date with UK hour/minute values so getHours()/getMinutes() work
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
   };
 
+  // Sync if parent passes a new value (e.g. navigating back)
   useEffect(() => {
-    if (value) {
-      const [time, period] = value.split(" ");
-      const [h, m] = time.split(":");
-      setHours(h);
-      setMinutes(m);
-      setAmpm(period);
-    } else {
-      // Set default to current UK time
-      const ukNow = getUKTime();
-      const h = ukNow.getHours() % 12 || 12;
-      const m = Math.floor(ukNow.getMinutes() / 5) * 5;
-      setHours(h.toString().padStart(2, "0"));
-      setMinutes(m.toString().padStart(2, "0"));
-      setAmpm(ukNow.getHours() >= 12 ? "PM" : "AM");
-    }
+    const def = computeDefaultTime(value);
+    setHours(def.hours);
+    setMinutes(def.minutes);
+    setAmpm(def.ampm);
   }, [value]);
 
   // Scroll selected item into view when value changes
@@ -147,27 +155,32 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
     }
   }, [hours, minutes]);
 
-  // Check if a time is in the past (relative to UK time)
+  // Check if a time is before the minimum selectable time
+  // Minimum = GMT now + 30 min, rounded UP to next 30-min slot (same as default)
   const isTimeInPast = (h, m, ampm) => {
     const checkDate = selectedDate || new Date();
     const ukNow = getUKTime();
-    
-    // If checking against a different date, only block if it's today
+
+    // Only restrict today's times
     const isToday = checkDate.toDateString() === ukNow.toDateString();
-    
     if (!isToday) return false;
-    
-    // Convert 12-hour format to 24-hour format
+
+    // Convert selected time to 24-hour format
     let hour24 = parseInt(h);
     if (ampm === "PM" && hour24 !== 12) hour24 += 12;
     if (ampm === "AM" && hour24 === 12) hour24 = 0;
-    
     const minuteInt = parseInt(m);
-    
-    // Compare with current UK time
-    if (hour24 < ukNow.getHours()) return true;
-    if (hour24 === ukNow.getHours() && minuteInt < ukNow.getMinutes()) return true;
-    
+
+    // Compute minimum selectable time: GMT + 30 min rounded UP to next 30-min slot
+    const { h: ukH, m: ukM } = getUKHourMinute();
+    const totalMins = ukH * 60 + ukM + 30;
+    const roundedMins = Math.ceil(totalMins / 30) * 30;
+    const minHour24 = Math.floor(roundedMins / 60) % 24;
+    const minMinute = roundedMins % 60;
+
+    // Block anything BEFORE the minimum
+    if (hour24 < minHour24) return true;
+    if (hour24 === minHour24 && minuteInt < minMinute) return true;
     return false;
   };
 
@@ -213,7 +226,7 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
 
       <div className="flex justify-between h-40 relative py-2 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         {/* Hours */}
-        <div 
+        <div
           ref={hoursScrollRef}
           className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y snap-mandatory scroll-smooth"
           onWheel={handleWheel}
@@ -226,21 +239,19 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
                 key={h}
                 data-hour={h}
                 onClick={() => !isPast && setHours(h)}
-                className={`py-3 transition-colors snap-center ${
-                  isSelected
-                    ? "font-bold text-2xl"
-                    : "text-lg"
-                } ${
-                  isPast
+                className={`py-3 transition-colors snap-center ${isSelected
+                  ? "font-bold text-2xl"
+                  : "text-lg"
+                  } ${isPast
                     ? "opacity-20 cursor-not-allowed"
                     : "cursor-pointer"
-                }`}
-                style={{ 
-                  color: isSelected 
-                    ? 'var(--color-primary)' 
-                    : isPast 
-                      ? 'rgba(255,255,255,0.1)'
-                      : 'rgba(255,255,255,0.3)' 
+                  }`}
+                style={{
+                  color: isSelected
+                    ? 'var(--color-primary)'
+                    : isPast
+                      ? 'rgba(255,255,255,0.3)'
+                      : 'rgba(255,255,255,1)'
                 }}
               >
                 {h}
@@ -250,9 +261,9 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
         </div>
 
         {/* Minutes */}
-        <div 
+        <div
           ref={minutesScrollRef}
-          className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y snap-mandatory scroll-smooth" 
+          className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y snap-mandatory scroll-smooth"
           style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }}
           onWheel={handleWheel}
         >
@@ -264,21 +275,19 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
                 key={m}
                 data-minute={m}
                 onClick={() => !isPast && setMinutes(m)}
-                className={`py-3 transition-colors snap-center ${
-                  isSelected
-                    ? "font-bold text-2xl"
-                    : "text-lg"
-                } ${
-                  isPast
+                className={`py-3 transition-colors snap-center ${isSelected
+                  ? "font-bold text-2xl"
+                  : "text-lg"
+                  } ${isPast
                     ? "opacity-20 cursor-not-allowed"
                     : "cursor-pointer"
-                }`}
-                style={{ 
-                  color: isSelected 
-                    ? 'var(--color-primary)' 
-                    : isPast 
-                      ? 'rgba(255,255,255,0.1)'
-                      : 'rgba(255,255,255,0.3)' 
+                  }`}
+                style={{
+                  color: isSelected
+                    ? 'var(--color-primary)'
+                    : isPast
+                      ? 'rgba(255,255,255,0.3)'
+                      : 'rgba(255,255,255,1)'
                 }}
               >
                 {m}
@@ -319,11 +328,10 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
       <button
         onClick={handleConfirm}
         disabled={!isTimeValid}
-        className={`w-full mt-2 font-bold py-3 rounded-lg shadow-md transition-all ${
-          isTimeValid
-            ? 'active:scale-95 hover:opacity-90'
-            : 'opacity-50 cursor-not-allowed'
-        }`}
+        className={`w-full mt-2 font-bold py-3 rounded-lg shadow-md transition-all ${isTimeValid
+          ? 'active:scale-95 hover:opacity-90'
+          : 'opacity-50 cursor-not-allowed'
+          }`}
         style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
       >
         Set Pickup Time
@@ -648,9 +656,9 @@ function Locations({ data, updateData, onNext }) {
   // Get current UK time (GMT/BST)
   const getUKTime = () => {
     const now = new Date();
-    
+
     // Get UK time using Intl.DateTimeFormat for accurate timezone conversion
-    const ukDateStr = now.toLocaleString("en-GB", { 
+    const ukDateStr = now.toLocaleString("en-GB", {
       timeZone: "Europe/London",
       year: 'numeric',
       month: '2-digit',
@@ -660,14 +668,14 @@ function Locations({ data, updateData, onNext }) {
       second: '2-digit',
       hour12: false
     });
-    
+
     // Parse the UK date string and create a Date object
     const [datePart, timePart] = ukDateStr.split(', ');
     const [day, month, year] = datePart.split('/');
     const [hours, minutes, seconds] = timePart.split(':');
-    
+
     const ukTime = new Date(year, month - 1, day, hours, minutes, seconds);
-    
+
     return ukTime;
   };
 
@@ -682,10 +690,7 @@ function Locations({ data, updateData, onNext }) {
 
     // Only check if it's today
     const isToday = checkDate.toDateString() === ukNow.toDateString();
-
-    if (!isToday) {
-      return false;
-    }
+    if (!isToday) return false;
 
     // Parse the selected time
     const [time, period] = data.pickupTime.split(" ");
@@ -695,13 +700,18 @@ function Locations({ data, updateData, onNext }) {
     let hour24 = parseInt(h);
     if (period === "PM" && hour24 !== 12) hour24 += 12;
     if (period === "AM" && hour24 === 12) hour24 = 0;
-
     const minuteInt = parseInt(m);
 
-    // Compare with current UK time
-    const isPastHour = hour24 < ukNow.getHours();
-    const isPastMinute = hour24 === ukNow.getHours() && minuteInt < ukNow.getMinutes();
+    // Minimum selectable time: GMT + 30 min rounded UP to next 30-min slot
+    const { h: ukH, m: ukM } = getUKHourMinute();
+    const totalMins = ukH * 60 + ukM + 30;
+    const roundedMins = Math.ceil(totalMins / 30) * 30;
+    const minHour24 = Math.floor(roundedMins / 60) % 24;
+    const minMinute = roundedMins % 60;
 
+    // Block anything before the minimum
+    const isPastHour = hour24 < minHour24;
+    const isPastMinute = hour24 === minHour24 && minuteInt < minMinute;
     return isPastHour || isPastMinute;
   };
 
@@ -709,7 +719,7 @@ function Locations({ data, updateData, onNext }) {
     const newErrors = {};
     if (!data.pickup?.trim()) newErrors.pickup = "Required";
     if (serviceType === "oneway" && !data.dropoff?.trim()) newErrors.dropoff = "Required";
-    
+
     // Check for past time
     if (data.pickupTime && data.pickupDate) {
       const isPast = isTimeInPast();
@@ -717,7 +727,7 @@ function Locations({ data, updateData, onNext }) {
         newErrors.pickupTime = "Cannot select a time in the past";
       }
     }
-    
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
       onNext();
@@ -884,7 +894,10 @@ function Locations({ data, updateData, onNext }) {
                 {activePicker === 'time' && (
                   <CustomTimePicker
                     value={data.pickupTime}
-                    onChange={(t) => updateData("pickupTime", t)}
+                    onChange={(t) => {
+                      updateData("pickupTime", t);
+                      setErrors((prev) => ({ ...prev, pickupTime: null }));
+                    }}
                     onClose={() => setActivePicker(null)}
                     selectedDate={data.pickupDate}
                   />

@@ -11,6 +11,34 @@ import Analytics from "../Utils/analytics";
 
 const LIBRARIES = ["places"];
 
+// Compute default pickup time: GMT now + 30 min, rounded UP to next 30-min slot
+// Returns a 12-hour formatted string like "02:00 PM"
+const getDefaultPickupTime = () => {
+  const now = new Date();
+  // Use Intl.DateTimeFormat to get reliable UK/GMT time parts
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const ukH = parseInt(parts.find((p) => p.type === "hour").value, 10);
+  const ukM = parseInt(parts.find((p) => p.type === "minute").value, 10);
+
+  // Add 30 min, round UP to next 30-min boundary
+  const totalMinutes = ukH * 60 + ukM + 30;
+  const roundedMinutes = Math.ceil(totalMinutes / 30) * 30;
+  const hour24 = Math.floor(roundedMinutes / 60) % 24;
+  const min = roundedMinutes % 60;
+
+  // Convert to 12-hour format
+  const hour12 = (hour24 % 12 || 12).toString().padStart(2, "0");
+  const minStr = min.toString().padStart(2, "0");
+  const ampm = hour24 >= 12 ? "PM" : "AM";
+
+  return `${hour12}:${minStr} ${ampm}`;
+};
+
 // Step configurations - 4 steps including payment
 const STEPS = [
   { id: 1, label: "Locations", description: "Where would you like to go?" },
@@ -33,7 +61,7 @@ function Booking() {
     pickup: null,
     dropoff: null,
     pickupDate: new Date(),
-    pickupTime: "12:00 PM",
+    pickupTime: getDefaultPickupTime(),
     serviceType: "oneway",
     hours: 2,
     selectedVehicle: null,
@@ -405,7 +433,7 @@ function Booking() {
                         pickup: null,
                         dropoff: null,
                         pickupDate: new Date(),
-                        pickupTime: "12:00 PM",
+                        pickupTime: getDefaultPickupTime(),
                         serviceType: "oneway",
                         hours: 2,
                         selectedVehicle: null,
