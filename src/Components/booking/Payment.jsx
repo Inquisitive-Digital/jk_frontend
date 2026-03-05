@@ -329,7 +329,7 @@ function Payment({ data, clientSecret, onBack, onPaymentSuccess, onComplete, isL
 
       <div className="py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-8">
             {/* Left: Order Summary */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
