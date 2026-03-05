@@ -76,7 +76,7 @@ function useClickOutside(ref, handler) {
 }
 
 // --- CUSTOM TIME PICKER COMPONENT ---
-const CustomTimePicker = ({ value, onChange, onClose }) => {
+const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValidate }) => {
   const wrapperRef = useRef(null);
   const hoursScrollRef = useRef(null);
   const minutesScrollRef = useRef(null);
@@ -85,6 +85,33 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
   const [hours, setHours] = useState("12");
   const [minutes, setMinutes] = useState("00");
   const [ampm, setAmpm] = useState("PM");
+  const [isTimeValid, setIsTimeValid] = useState(true);
+
+  // Get current UK time (GMT/BST)
+  const getUKTime = () => {
+    const now = new Date();
+    
+    // Get UK time using Intl.DateTimeFormat for accurate timezone conversion
+    const ukDateStr = now.toLocaleString("en-GB", { 
+      timeZone: "Europe/London",
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    
+    // Parse the UK date string and create a Date object
+    const [datePart, timePart] = ukDateStr.split(', ');
+    const [day, month, year] = datePart.split('/');
+    const [hours, minutes, seconds] = timePart.split(':');
+    
+    const ukTime = new Date(year, month - 1, day, hours, minutes, seconds);
+    
+    return ukTime;
+  };
 
   useEffect(() => {
     if (value) {
@@ -93,6 +120,14 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
       setHours(h);
       setMinutes(m);
       setAmpm(period);
+    } else {
+      // Set default to current UK time
+      const ukNow = getUKTime();
+      const h = ukNow.getHours() % 12 || 12;
+      const m = Math.floor(ukNow.getMinutes() / 5) * 5;
+      setHours(h.toString().padStart(2, "0"));
+      setMinutes(m.toString().padStart(2, "0"));
+      setAmpm(ukNow.getHours() >= 12 ? "PM" : "AM");
     }
   }, [value]);
 
@@ -112,7 +147,41 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
     }
   }, [hours, minutes]);
 
+  // Check if a time is in the past (relative to UK time)
+  const isTimeInPast = (h, m, ampm) => {
+    const checkDate = selectedDate || new Date();
+    const ukNow = getUKTime();
+    
+    // If checking against a different date, only block if it's today
+    const isToday = checkDate.toDateString() === ukNow.toDateString();
+    
+    if (!isToday) return false;
+    
+    // Convert 12-hour format to 24-hour format
+    let hour24 = parseInt(h);
+    if (ampm === "PM" && hour24 !== 12) hour24 += 12;
+    if (ampm === "AM" && hour24 === 12) hour24 = 0;
+    
+    const minuteInt = parseInt(m);
+    
+    // Compare with current UK time
+    if (hour24 < ukNow.getHours()) return true;
+    if (hour24 === ukNow.getHours() && minuteInt < ukNow.getMinutes()) return true;
+    
+    return false;
+  };
+
+  // Validate current selection and notify parent
+  useEffect(() => {
+    const valid = !isTimeInPast(hours, minutes, ampm);
+    setIsTimeValid(valid);
+    if (onTimeValidate) {
+      onTimeValidate(valid);
+    }
+  }, [hours, minutes, ampm, selectedDate, onTimeValidate]);
+
   const handleConfirm = () => {
+    if (!isTimeValid) return;
     onChange(`${hours}:${minutes} ${ampm}`);
     onClose();
   };
@@ -149,20 +218,35 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
           className="w-1/3 overflow-y-auto scrollbar-hide text-center snap-y snap-mandatory scroll-smooth"
           onWheel={handleWheel}
         >
-          {hoursArr.map((h) => (
-            <div
-              key={h}
-              data-hour={h}
-              onClick={() => setHours(h)}
-              className={`py-3 cursor-pointer transition-colors snap-center ${hours === h
-                ? "font-bold text-2xl"
-                : "text-lg"
+          {hoursArr.map((h) => {
+            const isPast = isTimeInPast(h, minutes, ampm);
+            const isSelected = hours === h;
+            return (
+              <div
+                key={h}
+                data-hour={h}
+                onClick={() => !isPast && setHours(h)}
+                className={`py-3 transition-colors snap-center ${
+                  isSelected
+                    ? "font-bold text-2xl"
+                    : "text-lg"
+                } ${
+                  isPast
+                    ? "opacity-20 cursor-not-allowed"
+                    : "cursor-pointer"
                 }`}
-              style={{ color: hours === h ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)' }}
-            >
-              {h}
-            </div>
-          ))}
+                style={{ 
+                  color: isSelected 
+                    ? 'var(--color-primary)' 
+                    : isPast 
+                      ? 'rgba(255,255,255,0.1)'
+                      : 'rgba(255,255,255,0.3)' 
+                }}
+              >
+                {h}
+              </div>
+            );
+          })}
         </div>
 
         {/* Minutes */}
@@ -172,44 +256,74 @@ const CustomTimePicker = ({ value, onChange, onClose }) => {
           style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }}
           onWheel={handleWheel}
         >
-          {minutesArr.map((m) => (
-            <div
-              key={m}
-              data-minute={m}
-              onClick={() => setMinutes(m)}
-              className={`py-3 cursor-pointer transition-colors snap-center ${minutes === m
-                ? "font-bold text-2xl"
-                : "text-lg"
+          {minutesArr.map((m) => {
+            const isPast = isTimeInPast(hours, m, ampm);
+            const isSelected = minutes === m;
+            return (
+              <div
+                key={m}
+                data-minute={m}
+                onClick={() => !isPast && setMinutes(m)}
+                className={`py-3 transition-colors snap-center ${
+                  isSelected
+                    ? "font-bold text-2xl"
+                    : "text-lg"
+                } ${
+                  isPast
+                    ? "opacity-20 cursor-not-allowed"
+                    : "cursor-pointer"
                 }`}
-              style={{ color: minutes === m ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)' }}
-            >
-              {m}
-            </div>
-          ))}
+                style={{ 
+                  color: isSelected 
+                    ? 'var(--color-primary)' 
+                    : isPast 
+                      ? 'rgba(255,255,255,0.1)'
+                      : 'rgba(255,255,255,0.3)' 
+                }}
+              >
+                {m}
+              </div>
+            );
+          })}
         </div>
 
         {/* AM/PM */}
         <div className="w-1/3 flex flex-col justify-center items-center gap-3">
-          {["AM", "PM"].map((p) => (
-            <button
-              key={p}
-              onClick={() => setAmpm(p)}
-              className="px-4 py-2 rounded-lg text-sm font-bold transition-all"
-              style={
-                ampm === p
-                  ? { backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }
-                  : { backgroundColor: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }
-              }
-            >
-              {p}
-            </button>
-          ))}
+          {["AM", "PM"].map((p) => {
+            // Don't disable AM/PM buttons based on time validation
+            // Only the final selected time should be validated
+            return (
+              <button
+                key={p}
+                onClick={() => setAmpm(p)}
+                className="px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                style={
+                  ampm === p
+                    ? { backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }
+                    : { backgroundColor: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }
+                }
+              >
+                {p}
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      {!isTimeValid && (
+        <p className="text-xs text-red-400 text-center mt-2 mb-1">
+          Cannot select a time in the past
+        </p>
+      )}
+
       <button
         onClick={handleConfirm}
-        className="w-full mt-5 font-bold py-3 rounded-lg shadow-md transition-transform active:scale-95"
+        disabled={!isTimeValid}
+        className={`w-full mt-2 font-bold py-3 rounded-lg shadow-md transition-all ${
+          isTimeValid
+            ? 'active:scale-95 hover:opacity-90'
+            : 'opacity-50 cursor-not-allowed'
+        }`}
         style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
       >
         Set Pickup Time
@@ -424,6 +538,23 @@ function Locations({ data, updateData, onNext }) {
   const pickupInputRef = useRef(null);
   const dropoffInputRef = useRef(null);
 
+  // Sync serviceType with data when navigating back
+  useEffect(() => {
+    if (data.serviceType && data.serviceType !== serviceType) {
+      setServiceType(data.serviceType);
+    }
+  }, [data.serviceType]);
+
+  // Populate input fields when component mounts or data changes (e.g., when navigating back)
+  useEffect(() => {
+    if (data.pickup && pickupInputRef.current) {
+      pickupInputRef.current.value = data.pickup;
+    }
+    if (data.dropoff && dropoffInputRef.current) {
+      dropoffInputRef.current.value = data.dropoff;
+    }
+  }, [data.pickup, data.dropoff]);
+
   // Handle pickup place selection
   const handlePickupPlaceChanged = () => {
     if (pickupAutocompleteRef.current) {
@@ -448,6 +579,17 @@ function Locations({ data, updateData, onNext }) {
         setErrors((prev) => ({ ...prev, pickup: null }));
         if (pickupInputRef.current) {
           pickupInputRef.current.value = fullAddress;
+        }
+        // Clear vehicle selection and dependent data when pickup changes
+        if (data.selectedVehicle) {
+          updateData("selectedVehicle", null);
+          updateData("journeyInfo", null);
+        }
+        // Clear passenger details and dependent data if moving forward
+        if (data.passengerDetails) {
+          updateData("passengerDetails", null);
+          updateData("flightDetails", null);
+          updateData("specialInstructions", "");
         }
       }
     }
@@ -478,6 +620,17 @@ function Locations({ data, updateData, onNext }) {
         if (dropoffInputRef.current) {
           dropoffInputRef.current.value = fullAddress;
         }
+        // Clear vehicle selection and dependent data when dropoff changes
+        if (data.selectedVehicle) {
+          updateData("selectedVehicle", null);
+          updateData("journeyInfo", null);
+        }
+        // Clear passenger details and dependent data if moving forward
+        if (data.passengerDetails) {
+          updateData("passengerDetails", null);
+          updateData("flightDetails", null);
+          updateData("specialInstructions", "");
+        }
       }
     }
   };
@@ -492,12 +645,83 @@ function Locations({ data, updateData, onNext }) {
     }
   };
 
+  // Get current UK time (GMT/BST)
+  const getUKTime = () => {
+    const now = new Date();
+    
+    // Get UK time using Intl.DateTimeFormat for accurate timezone conversion
+    const ukDateStr = now.toLocaleString("en-GB", { 
+      timeZone: "Europe/London",
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    
+    // Parse the UK date string and create a Date object
+    const [datePart, timePart] = ukDateStr.split(', ');
+    const [day, month, year] = datePart.split('/');
+    const [hours, minutes, seconds] = timePart.split(':');
+    
+    const ukTime = new Date(year, month - 1, day, hours, minutes, seconds);
+    
+    return ukTime;
+  };
+
+  // Check if selected time is in the past (relative to UK time)
+  const isTimeInPast = () => {
+    if (!data.pickupTime || !data.pickupDate) {
+      return false;
+    }
+
+    const ukNow = getUKTime();
+    const checkDate = data.pickupDate;
+
+    // Only check if it's today
+    const isToday = checkDate.toDateString() === ukNow.toDateString();
+
+    if (!isToday) {
+      return false;
+    }
+
+    // Parse the selected time
+    const [time, period] = data.pickupTime.split(" ");
+    const [h, m] = time.split(":");
+
+    // Convert 12-hour format to 24-hour format
+    let hour24 = parseInt(h);
+    if (period === "PM" && hour24 !== 12) hour24 += 12;
+    if (period === "AM" && hour24 === 12) hour24 = 0;
+
+    const minuteInt = parseInt(m);
+
+    // Compare with current UK time
+    const isPastHour = hour24 < ukNow.getHours();
+    const isPastMinute = hour24 === ukNow.getHours() && minuteInt < ukNow.getMinutes();
+
+    return isPastHour || isPastMinute;
+  };
+
   const validateAndProceed = () => {
     const newErrors = {};
     if (!data.pickup?.trim()) newErrors.pickup = "Required";
     if (serviceType === "oneway" && !data.dropoff?.trim()) newErrors.dropoff = "Required";
+    
+    // Check for past time
+    if (data.pickupTime && data.pickupDate) {
+      const isPast = isTimeInPast();
+      if (isPast) {
+        newErrors.pickupTime = "Cannot select a time in the past";
+      }
+    }
+    
     setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) onNext();
+    if (Object.keys(newErrors).length === 0) {
+      onNext();
+    }
   };
 
   return (
@@ -649,11 +873,11 @@ function Locations({ data, updateData, onNext }) {
               <div className="relative">
                 <div
                   onClick={() => setActivePicker(activePicker === 'time' ? null : 'time')}
-                  className="flex items-center justify-between bg-white/5 border border-white/10 hover:border-[var(--color-primary)]/50 rounded-lg py-3 px-3 cursor-pointer transition-colors"
+                  className={`flex items-center justify-between bg-white/5 border ${errors.pickupTime ? 'border-red-500' : 'border-white/10'} hover:border-[var(--color-primary)]/50 focus:border-[var(--color-primary)] rounded-lg py-3 px-3 cursor-pointer transition-colors`}
                 >
                   <div className="flex items-center gap-2">
                     <Clock size={14} className="text-[var(--color-primary)]" />
-                    <span className="text-xs text-white">{data.pickupTime}</span>
+                    <span className="text-xs text-white">{data.pickupTime || "Select Time"}</span>
                   </div>
                   <ChevronDown size={12} className="opacity-40 text-white" />
                 </div>
@@ -662,9 +886,13 @@ function Locations({ data, updateData, onNext }) {
                     value={data.pickupTime}
                     onChange={(t) => updateData("pickupTime", t)}
                     onClose={() => setActivePicker(null)}
+                    selectedDate={data.pickupDate}
                   />
                 )}
               </div>
+              {errors.pickupTime && (
+                <p className="text-xs text-red-400 ml-1">{errors.pickupTime}</p>
+              )}
             </div>
           </div>
 

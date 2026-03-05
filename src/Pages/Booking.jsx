@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Locations from "../Components/booking/Locations";
 import CarsSelection from "../Components/booking/CarsSelection";
 import UserDetails from "../Components/booking/UserDetails";
-import BookingSummary from "../Components/booking/BookingSummary";
 import Payment from "../Components/booking/Payment";
 import StickyBookingSummary from "../Components/booking/StickyBookingSummary";
 import { paymentAPI, bookingAPI } from "../Utils/api";
@@ -27,10 +26,8 @@ function Booking() {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [showSummary, setShowSummary] = useState(false);
   const [clientSecret, setClientSecret] = useState(null);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
-  const [isLoadingLead, setIsLoadingLead] = useState(false);
   const [isTestMode, setIsTestMode] = useState(false);
   const [bookingData, setBookingData] = useState({
     pickup: null,
@@ -38,14 +35,14 @@ function Booking() {
     pickupDate: new Date(),
     pickupTime: "12:00 PM",
     serviceType: "oneway",
-    hours: 2, // Default hours for hourly bookings
+    hours: 2,
     selectedVehicle: null,
     journeyInfo: null,
     passengerDetails: null,
     flightDetails: null,
     specialInstructions: "",
-    savedBookingId: null, // Track saved booking ID
-    originalEmail: null, // Track original email for change detection
+    savedBookingId: null,
+    originalEmail: null,
   });
 
   const updateBooking = (field, value) => {
@@ -53,17 +50,13 @@ function Booking() {
   };
 
   const goToStep = (step) => {
-    setShowSummary(false);
     setCurrentStep(step);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Build booking payload (shared between create and update)
-  // Accepts optional formData to use instead of bookingData state (for avoiding race conditions)
   const buildBookingPayload = (formData = null) => {
     const isHourly = bookingData.serviceType === "hourly";
 
-    // Use formData if provided, otherwise fall back to state
     const passengerDetails = formData?.passengerDetails || bookingData.passengerDetails;
     const flightDetails = formData?.flightDetails || bookingData.flightDetails;
     const specialInstructions = formData?.specialInstructions ?? bookingData.specialInstructions;
@@ -112,46 +105,42 @@ function Booking() {
     };
   };
 
-  // Handle UserDetails form submission - CREATE LEAD and show summary
-  // formData is passed directly from UserDetails to avoid race condition with state updates
+  // Handle UserDetails form submission - CREATE LEAD + CREATE PAYMENT INTENT + GO TO PAYMENT
   const handleUserDetailsSubmit = async (formData = null) => {
     const existingBookingId = bookingData.savedBookingId;
-
-    // Get the current email from formData or fall back to state
     const currentPassengerDetails = formData?.passengerDetails || bookingData.passengerDetails;
 
-    // If booking already exists, this is a re-submit from edit
-    // Just go to summary without creating a new booking
+    // If booking already exists (re-submit from edit)
     if (existingBookingId) {
-      // Check if email changed and update if needed
       const currentEmail = currentPassengerDetails?.email;
       const originalEmail = bookingData.originalEmail;
 
+      // Update booking if email changed
       if (currentEmail !== originalEmail) {
-        // Email changed - update booking and send welcome email to new address
-        setIsLoadingLead(true);
+        setIsLoadingPayment(true);
         try {
           await bookingAPI.updateBookingDetails(existingBookingId, {
             ...buildBookingPayload(formData),
-            originalEmail: originalEmail, // Send original email for comparison
+            originalEmail: originalEmail,
           });
-          // Update original email to current
           updateBooking("originalEmail", currentEmail);
-          console.log("Booking updated with new email, welcome email sent to:", currentEmail);
+          console.log("Booking updated with new email:", currentEmail);
         } catch (error) {
           console.error("Error updating booking:", error);
         } finally {
-          setIsLoadingLead(false);
+          setIsLoadingPayment(false);
         }
       }
 
-      setShowSummary(true);
+      // Create payment intent and go to payment
+      await createPaymentIntentAndProceed();
       return;
     }
 
-    // NEW LEAD - Create booking in database
-    setIsLoadingLead(true);
+    // NEW LEAD - Create booking + Create payment intent + Go to payment
+    setIsLoadingPayment(true);
     try {
+      // Step 1: Create booking
       const bookingPayload = {
         ...buildBookingPayload(formData),
         paymentStatus: "pending",
@@ -159,14 +148,12 @@ function Booking() {
       };
 
       console.log("Creating booking with payload:", bookingPayload);
-
       const bookingResponse = await bookingAPI.createBooking(bookingPayload);
 
       if (!bookingResponse.success) {
         throw new Error("Failed to save booking");
       }
 
-      // Store booking ID and original email for later
       const savedBookingId = bookingResponse.data._id;
       const originalEmail = currentPassengerDetails?.email;
 
@@ -174,27 +161,21 @@ function Booking() {
       updateBooking("originalEmail", originalEmail);
 
       console.log("Lead saved with ID:", savedBookingId);
-      console.log("Welcome emails sent to user and admin notification sent!");
 
-      setShowSummary(true);
+      // Step 2: Create payment intent and proceed
+      await createPaymentIntentAndProceed(savedBookingId);
     } catch (error) {
       console.error("Error creating lead:", error);
       alert("Something went wrong. Please try again.");
     } finally {
-      setIsLoadingLead(false);
+      setIsLoadingPayment(false);
     }
   };
 
-  // Handle edit from summary - go back to step 3
-  const handleEditFromSummary = () => {
-    setShowSummary(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Handle proceed to payment - CREATE PAYMENT INTENT (booking already exists)
-  const handleProceedToPayment = async () => {
+  // Helper function to create payment intent and navigate to payment step
+  const createPaymentIntentAndProceed = async (bookingId = null) => {
     const totalAmount = bookingData.selectedVehicle?.pricing?.totalPrice;
-    const savedBookingId = bookingData.savedBookingId;
+    const savedBookingId = bookingId || bookingData.savedBookingId;
 
     if (!totalAmount) {
       alert("Invalid booking amount");
@@ -206,13 +187,7 @@ function Booking() {
       return;
     }
 
-    // 🔥 TRACK: Initiate Checkout — user tapped "Proceed to Payment"
-    Analytics.trackInitiateCheckout(bookingData);
-
-    setIsLoadingPayment(true);
-
     try {
-      // Create payment intent (booking already saved in handleUserDetailsSubmit)
       const response = await paymentAPI.createPaymentIntent({
         amount: totalAmount,
         currency: "gbp",
@@ -223,21 +198,17 @@ function Booking() {
       if (response.success) {
         setClientSecret(response.clientSecret);
         setIsTestMode(response.isTestMode || false);
-        setShowSummary(false);
         setCurrentStep(4);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         alert("Failed to initialize payment. Please try again.");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error creating payment intent:", error);
       alert("Something went wrong. Please try again.");
-    } finally {
-      setIsLoadingPayment(false);
     }
   };
 
-  // Handle payment success - UPDATE existing booking (triggers confirmation emails)
   const handlePaymentSuccess = async (paymentIntent) => {
     // 🔥 TRACK: Purchase — Stripe confirmed payment succeeded
     Analytics.trackPurchase(paymentIntent, bookingData);
@@ -246,8 +217,6 @@ function Booking() {
       const bookingId = bookingData.savedBookingId;
 
       if (bookingId) {
-        // Update the existing booking with paid status
-        // This triggers confirmation emails on the backend
         await bookingAPI.updateBookingStatus(bookingId, {
           paymentStatus: "paid",
           paymentIntentId: paymentIntent.id,
@@ -261,7 +230,6 @@ function Booking() {
     }
   };
 
-  // Loading state
   if (!isLoaded) {
     return (
       <div className="h-screen flex flex-col items-center justify-center" style={{ backgroundColor: 'var(--color-dark)' }}>
@@ -277,9 +245,7 @@ function Booking() {
   }
 
   const currentStepConfig = STEPS.find((s) => s.id === currentStep);
-  const displayStep = showSummary ? 3 : currentStep;
 
-  // Build vehicle prop for StickyBookingSummary
   const stickyVehicle = bookingData.selectedVehicle
     ? {
       name: bookingData.selectedVehicle.categoryName,
@@ -303,7 +269,6 @@ function Booking() {
       {/* --- STEPS INDICATOR --- */}
       <div className="pt-32 md:pt-36 pb-6" style={{ backgroundColor: 'var(--color-dark)' }}>
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          {/* Stepper — always centered */}
           <div className="flex items-center space-x-1 lg:space-x-4 text-sm justify-center">
             {STEPS.map((step, index) => (
               <React.Fragment key={step.id}>
@@ -311,27 +276,27 @@ function Booking() {
                   <div
                     className="w-8 lg:w-16 h-0.5 rounded-full transition-all duration-500"
                     style={{
-                      background: displayStep >= step.id
+                      background: currentStep >= step.id
                         ? 'linear-gradient(to right, var(--color-primary), var(--color-primary))'
                         : 'rgba(255,255,255,0.15)'
                     }}
                   ></div>
                 )}
                 <div
-                  className={`flex items-center gap-1 lg:gap-2 transition-all duration-300 ${displayStep >= step.id ? "font-semibold" : ""}`}
-                  style={{ color: displayStep >= step.id ? '#fff' : 'rgba(255,255,255,0.35)' }}
+                  className={`flex items-center gap-1 lg:gap-2 transition-all duration-300 ${currentStep >= step.id ? "font-semibold" : ""}`}
+                  style={{ color: currentStep >= step.id ? '#fff' : 'rgba(255,255,255,0.35)' }}
                 >
                   <span
                     className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full text-sm font-bold border-2 transition-all duration-300"
                     style={
-                      displayStep > step.id
+                      currentStep > step.id
                         ? {
                           backgroundColor: 'var(--color-primary)',
                           color: 'var(--color-dark)',
                           borderColor: 'var(--color-primary)',
                           boxShadow: '0 4px 14px rgba(215,183,94,0.3)'
                         }
-                        : displayStep === step.id
+                        : currentStep === step.id
                           ? {
                             backgroundColor: 'rgba(215,183,94,0.15)',
                             color: 'var(--color-primary)',
@@ -345,7 +310,7 @@ function Booking() {
                           }
                     }
                   >
-                    {displayStep > step.id ? "✓" : step.id}
+                    {currentStep > step.id ? "✓" : step.id}
                   </span>
                   <span className="hidden lg:inline uppercase text-xs tracking-wide">
                     {step.label}
@@ -357,13 +322,12 @@ function Booking() {
         </div>
       </div>
 
-      {/* --- TWO-COLUMN LAYOUT (desktop) / SINGLE-COLUMN (mobile) --- */}
+      {/* --- TWO-COLUMN LAYOUT --- */}
       <div className="max-w-7xl mx-auto mt-0 px-4 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:gap-8">
 
-          {/* LEFT: Main content — full width on mobile, 60% on desktop (full width on Step 1, review, and payment) */}
-          <div className={`w-full min-w-0 ${showSummary || currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"
-            }`}>
+          {/* LEFT: Main content */}
+          <div className={`w-full min-w-0 ${currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"}`}>
             <AnimatePresence mode="wait">
               {currentStep === 1 && (
                 <motion.div
@@ -398,7 +362,7 @@ function Booking() {
                 </motion.div>
               )}
 
-              {currentStep === 3 && !showSummary && (
+              {currentStep === 3 && (
                 <motion.div
                   key="step-3"
                   initial={{ opacity: 0, x: 20 }}
@@ -411,23 +375,6 @@ function Booking() {
                     updateData={updateBooking}
                     onNext={handleUserDetailsSubmit}
                     onBack={() => goToStep(2)}
-                    isLoading={isLoadingLead}
-                  />
-                </motion.div>
-              )}
-
-              {currentStep === 3 && showSummary && (
-                <motion.div
-                  key="step-3-summary"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <BookingSummary
-                    data={bookingData}
-                    onEdit={handleEditFromSummary}
-                    onProceed={handleProceedToPayment}
                     isLoading={isLoadingPayment}
                   />
                 </motion.div>
@@ -444,15 +391,7 @@ function Booking() {
                   <Payment
                     data={bookingData}
                     clientSecret={clientSecret}
-                    onBack={() => {
-                      // 🔥 TRACK: Payment Failure — user went back from payment page
-                      Analytics.trackPaymentFailure("user_navigated_back", {
-                        amount: bookingData.selectedVehicle?.pricing?.totalPrice,
-                        vehicle: bookingData.selectedVehicle?.categoryName,
-                      });
-                      setShowSummary(true);
-                      setCurrentStep(3);
-                    }}
+                    onBack={() => goToStep(3)}
                     onPaymentSuccess={handlePaymentSuccess}
                     onPaymentFailure={(reason, extra) =>
                       Analytics.trackPaymentFailure(reason, {
@@ -478,7 +417,6 @@ function Booking() {
                         originalEmail: null,
                       });
                       setClientSecret(null);
-                      setShowSummary(false);
                       setCurrentStep(1);
                     }}
                     isLoadingIntent={isLoadingPayment}
@@ -489,8 +427,8 @@ function Booking() {
             </AnimatePresence>
           </div>
 
-          {/* RIGHT: Sticky summary — hidden on mobile/tablet, Step 1, review step, and payment step */}
-          {!showSummary && currentStep !== 1 && currentStep !== 4 && (
+          {/* RIGHT: Sticky summary — hidden on Step 1 and payment step */}
+          {currentStep !== 1 && currentStep !== 4 && (
             <div className="hidden lg:block lg:w-[40%]">
               <div className="sticky top-32">
                 <StickyBookingSummary

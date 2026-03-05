@@ -16,6 +16,94 @@ import {
 import { useState, useEffect, useRef } from "react";
 import StepNavBar from "./StepNavBar";
 
+/**
+ * UK Landline Number Validation (London 020 numbers)
+ * Accepts formats: 020 XXXX XXXX, 020XXXXXXXX, +44 20 XXXX XXXX
+ * Returns { isValid: boolean, errorMessage: string }
+ */
+const validateUkLandline = (phoneNumber, countryCode) => {
+  if (!phoneNumber || phoneNumber.trim() === "") {
+    return { isValid: false, errorMessage: "Phone number is required" };
+  }
+
+  // Strip all spaces, dashes, brackets, and parentheses
+  const cleaned = phoneNumber.replace(/[\s\-\(\)\[\]]/g, "");
+
+  // Only validate when UK country code is selected
+  if (countryCode === "+44") {
+    // Check for double prefix like +44020
+    if (cleaned.startsWith("+440")) {
+      return { isValid: false, errorMessage: "Invalid format: do not include both +44 and leading 0" };
+    }
+
+    // Handle international format (+44)
+    if (cleaned.startsWith("+44")) {
+      const digitsOnly = cleaned.slice(3); // Remove +44
+
+      // Must start with 20 (London area code)
+      if (!digitsOnly.startsWith("20")) {
+        return { isValid: false, errorMessage: "Only London landline numbers (020) are accepted" };
+      }
+
+      // Check digit after 20 is 3, 7, or 8
+      const thirdDigit = digitsOnly.charAt(2);
+      if (!["3", "7", "8"].includes(thirdDigit)) {
+        return { isValid: false, errorMessage: "Invalid London number: digit after 020 must be 3, 7, or 8" };
+      }
+
+      // Total should be 10 digits after +44 (20 + 8 digits)
+      if (digitsOnly.length !== 10) {
+        return { isValid: false, errorMessage: "Invalid number length: London landline must have exactly 10 digits after area code" };
+      }
+
+      return { isValid: true, errorMessage: "" };
+    }
+
+    // Handle local format (starting with 0)
+    if (cleaned.startsWith("0")) {
+      // Reject mobile numbers starting with 07
+      if (cleaned.startsWith("07")) {
+        return { isValid: false, errorMessage: "Mobile numbers (07) are not accepted" };
+      }
+
+      // Reject special/premium numbers
+      if (cleaned.startsWith("0800") || cleaned.startsWith("0845") || cleaned.startsWith("0870") || cleaned.startsWith("09")) {
+        return { isValid: false, errorMessage: "Special/premium rate numbers are not accepted" };
+      }
+
+      // Must start with 020 (London area code)
+      if (!cleaned.startsWith("020")) {
+        return { isValid: false, errorMessage: "Only London landline numbers (020) are accepted" };
+      }
+
+      // Check digit after 020 is 3, 7, or 8
+      const thirdDigit = cleaned.charAt(3);
+      if (!["3", "7", "8"].includes(thirdDigit)) {
+        return { isValid: false, errorMessage: "Invalid London number: digit after 020 must be 3, 7, or 8" };
+      }
+
+      // Total should be 11 digits (0 + 10 digits for 020 number)
+      if (cleaned.length !== 11) {
+        return { isValid: false, errorMessage: "Invalid number length: London landline must have exactly 11 digits" };
+      }
+
+      return { isValid: true, errorMessage: "" };
+    }
+
+    // Doesn't start with valid prefix
+    return { isValid: false, errorMessage: "Number must start with 020" };
+  }
+
+  // For non-UK numbers, just basic validation
+  if (!/^\d+$/.test(cleaned)) {
+    return { isValid: false, errorMessage: "Phone number can only contain digits" };
+  }
+  if (cleaned.length < 7) {
+    return { isValid: false, errorMessage: "Phone number is too short" };
+  }
+
+  return { isValid: true, errorMessage: "" };
+};
 // Country codes data with flags
 const countryCodes = [
   { code: "+44", country: "UK", flag: "🇬🇧" },
@@ -183,7 +271,7 @@ const InputField = ({
 };
 
 // Select Field Component
-const SelectField = ({ label, icon: Icon, required, options, ...props }) => (
+const SelectField = ({ label, icon: Icon, required, options, error, ...props }) => (
   <div className="space-y-2">
     <label className="flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
       {Icon && <Icon size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />}
@@ -196,7 +284,7 @@ const SelectField = ({ label, icon: Icon, required, options, ...props }) => (
         className="w-full px-4 py-3.5 border rounded-xl outline-none appearance-none transition-all duration-200"
         style={{
           backgroundColor: 'rgba(255,255,255,0.05)',
-          borderColor: 'rgba(255,255,255,0.1)',
+          borderColor: error ? '#ef4444' : 'rgba(255,255,255,0.1)',
           color: '#fff',
         }}
       >
@@ -208,6 +296,7 @@ const SelectField = ({ label, icon: Icon, required, options, ...props }) => (
       </select>
       <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'rgba(255,255,255,0.4)' }} />
     </div>
+    {error && <p className="text-sm text-red-400">{error}</p>}
   </div>
 );
 
@@ -272,6 +361,30 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
 
   const [errors, setErrors] = useState({});
 
+  // Sync formData with data when navigating back
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      firstName: data?.passengerDetails?.firstName || prev.firstName,
+      lastName: data?.passengerDetails?.lastName || prev.lastName,
+      email: data?.passengerDetails?.email || prev.email,
+      countryCode: data?.passengerDetails?.countryCode || prev.countryCode,
+      phone: data?.passengerDetails?.phone || prev.phone,
+      numberOfPassengers: data?.passengerDetails?.numberOfPassengers || prev.numberOfPassengers,
+      numberOfSuitcases: data?.passengerDetails?.numberOfSuitcases || prev.numberOfSuitcases,
+      isBookingForSomeoneElse: data?.passengerDetails?.isBookingForSomeoneElse || prev.isBookingForSomeoneElse,
+      guestFirstName: data?.passengerDetails?.guestFirstName || prev.guestFirstName,
+      guestLastName: data?.passengerDetails?.guestLastName || prev.guestLastName,
+      guestCountryCode: data?.passengerDetails?.guestCountryCode || prev.guestCountryCode,
+      guestPhone: data?.passengerDetails?.guestPhone || prev.guestPhone,
+      guestEmail: data?.passengerDetails?.guestEmail || prev.guestEmail,
+      isAirportPickup: data?.flightDetails?.isAirportPickup || prev.isAirportPickup,
+      flightNumber: data?.flightDetails?.flightNumber || prev.flightNumber,
+      nameBoard: data?.flightDetails?.nameBoard || prev.nameBoard,
+      additionalRequirements: data?.specialInstructions ?? prev.additionalRequirements,
+    }));
+  }, [data]);
+
   const updateField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -304,12 +417,29 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
       newErrors.email = "Please enter a valid email address";
     }
 
+    // Phone number validation with UK landline check
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else if (!phonePattern.test(formData.phone.trim())) {
-      newErrors.phone = "Phone number can only contain digits";
-    } else if (formData.phone.trim().length < 7) {
-      newErrors.phone = "Phone number is too short";
+    } else {
+      const phoneValidation = validateUkLandline(formData.phone, formData.countryCode);
+      if (!phoneValidation.isValid) {
+        newErrors.phone = phoneValidation.errorMessage;
+      }
+    }
+
+    // Validate passengers and suitcases against selected vehicle capacity
+    const selectedVehicle = data?.selectedVehicle;
+    if (selectedVehicle) {
+      const maxPassengers = selectedVehicle.numberOfPassengers || 0;
+      const maxLuggage = selectedVehicle.numberOfBigLuggage || 0;
+      
+      if (formData.numberOfPassengers > maxPassengers) {
+        newErrors.numberOfPassengers = `Maximum ${maxPassengers} ${maxPassengers === 1 ? 'passenger' : 'passengers'} allowed for this vehicle`;
+      }
+      
+      if (formData.numberOfSuitcases > maxLuggage) {
+        newErrors.numberOfSuitcases = `Maximum ${maxLuggage} ${maxLuggage === 1 ? 'suitcase' : 'suitcases'} allowed for this vehicle`;
+      }
     }
 
     if (formData.isBookingForSomeoneElse) {
@@ -331,8 +461,11 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
         newErrors.guestEmail = "Please enter a valid email address";
       }
 
-      if (formData.guestPhone.trim() && !phonePattern.test(formData.guestPhone.trim())) {
-        newErrors.guestPhone = "Phone number can only contain digits";
+      if (formData.guestPhone.trim()) {
+        const guestPhoneValidation = validateUkLandline(formData.guestPhone, formData.guestCountryCode);
+        if (!guestPhoneValidation.isValid) {
+          newErrors.guestPhone = guestPhoneValidation.errorMessage;
+        }
       }
     }
 
@@ -474,6 +607,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
                 value={formData.numberOfPassengers}
                 onChange={(e) => updateField("numberOfPassengers", parseInt(e.target.value))}
                 options={passengerOptions}
+                error={errors.numberOfPassengers}
               />
               <SelectField
                 label="Number of Suitcases"
@@ -482,6 +616,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
                 value={formData.numberOfSuitcases}
                 onChange={(e) => updateField("numberOfSuitcases", parseInt(e.target.value))}
                 options={suitcaseOptions}
+                error={errors.numberOfSuitcases}
               />
             </div>
           </div>
@@ -635,7 +770,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
           onBack={onBack}
           onContinue={handleSubmit}
           backLabel="BACK"
-          continueLabel="PROCEED"
+          continueLabel="PROCEED TO PAYMENT"
           isLoading={isLoading}
         />
       </div>

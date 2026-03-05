@@ -11,7 +11,7 @@ import {
   Clock,
   MapPin,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { vehicleAPI } from "../../Utils/api";
 import FilterBar from "./car-selection/FilterBar";
 import VehicleCard from "./car-selection/VehicleCard";
@@ -25,6 +25,13 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [passengerFilter, setPassengerFilter] = useState(1);
   const [luggageFilter, setLuggageFilter] = useState(1);
+
+  // Sync selected vehicle with data when navigating back
+  useEffect(() => {
+    if (data.selectedVehicle && data.selectedVehicle._id !== selectedVehicle?._id) {
+      setSelectedVehicle(data.selectedVehicle);
+    }
+  }, [data.selectedVehicle]);
 
   // Prepare search data for API
   const searchData = useMemo(() => {
