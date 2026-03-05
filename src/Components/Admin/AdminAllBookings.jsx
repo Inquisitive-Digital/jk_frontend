@@ -677,11 +677,7 @@ function AdminAllBookings() {
             const response = await bookingAPI.getAllBookings(params);
 
             if (response.success) {
-                // All Bookings page shows only CONFIRMED and COMPLETED bookings
-                const confirmedBookings = response.data.filter(
-                    (b) => b.status === "confirmed" || b.status === "completed"
-                );
-                setBookings(confirmedBookings);
+                setBookings(response.data);
                 setPagination(response.pagination);
                 setStats(response.stats);
             }

@@ -263,18 +263,35 @@ const LeadCard = ({ booking, onEdit, onDelete }) => {
 // Edit Lead Modal - Changed to allow status change
 const EditLeadModal = ({ booking, isOpen, onClose, onSave }) => {
     const [status, setStatus] = useState(booking?.status || "pending");
+    const [paymentStatus, setPaymentStatus] = useState(booking?.paymentStatus || "pending");
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (booking) {
             setStatus(booking.status);
+            setPaymentStatus(booking.paymentStatus);
         }
     }, [booking]);
+
+    const handleStatusChange = (s) => {
+        setStatus(s);
+        // When confirming booking, automatically mark as paid
+        if (s === "confirmed") {
+            setPaymentStatus("paid");
+        } else {
+            setPaymentStatus(booking?.paymentStatus || "pending");
+        }
+    };
 
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await onSave(booking._id, { status });
+            const updateData = { status };
+            // If confirming, also update payment status to paid
+            if (status === "confirmed") {
+                updateData.paymentStatus = "paid";
+            }
+            await onSave(booking._id, updateData);
             onClose();
         } catch (error) {
             console.error("Error saving:", error);
@@ -349,7 +366,7 @@ const EditLeadModal = ({ booking, isOpen, onClose, onSave }) => {
                                 {["pending", "confirmed", "cancelled"].map((s) => (
                                     <button
                                         key={s}
-                                        onClick={() => setStatus(s)}
+                                        onClick={() => handleStatusChange(s)}
                                         className={`px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all ${status === s
                                             ? s === "confirmed"
                                                 ? "bg-green-600 text-white shadow-lg"
@@ -363,6 +380,15 @@ const EditLeadModal = ({ booking, isOpen, onClose, onSave }) => {
                                     </button>
                                 ))}
                             </div>
+                            {/* Auto-paid indicator */}
+                            {status === "confirmed" && (
+                                <div className="mt-3 flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-2">
+                                    <CreditCard size={16} className="text-green-600" />
+                                    <span className="text-sm font-semibold text-green-700">
+                                        Payment will be automatically marked as <span className="uppercase">Paid</span>
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Journey Details */}
@@ -505,7 +531,7 @@ const EditLeadModal = ({ booking, isOpen, onClose, onSave }) => {
                                         <span className="text-sm text-gray-600">
                                             Payment Status
                                         </span>
-                                        <StatusBadge status={booking.paymentStatus} type="payment" />
+                                        <StatusBadge status={paymentStatus} type="payment" />
                                     </div>
                                 </div>
                             </div>
