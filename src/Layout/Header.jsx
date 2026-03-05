@@ -46,8 +46,9 @@ function Header({ isTransparent = false, theme = 'dark' }) {
   const [serviceMenuItems, setServiceMenuItems] = useState([]);
   const location = useLocation();
 
-  // Check if we're on the home page
+  // Check if we're on the home page or booking page
   const isHomePage = location.pathname === '/';
+  const isBookingPage = location.pathname === '/booking';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -225,9 +226,9 @@ function Header({ isTransparent = false, theme = 'dark' }) {
 
             {/* Right side container */}
             <div className="flex items-center gap-3">
-              {/* Mobile Book Now Button */}
+              {/* Mobile Book Now Button - Hidden on booking page */}
               <AnimatePresence>
-                {isScrolled && (
+                {isScrolled && !isBookingPage && (
                   <motion.div
                     initial={{ opacity: 0, x: 20, scale: 0.9 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -246,25 +247,27 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 )}
               </AnimatePresence>
 
-              {/* Book Now Button (Desktop only) */}
-              <Link
-                to="/booking"
-                className="hidden md:block px-4 py-2.5 md:px-6 text-black font-semibold text-sm uppercase tracking-wider rounded transition-all duration-300"
-                style={{
-                  backgroundColor: 'var(--color-primary)',
-                  boxShadow: 'none'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)';
-                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(var(--color-primary-rgb), 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-primary)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                Book Now
-              </Link>
+              {/* Book Now Button (Desktop only) - Hidden on booking page */}
+              {!isBookingPage && (
+                <Link
+                  to="/booking"
+                  className="hidden md:block px-4 py-2.5 md:px-6 text-black font-semibold text-sm uppercase tracking-wider rounded transition-all duration-300"
+                  style={{
+                    backgroundColor: 'var(--color-primary)',
+                    boxShadow: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(var(--color-primary-rgb), 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  Book Now
+                </Link>
+              )}
 
               {/* Mobile Menu Button */}
               <button
