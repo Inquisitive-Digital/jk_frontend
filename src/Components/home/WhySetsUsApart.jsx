@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Award, Crown, Armchair, CheckCircle, ChevronDown } from 'lucide-react';
+import Analytics from '../../Utils/analytics';
 
 // Key differentiators data
 const DIFFERENTIATORS = [
@@ -171,6 +172,7 @@ function WhySetsUsApart() {
                     </p> */}
                     <a
                         href="/booking"
+                        onClick={() => Analytics.trackBookingClick('why_us_book_journey')}
                         className="inline-flex items-center gap-2 px-8 py-3 text-black font-semibold text-sm uppercase tracking-wider rounded-lg transition-all duration-300 hover:shadow-lg"
                         style={{
                             backgroundColor: 'var(--color-primary)',

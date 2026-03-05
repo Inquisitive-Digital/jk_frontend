@@ -6,6 +6,7 @@ import {
     MapPin, CheckCircle, ArrowRight, Heart,
     Target, Gauge, Crown
 } from 'lucide-react';
+import Analytics from '../Utils/analytics';
 
 function AboutUs() {
     const values = [
@@ -344,6 +345,7 @@ function AboutUs() {
 
                             <Link
                                 to="/booking"
+                                onClick={() => Analytics.trackBookingClick('about_why_choose_us_book')}
                                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
                                 style={{
                                     backgroundColor: 'var(--color-primary)',
@@ -419,6 +421,7 @@ function AboutUs() {
                         </Link>
                         <Link
                             to="/booking"
+                            onClick={() => Analytics.trackBookingClick('about_bottom_cta_book_now')}
                             className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
                             style={{
                                 backgroundColor: 'var(--color-primary)',

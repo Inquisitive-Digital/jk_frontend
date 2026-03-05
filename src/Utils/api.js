@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -9,6 +10,38 @@ const api = axios.create({
     },
     withCredentials: true,
 });
+
+// Automatically attach admin JWT token to every request if available
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("adminToken");
+        if (token) {
+            config.headers["Authorization"] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// Show a toast notification when the server returns 429 Too Many Requests
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 429) {
+            toast.error(
+                "Too many requests! You've hit the rate limit. Please wait 15 minutes before trying again.",
+                {
+                    toastId: "rate-limit-error", // prevent duplicate toasts
+                    autoClose: 5000,
+                    position: "top-center",
+                }
+            );
+        }
+        return Promise.reject(error);
+    }
+);
+
+
 
 // Vehicle APIs
 export const vehicleAPI = {

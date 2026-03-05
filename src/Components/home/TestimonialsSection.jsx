@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import Analytics from '../../Utils/analytics';
 
 // Testimonials data
 const TESTIMONIALS = [
@@ -276,6 +277,7 @@ function TestimonialsSection() {
                 >
                     <a
                         href="/booking"
+                        onClick={() => Analytics.trackBookingClick('testimonials_book_now')}
                         className="inline-flex items-center gap-2 px-8 py-3 text-black font-semibold text-sm uppercase tracking-wider rounded-lg transition-all duration-300 hover:shadow-lg"
                         style={{
                             backgroundColor: 'var(--color-primary)',
@@ -291,9 +293,9 @@ function TestimonialsSection() {
                     </a>
                 </motion.div>
             </div>
-             <div className="hidden md:flex justify-center mt-10">
-                    <div className="w-[80%] h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                </div>
+            <div className="hidden md:flex justify-center mt-10">
+                <div className="w-[80%] h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
         </section>
     );
 }

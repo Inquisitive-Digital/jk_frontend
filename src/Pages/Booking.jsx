@@ -7,6 +7,7 @@ import UserDetails from "../Components/booking/UserDetails";
 import Payment from "../Components/booking/Payment";
 import StickyBookingSummary from "../Components/booking/StickyBookingSummary";
 import { paymentAPI, bookingAPI } from "../Utils/api";
+import Analytics from "../Utils/analytics";
 
 const LIBRARIES = ["places"];
 
@@ -209,6 +210,9 @@ function Booking() {
   };
 
   const handlePaymentSuccess = async (paymentIntent) => {
+    // 🔥 TRACK: Purchase — Stripe confirmed payment succeeded
+    Analytics.trackPurchase(paymentIntent, bookingData);
+
     try {
       const bookingId = bookingData.savedBookingId;
 
@@ -389,6 +393,13 @@ function Booking() {
                     clientSecret={clientSecret}
                     onBack={() => goToStep(3)}
                     onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentFailure={(reason, extra) =>
+                      Analytics.trackPaymentFailure(reason, {
+                        amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+                        vehicle: bookingData.selectedVehicle?.categoryName,
+                        ...extra,
+                      })
+                    }
                     onComplete={() => {
                       setBookingData({
                         pickup: null,

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import bgVideo from '../../assets/bgVideo.mp4';
+import Analytics from '../../Utils/analytics';
 
 // Rotating text options
 const ROTATING_TEXTS = [
@@ -107,6 +108,7 @@ function HeroSection() {
                 >
                     <Link
                         to="/booking"
+                        onClick={() => Analytics.trackBookingClick('hero_get_quote')}
                         className="group flex items-center gap-2 px-8 py-4 text-black font-bold uppercase tracking-wider rounded transition-all duration-300"
                         style={{
                             backgroundColor: 'var(--color-primary)',
@@ -125,7 +127,10 @@ function HeroSection() {
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                     <button
-                        onClick={() => window.open('tel:+442012345678', '_self')}
+                        onClick={() => {
+                            Analytics.trackCallClick('hero_speak_to_us');
+                            window.open('tel:+442012345678', '_self');
+                        }}
                         className="px-8 py-4 border-2 border-white/30 hover:border-white/60 text-white font-medium uppercase tracking-wider rounded transition-all duration-300 hover:bg-white/5"
                     >
                         Speak to Us

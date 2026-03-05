@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { serviceAPI } from '../Utils/api';
+import Analytics from '../Utils/analytics';
 
 function ServiceWrapper() {
     const { slug } = useParams();
@@ -216,6 +217,7 @@ function ServiceWrapper() {
                             {/* Book Now CTA */}
                             <Link
                                 to="/booking"
+                                onClick={() => Analytics.trackBookingClick('service_page_book_now', { service_title: service.title })}
                                 className="block w-full text-center px-6 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
                                 style={{
                                     backgroundColor: 'var(--color-primary)',
@@ -238,6 +240,7 @@ function ServiceWrapper() {
                                 <p className="text-white/40 text-xs mb-1">Or call us directly</p>
                                 <a
                                     href="tel:+442012345678"
+                                    onClick={() => Analytics.trackCallClick('service_page_phone')}
                                     className="text-sm font-medium transition-colors"
                                     style={{ color: 'var(--color-primary)' }}
                                 >

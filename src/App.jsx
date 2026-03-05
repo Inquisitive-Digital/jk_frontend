@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-
+import Analytics from "./Utils/analytics";
 import Lenis from "lenis";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Layout from "./Layout/Layout";
@@ -53,6 +53,26 @@ function ScrollToTop() {
 function App() {
 
   useEffect(() => {
+
+    // TAWK.TO INTEGRATION 
+    const propertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
+    const widgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
+
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function(){
+      var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+      s1.async = true;
+      s1.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
+      s1.charset = 'UTF-8';
+      s1.setAttribute('crossorigin', '*');
+      s0.parentNode.insertBefore(s1, s0);
+    })();
+    
+    // Initialize Google Analytics / GTM (only fires in production)
+    Analytics.loadTrackingScripts().then(() => {
+      Analytics.initialize();
+    });
+
     // CRITICAL: Disable browser scroll restoration to prevent scroll position being saved on reload
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
@@ -73,6 +93,8 @@ function App() {
       lenisInstance = null;
     };
   }, []);
+
+
 
 
   return (

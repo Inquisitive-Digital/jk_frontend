@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Loader2, ArrowRight } from 'lucide-react';
 import { eventAPI } from '../Utils/api';
+import Analytics from '../Utils/analytics';
 
 function EventWrapper() {
     const { slug } = useParams();
@@ -346,6 +347,7 @@ function EventWrapper() {
                             {/* Book Now CTA */}
                             <Link
                                 to="/booking"
+                                onClick={() => Analytics.trackBookingClick('event_page_book_now', { event_title: event.title })}
                                 className="block w-full text-center px-6 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
                                 style={{
                                     backgroundColor: 'var(--color-primary)',
@@ -368,6 +370,7 @@ function EventWrapper() {
                                 <p className="text-white/40 text-xs mb-1">Or call us directly</p>
                                 <a
                                     href="tel:+442012345678"
+                                    onClick={() => Analytics.trackCallClick('event_page_phone')}
                                     className="text-sm font-medium transition-colors"
                                     style={{ color: 'var(--color-primary)' }}
                                 >
