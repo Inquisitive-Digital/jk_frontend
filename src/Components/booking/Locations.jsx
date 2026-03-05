@@ -155,27 +155,32 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
     }
   }, [hours, minutes]);
 
-  // Check if a time is in the past (relative to UK time)
+  // Check if a time is before the minimum selectable time
+  // Minimum = GMT now + 30 min, rounded UP to next 30-min slot (same as default)
   const isTimeInPast = (h, m, ampm) => {
     const checkDate = selectedDate || new Date();
     const ukNow = getUKTime();
 
-    // If checking against a different date, only block if it's today
+    // Only restrict today's times
     const isToday = checkDate.toDateString() === ukNow.toDateString();
-
     if (!isToday) return false;
 
-    // Convert 12-hour format to 24-hour format
+    // Convert selected time to 24-hour format
     let hour24 = parseInt(h);
     if (ampm === "PM" && hour24 !== 12) hour24 += 12;
     if (ampm === "AM" && hour24 === 12) hour24 = 0;
-
     const minuteInt = parseInt(m);
 
-    // Compare with current UK time
-    if (hour24 < ukNow.getHours()) return true;
-    if (hour24 === ukNow.getHours() && minuteInt < ukNow.getMinutes()) return true;
+    // Compute minimum selectable time: GMT + 30 min rounded UP to next 30-min slot
+    const { h: ukH, m: ukM } = getUKHourMinute();
+    const totalMins = ukH * 60 + ukM + 30;
+    const roundedMins = Math.ceil(totalMins / 30) * 30;
+    const minHour24 = Math.floor(roundedMins / 60) % 24;
+    const minMinute = roundedMins % 60;
 
+    // Block anything BEFORE the minimum
+    if (hour24 < minHour24) return true;
+    if (hour24 === minHour24 && minuteInt < minMinute) return true;
     return false;
   };
 
@@ -685,10 +690,7 @@ function Locations({ data, updateData, onNext }) {
 
     // Only check if it's today
     const isToday = checkDate.toDateString() === ukNow.toDateString();
-
-    if (!isToday) {
-      return false;
-    }
+    if (!isToday) return false;
 
     // Parse the selected time
     const [time, period] = data.pickupTime.split(" ");
@@ -698,13 +700,18 @@ function Locations({ data, updateData, onNext }) {
     let hour24 = parseInt(h);
     if (period === "PM" && hour24 !== 12) hour24 += 12;
     if (period === "AM" && hour24 === 12) hour24 = 0;
-
     const minuteInt = parseInt(m);
 
-    // Compare with current UK time
-    const isPastHour = hour24 < ukNow.getHours();
-    const isPastMinute = hour24 === ukNow.getHours() && minuteInt < ukNow.getMinutes();
+    // Minimum selectable time: GMT + 30 min rounded UP to next 30-min slot
+    const { h: ukH, m: ukM } = getUKHourMinute();
+    const totalMins = ukH * 60 + ukM + 30;
+    const roundedMins = Math.ceil(totalMins / 30) * 30;
+    const minHour24 = Math.floor(roundedMins / 60) % 24;
+    const minMinute = roundedMins % 60;
 
+    // Block anything before the minimum
+    const isPastHour = hour24 < minHour24;
+    const isPastMinute = hour24 === minHour24 && minuteInt < minMinute;
     return isPastHour || isPastMinute;
   };
 
