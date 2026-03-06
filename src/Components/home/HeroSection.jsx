@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import bgVideo from '../../assets/bgVideo.mp4';
+import heroImage from '../../assets/heroImage.png';
 import Analytics from '../../Utils/analytics';
 
 // Rotating text options
@@ -27,17 +27,13 @@ function HeroSection() {
 
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-            {/* Video Background */}
+            {/* Image Background */}
             <div className="absolute inset-0 z-0">
-                <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
+                <img
+                    src={heroImage}
+                    alt="Hero background"
                     className="w-full h-full object-cover"
-                >
-                    <source src={bgVideo} type="video/mp4" />
-                </video>
+                />
                 {/* Dark Overlay */}
                 <div className="absolute inset-0 bg-black/60" />
                 {/* Gradient Overlay for depth */}
@@ -66,10 +62,10 @@ function HeroSection() {
                 >
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight">
                         {/* Chauffeur for - positioned left */}
-                        <span className="block mb-1">Chauffeur for</span>
+                        <span className="block mb-1">Chauffeurs for</span>
                         {/* Rotating Text - indented to the right */}
                         <span className="block pl-8 md:pl-16 lg:pl-24">
-                            <span className="relative inline-block h-[1.2em] overflow-hidden">
+                            <span className="relative inline-block h-[1.4em] overflow-hidden">
                                 <AnimatePresence mode="wait">
                                     <motion.span
                                         key={currentTextIndex}
