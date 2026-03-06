@@ -208,7 +208,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
             <Link to="/" className="flex items-center gap-3 group md:absolute md:left-1/2 md:-translate-x-1/2">
               <img
                 src={JkLogo}
-                alt="JK Executive Chauffeur Logo"
+                alt="JK Executive Chauffeurs Logo"
                 className="w-24 h-18 md:w-28 md:h-20 object-contain flex-shrink-0"
               />
               <motion.div
@@ -221,7 +221,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
               >
                 <span className={`text-2xl md:text-3xl font-light tracking-wider whitespace-nowrap block ${logoTextColor}`}>
-                  JK Executive Chauffeur
+                  JK Executive Chauffeurs
                 </span>
               </motion.div>
             </Link>
