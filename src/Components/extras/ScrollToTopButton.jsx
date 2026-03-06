@@ -25,12 +25,10 @@ function ScrollToTopButton() {
     const scrollToTop = () => {
         const lenis = getLenisInstance();
         if (lenis) {
-            // Use Lenis's scrollTo for smooth, conflict-free scroll
-            lenis.scrollTo(0, { duration: 1 });
-        } else {
-            // Fallback if Lenis not available
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            lenis.scrollTo(0, { duration: 1.2 });
         }
+        // Also call native scroll as backup
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const defaultColor = '#D7B75E'; // Gold/yellow theme color
@@ -51,7 +49,7 @@ function ScrollToTopButton() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.8 }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className={`fixed bottom-6 ${positionClass} z-[9999] w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300`}
+                    className={`fixed bottom-6 ${positionClass} z-[9999] w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300 cursor-pointer`}
                     style={{
                         backgroundColor: hovered ? hoverBg : defaultBg,
                         color: hovered ? hoverColor : defaultColor,
