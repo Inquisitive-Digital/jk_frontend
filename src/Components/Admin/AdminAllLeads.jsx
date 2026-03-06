@@ -27,9 +27,11 @@ import {
     PoundSterling,
     Target,
     DollarSign,
+    Plus,
 } from "lucide-react";
 import { bookingAPI } from "../../Utils/api";
 import CustomDropdown from "./CustomDropdown";
+import CreateLeadModal from "./CreateLeadModal";
 
 // Status Badge Component
 const StatusBadge = ({ status, type = "booking" }) => {
@@ -266,6 +268,18 @@ const EditLeadModal = ({ booking, isOpen, onClose, onSave }) => {
     const [paymentStatus, setPaymentStatus] = useState(booking?.paymentStatus || "pending");
     const [isSaving, setIsSaving] = useState(false);
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isOpen]);
+
     useEffect(() => {
         if (booking) {
             setStatus(booking.status);
@@ -319,6 +333,8 @@ const EditLeadModal = ({ booking, isOpen, onClose, onSave }) => {
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                 onClick={onClose}
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
             >
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
@@ -635,6 +651,18 @@ const EditLeadModal = ({ booking, isOpen, onClose, onSave }) => {
 const DeleteConfirmModal = ({ booking, isOpen, onClose, onConfirm }) => {
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isOpen]);
+
     const handleConfirm = async () => {
         setIsDeleting(true);
         try {
@@ -657,6 +685,8 @@ const DeleteConfirmModal = ({ booking, isOpen, onClose, onConfirm }) => {
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                 onClick={onClose}
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
             >
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
@@ -798,6 +828,7 @@ function AdminAllLeads() {
         isOpen: false,
         booking: null,
     });
+    const [createLeadModal, setCreateLeadModal] = useState(false);
 
     // Fetch leads (bookings that are NOT confirmed)
     const fetchLeads = async (page = 1) => {
@@ -890,6 +921,13 @@ function AdminAllLeads() {
                                 </p>
                             </div>
                         </div>
+                        <button
+                            onClick={() => setCreateLeadModal(true)}
+                            className="flex items-center gap-2 px-5 py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/30"
+                        >
+                            <Plus size={20} />
+                            Create Lead
+                        </button>
                     </div>
 
                     {/* Stats Row */}
@@ -1016,6 +1054,11 @@ function AdminAllLeads() {
                 isOpen={deleteModal.isOpen}
                 onClose={() => setDeleteModal({ isOpen: false, booking: null })}
                 onConfirm={handleDelete}
+            />
+            <CreateLeadModal
+                isOpen={createLeadModal}
+                onClose={() => setCreateLeadModal(false)}
+                onCreate={() => fetchLeads(pagination.page)}
             />
         </div>
     );
