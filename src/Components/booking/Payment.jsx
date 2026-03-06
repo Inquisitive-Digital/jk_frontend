@@ -20,6 +20,8 @@ import {
   Shield,
   Lock,
   TestTube2,
+  Mail,
+  Phone,
 } from "lucide-react";
 
 
@@ -392,6 +394,46 @@ function Payment({ data, clientSecret, onBack, onPaymentSuccess, onPaymentFailur
                   </div>
                 </div>
 
+                {/* Passenger Details */}
+                <div className="space-y-3 mb-6 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <h3 className="text-sm font-semibold text-white uppercase mb-3">Passenger Details</h3>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(215,183,94,0.1)' }}>
+                      <Shield size={16} style={{ color: 'var(--color-primary)' }} />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>Name</p>
+                      <p className="font-medium text-white text-sm">
+                        {data.passengerDetails?.firstName && data.passengerDetails?.lastName
+                          ? `${data.passengerDetails.firstName} ${data.passengerDetails.lastName}`
+                          : "—"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                      <Mail size={16} style={{ color: 'var(--color-primary)' }} />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>Email</p>
+                      <p className="font-medium text-white text-sm">{data.passengerDetails?.email || "—"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                      <Phone size={16} style={{ color: 'var(--color-primary)' }} />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>Phone</p>
+                      <p className="font-medium text-white text-sm">
+                        {data.passengerDetails?.countryCode && data.passengerDetails?.phone
+                          ? `${data.passengerDetails.countryCode} ${data.passengerDetails.phone}`
+                          : "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Date/Time & Vehicle */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <div className="p-3 rounded-xl text-center" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}>
@@ -454,7 +496,7 @@ function Payment({ data, clientSecret, onBack, onPaymentSuccess, onPaymentFailur
                 onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
               >
                 <ArrowLeft size={20} />
-                Back to Summary
+                Edit Details
               </button>
             </motion.div>
 
