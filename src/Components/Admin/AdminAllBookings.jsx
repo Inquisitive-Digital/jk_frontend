@@ -9,7 +9,6 @@ import {
     User,
     Phone,
     Mail,
-    Filter,
     ChevronLeft,
     ChevronRight,
     Eye,
@@ -25,10 +24,8 @@ import {
     Users,
     Briefcase,
     PoundSterling,
-    DollarSign,
 } from "lucide-react";
 import { bookingAPI } from "../../Utils/api";
-import CustomDropdown from "./CustomDropdown";
 
 // Status Badge Component
 const StatusBadge = ({ status, type = "booking" }) => {
@@ -651,13 +648,6 @@ function AdminAllBookings() {
     });
     const [stats, setStats] = useState(null);
 
-    // Filters
-    const [filters, setFilters] = useState({
-        status: "",
-        paymentStatus: "",
-        serviceType: "",
-    });
-
     // Modals
     const [editModal, setEditModal] = useState({ isOpen: false, booking: null });
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, booking: null });
@@ -669,9 +659,6 @@ function AdminAllBookings() {
             const params = {
                 page,
                 limit: pagination.limit,
-                ...(filters.status && { status: filters.status }),
-                ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
-                ...(filters.serviceType && { serviceType: filters.serviceType }),
             };
 
             const response = await bookingAPI.getAllBookings(params);
@@ -691,14 +678,10 @@ function AdminAllBookings() {
 
     useEffect(() => {
         fetchBookings(1);
-    }, [filters]);
+    }, []);
 
     const handlePageChange = (page) => {
         fetchBookings(page);
-    };
-
-    const handleFilterChange = (key, value) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
     };
 
     const handleUpdateStatus = async (id, data) => {
@@ -748,84 +731,19 @@ function AdminAllBookings() {
                     {/* Stats Row */}
                     {stats && (
                         <div className="flex gap-4 overflow-x-auto pb-2">
-                            {[
-                                { label: "Total", value: stats.total, color: "bg-gray-100" },
-                                { label: "Pending", value: stats.pending, color: "bg-yellow-100 text-yellow-700" },
-                                { label: "Confirmed", value: stats.confirmed, color: "bg-blue-100 text-blue-700" },
-                                { label: "Completed", value: stats.completed, color: "bg-green-100 text-green-700" },
-                                { label: "Cancelled", value: stats.cancelled, color: "bg-red-100 text-red-700" },
-                            ].map((stat) => (
-                                <div
-                                    key={stat.label}
-                                    className={`px-4 py-2 rounded-xl ${stat.color} flex items-center gap-2 whitespace-nowrap`}
-                                >
-                                    <span className="text-sm font-medium">{stat.label}:</span>
-                                    <span className="font-bold">{stat.value}</span>
-                                </div>
-                            ))}
+                            <div
+                                className={`px-4 py-2 rounded-xl bg-gray-100 flex items-center gap-2 whitespace-nowrap`}
+                            >
+                                <span className="text-sm font-medium">Total:</span>
+                                <span className="font-bold">{stats.total}</span>
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Filters */}
+            {/* Content */}
             <div className="max-w-7xl mx-auto px-6 py-4">
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Filter size={18} className="text-gray-500" />
-                        <h3 className="font-semibold text-gray-800">Filters</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <CustomDropdown
-                                label="Booking Status"
-                                icon={Calendar}
-                                value={filters.status}
-                                onChange={(value) => handleFilterChange("status", value)}
-                                placeholder="All Statuses"
-                                options={[
-                                    { value: "", label: "All Statuses" },
-                                    { value: "pending", label: "Pending" },
-                                    { value: "confirmed", label: "Confirmed" },
-                                    { value: "in-progress", label: "In Progress" },
-                                    { value: "completed", label: "Completed" },
-                                    { value: "cancelled", label: "Cancelled" },
-                                ]}
-                            />
-                        </div>
-                        <div>
-                            <CustomDropdown
-                                label="Payment Status"
-                                icon={DollarSign}
-                                value={filters.paymentStatus}
-                                onChange={(value) => handleFilterChange("paymentStatus", value)}
-                                placeholder="All Payment"
-                                options={[
-                                    { value: "", label: "All Payment" },
-                                    { value: "pending", label: "Pending" },
-                                    { value: "paid", label: "Paid" },
-                                    { value: "refunded", label: "Refunded" },
-                                    { value: "failed", label: "Failed" },
-                                ]}
-                            />
-                        </div>
-                        <div>
-                            <CustomDropdown
-                                label="Booking Type"
-                                icon={Car}
-                                value={filters.serviceType}
-                                onChange={(value) => handleFilterChange("serviceType", value)}
-                                placeholder="All Types"
-                                options={[
-                                    { value: "", label: "All Types" },
-                                    { value: "oneway", label: "One Way (P2P)" },
-                                    { value: "hourly", label: "Hourly" },
-                                ]}
-                            />
-                        </div>
-                    </div>
-                </div>
-
                 {/* Loading State */}
                 {isLoading && (
                     <div className="flex flex-col items-center justify-center py-20">

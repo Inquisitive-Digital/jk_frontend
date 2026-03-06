@@ -283,14 +283,20 @@ function AdminDashboard() {
       >
         {/* Logo Section */}
         <div className="p-6 border-b border-slate-700/50">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <Car size={22} className="text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src="/JkLogo.png" alt="JK Logo" className="w-11 h-11 object-contain" />
+              <div>
+                <h1 className="font-bold text-lg tracking-tight">JK Chauffeur</h1>
+                <p className="text-slate-400 text-xs font-medium">Admin Panel</p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-bold text-lg tracking-tight">JK Chauffeur</h1>
-              <p className="text-slate-400 text-xs font-medium">Admin Panel</p>
-            </div>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden p-2 hover:bg-slate-700/50 rounded-xl transition-colors"
+            >
+              <X size={24} className="text-white" />
+            </button>
           </div>
         </div>
 
