@@ -27,9 +27,11 @@ import {
     PoundSterling,
     Target,
     DollarSign,
+    Plus,
 } from "lucide-react";
 import { bookingAPI } from "../../Utils/api";
 import CustomDropdown from "./CustomDropdown";
+import CreateLeadModal from "./CreateLeadModal";
 
 // Status Badge Component
 const StatusBadge = ({ status, type = "booking" }) => {
@@ -798,6 +800,7 @@ function AdminAllLeads() {
         isOpen: false,
         booking: null,
     });
+    const [createLeadModal, setCreateLeadModal] = useState(false);
 
     // Fetch leads (bookings that are NOT confirmed)
     const fetchLeads = async (page = 1) => {
@@ -890,6 +893,13 @@ function AdminAllLeads() {
                                 </p>
                             </div>
                         </div>
+                        <button
+                            onClick={() => setCreateLeadModal(true)}
+                            className="flex items-center gap-2 px-5 py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/30"
+                        >
+                            <Plus size={20} />
+                            Create Lead
+                        </button>
                     </div>
 
                     {/* Stats Row */}
@@ -1016,6 +1026,11 @@ function AdminAllLeads() {
                 isOpen={deleteModal.isOpen}
                 onClose={() => setDeleteModal({ isOpen: false, booking: null })}
                 onConfirm={handleDelete}
+            />
+            <CreateLeadModal
+                isOpen={createLeadModal}
+                onClose={() => setCreateLeadModal(false)}
+                onCreate={() => fetchLeads(pagination.page)}
             />
         </div>
     );
