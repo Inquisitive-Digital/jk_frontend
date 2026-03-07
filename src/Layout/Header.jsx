@@ -212,7 +212,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 className="w-24 h-18 md:w-28 md:h-20 object-contain flex-shrink-0"
               />
               <motion.div
-                className="overflow-hidden"
+                className="overflow-hidden hidden lg:block"
                 initial={{ width: 'auto', opacity: 1 }}
                 animate={{
                   width: isScrolled ? 0 : 'auto',
