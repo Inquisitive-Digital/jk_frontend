@@ -45,6 +45,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
   const [activeSubDropdown, setActiveSubDropdown] = useState(null);
   const [navItems, setNavItems] = useState([]);
   const [serviceMenuItems, setServiceMenuItems] = useState([]);
+  const [eventNavItems, setEventNavItems] = useState([]);
   const location = useLocation();
 
   // Check if we're on the home page or booking page
@@ -71,10 +72,10 @@ function Header({ isTransparent = false, theme = 'dark' }) {
   useEffect(() => {
     const buildNavItems = async () => {
       try {
-        const [servicesData, fleetData, eventsData] = await Promise.all([
+        const [servicesData, fleetData, eventsNavData] = await Promise.all([
           serviceAPI.getNavMenu(),
           fleetAPI.getAll(1, 100), // Get all fleets
-          eventAPI.getAll()        // Get all events
+          eventAPI.getNavEvents()  // Get events for nav dropdown (showInNav: true)
         ]);
 
         // 1. Services (Cascading)
@@ -100,17 +101,20 @@ function Header({ isTransparent = false, theme = 'dark' }) {
           dropdownItems: fleetItems.length > 0 ? fleetItems : STATIC_NAV_ITEMS[0].dropdownItems // Fallback
         };
 
-        // 3. Events (Fixed 3 items as requested)
+        // 3. Events (from backend - only those with showInNav: true)
+        const eventItems = (eventsNavData?.events || []).map(e => ({
+          label: e.title,
+          href: `/events/${e.slug}`
+        }));
         const eventsNavItem = {
           label: 'Events',
-          href: '/events/event-chauffeur-service-in-london',
+          href: eventItems.length > 0 ? eventItems[0].href : '/events',
           hasDropdown: true,
-          dropdownItems: [
-            { label: 'Event Chauffeur Service', href: '/events/event-chauffeur-service-in-london' },
-            { label: 'Chauffeur Service For Sports', href: '/events/chauffeur-service-for-sports-event' },
-            { label: 'Event Calendar', href: '/events/event-calendar' }
-          ]
+          dropdownItems: eventItems.length > 0 ? eventItems : [{ label: 'No Events Available', href: '/events' }]
         };
+
+        // Store event nav items for mobile menu
+        setEventNavItems(eventItems);
 
         // 4. Combine
         setNavItems([
@@ -438,6 +442,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                   key={item.label}
                   item={item}
                   serviceMenuItems={item.isCascading ? serviceMenuItems : null}
+                  eventNavItems={item.label === 'Events' ? eventNavItems : null}
                   location={location}
                 />
               ))}
@@ -475,7 +480,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
 }
 
 // Mobile Navigation Item Component (supports cascading sub-menus)
-function MobileNavItem({ item, serviceMenuItems, location }) {
+function MobileNavItem({ item, serviceMenuItems, eventNavItems, location }) {
   const [isOpen, setIsOpen] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState(null);
 
@@ -498,7 +503,8 @@ function MobileNavItem({ item, serviceMenuItems, location }) {
 
   // Determine items to render
   const isCascading = item.isCascading && serviceMenuItems;
-  const items = isCascading ? serviceMenuItems : item.dropdownItems;
+  const isEvents = item.label === 'Events' && eventNavItems;
+  const items = isCascading ? serviceMenuItems : (isEvents ? eventNavItems : item.dropdownItems);
 
   return (
     <div className="border-b border-white/10">
