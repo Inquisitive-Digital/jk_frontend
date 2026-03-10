@@ -369,6 +369,12 @@ export const fleetAPI = {
 
 // Event APIs
 export const eventAPI = {
+    // Get events for navigation dropdown (showInNav: true)
+    getNavEvents: async () => {
+        const response = await api.get("/api/events/nav");
+        return response.data;
+    },
+
     // Get all events
     getAll: async () => {
         const response = await api.get("/api/events", { params: { limit: 100 } });

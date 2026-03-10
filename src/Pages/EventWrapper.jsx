@@ -16,35 +16,23 @@ function EventWrapper() {
         enabled: !!slug,
     });
 
-    // Fetch all events for the "Sports Collection" page
+    // Fetch all sports events for the "Sports Collection" page
     const isSportsCollection = slug === 'chauffeur-service-for-sports-event';
     useEffect(() => {
         if (isSportsCollection) {
+            // Fetch all events and filter by Sports category
             eventAPI.getAll().then(res => {
-                setAllEvents(res.events || []);
+                const events = res.events || [];
+                // Filter events with Sports category
+                setAllEvents(events.filter(e => e.category === 'Sports'));
             });
         }
     }, [isSportsCollection]);
 
     const event = data?.event;
 
-    // Filter sports events for the collection
-    const sportsEvents = allEvents.filter(e =>
-        e.slug !== 'chauffeur-service-for-sports-event' && // Exclude self
-        e.slug !== 'event-calendar' &&
-        e.slug !== 'event-chauffeur-service-in-london' &&
-        (e.title.toLowerCase().includes('wimbledon') ||
-            e.title.toLowerCase().includes('ascot') ||
-            e.title.toLowerCase().includes('silverstone') ||
-            e.title.toLowerCase().includes('farnborough') ||
-            e.title.toLowerCase().includes('o2') ||
-            e.title.toLowerCase().includes('excel') ||
-            e.title.toLowerCase().includes('twickenham') ||
-            e.title.toLowerCase().includes('cheltenham') ||
-            e.title.toLowerCase().includes('goodwood') ||
-            e.title.toLowerCase().includes('stadium') ||
-            e.title.toLowerCase().includes('racecourse'))
-    );
+    // Filter sports events by category (not hardcoded keywords)
+    const sportsEvents = allEvents.filter(e => e.slug !== slug);
 
     // Loading State
     if (isLoading) {
@@ -139,13 +127,13 @@ function EventWrapper() {
 
                 {/* Title Overlay on Image */}
                 <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8">
-                    <div className="max-w-7xl mx-auto">
+                    <div className="max-w-7xl mx-auto xl:px-5">
                         {event.subtitle && (
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3"
+                                className="text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3 xl:ml-2"
                                 style={{ color: 'var(--color-primary)' }}
                             >
                                 {event.subtitle}
@@ -155,7 +143,7 @@ function EventWrapper() {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white relative z-10"
+                            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white xl:ml-2"
                         >
                             {event.title}
                         </motion.h1>
@@ -229,7 +217,7 @@ function EventWrapper() {
                 Actually, let's keep it below the grid or above. Above is better for intro.
             */}
 
-            <div className="max-w-5xl mx-auto px-4 md:px-8 py-12 md:py-20">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
                 <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
                     {/* Main Content — 2/3 */}
                     <div className="lg:col-span-2 space-y-8">
@@ -266,10 +254,11 @@ function EventWrapper() {
                                     className="w-full h-px"
                                     style={{ background: 'linear-gradient(90deg, var(--color-primary), transparent)' }}
                                 />
-                                <div
-                                    className="text-white/60 text-base leading-relaxed event-content"
-                                    dangerouslySetInnerHTML={{ __html: event.longDescription }}
-                                />
+                                <div className="text-white/60 text-base leading-relaxed space-y-4">
+                                    {event.longDescription.split('\n\n').map((para, i) => (
+                                        <p key={i}>{para}</p>
+                                    ))}
+                                </div>
                             </motion.div>
                         )}
 
