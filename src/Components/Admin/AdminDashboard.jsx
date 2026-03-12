@@ -23,8 +23,10 @@ import {
   List,
   Plus,
   Target,
+  UserPlus,
 } from "lucide-react";
 import { adminAPI } from "../../Utils/api";
+import CreateAdminModal from "./CreateAdminModal";
 
 // Sidebar Navigation Items - Organized by Section
 const NAV_ITEMS = [
@@ -173,6 +175,7 @@ function AdminDashboard() {
   const [adminInfo, setAdminInfo] = useState(null);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
+  const [isCreateAdminModalOpen, setIsCreateAdminModalOpen] = useState(false);
 
   // Load admin info and stats on mount
   useEffect(() => {
@@ -370,19 +373,29 @@ function AdminDashboard() {
                 <h2 className="text-lg font-bold text-gray-900">Dashboard</h2>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors active:scale-95"
-            >
-              <LogOut size={18} />
-              <span className="font-medium text-sm">Logout</span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="sm:hidden p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors active:scale-95"
-            >
-              <LogOut size={20} />
-            </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Create Admin Button */}
+              <button
+                onClick={() => setIsCreateAdminModalOpen(true)}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 active:scale-95 shadow-lg shadow-blue-600/30"
+              >
+                <UserPlus size={18} />
+                <span className="hidden sm:inline font-medium text-sm">Create Admin</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors active:scale-95"
+              >
+                <LogOut size={18} />
+                <span className="font-medium text-sm">Logout</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="sm:hidden p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors active:scale-95"
+              >
+                <LogOut size={20} />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -493,6 +506,16 @@ function AdminDashboard() {
           </motion.div>
         </div>
       </main>
+
+      {/* Create Admin Modal */}
+      <CreateAdminModal
+        isOpen={isCreateAdminModalOpen}
+        onClose={() => setIsCreateAdminModalOpen(false)}
+        onSuccess={() => {
+          // Optionally refresh stats or do nothing
+          console.log("Admin created successfully");
+        }}
+      />
     </div>
   );
 }
