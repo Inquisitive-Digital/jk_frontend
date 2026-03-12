@@ -50,24 +50,36 @@ function ScrollToTop() {
   return null;
 }
 
-function App() {
+// Component to handle Tawk.to integration with route awareness
+function TawkIntegration() {
+  const location = useLocation();
 
   useEffect(() => {
+    // List of admin routes where Tawk.to should be hidden
+    const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/login-admin');
 
-    // TAWK.TO INTEGRATION 
-    const propertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
-    const widgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
+    // TAWK.TO INTEGRATION - Only load on non-admin routes
+    if (!isAdminRoute) {
+      const propertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
+      const widgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
 
-    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-    (function(){
-      var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-      s1.async = true;
-      s1.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
-      s1.charset = 'UTF-8';
-      s1.setAttribute('crossorigin', '*');
-      s0.parentNode.insertBefore(s1, s0);
-    })();
-    
+      var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+      (function(){
+        var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+      })();
+    }
+  }, [location.pathname]);
+
+  return null;
+}
+
+function App() {
+  useEffect(() => {
     // Initialize Google Analytics / GTM (only fires in production)
     Analytics.loadTrackingScripts().then(() => {
       Analytics.initialize();
@@ -100,6 +112,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <TawkIntegration />
       <Routes>
         {/* Public Routes with Layout */}
         <Route path="/" element={<Layout isHeroPage={true}><Home /></Layout>} />

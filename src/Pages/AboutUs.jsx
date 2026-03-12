@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
     Shield, Users, Car, Award, Star, Clock,
     MapPin, CheckCircle, ArrowRight, Heart,
-    Target, Gauge, Crown
+    Target, Gauge, Crown, Lock, EyeOff, FileLock, UserCheck
 } from 'lucide-react';
 import Analytics from '../Utils/analytics';
+import { fleetAPI, getImageUrl } from '../Utils/api';
 
 function AboutUs() {
+    const [fleetVehicles, setFleetVehicles] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                const response = await fleetAPI.getAll(1, 3);
+                setFleetVehicles(response.fleet || []);
+            } catch (error) {
+                console.error('Error fetching vehicles:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchVehicles();
+    }, []);
     const values = [
         {
             icon: Crown,
@@ -64,7 +81,7 @@ function AboutUs() {
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
 
             {/* Hero Section */}
-            <section className="relative overflow-hidden" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
+            <section className="relative overflow-hidden" style={{ paddingTop: '120px', paddingBottom: '60px' }}>
                 {/* Background Glow */}
                 <div className="absolute inset-0 pointer-events-none">
                     <div
@@ -96,7 +113,7 @@ function AboutUs() {
                             Chauffeur Service
                         </h1>
                         <p className="text-white/50 text-base md:text-lg leading-relaxed">
-                            JK Executive Chauffeurs provides first-class chauffeur services across London and the United Kingdom.
+                            <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link> provides first-class chauffeur services across London and the United Kingdom.
                             With over a decade of experience, we deliver luxury, safety, and punctuality for every journey — from
                             airport transfers and corporate travel to weddings and special events.
                         </p>
@@ -105,7 +122,7 @@ function AboutUs() {
             </section>
 
             {/* Stats Bar */}
-            <section className="max-w-7xl mx-auto px-4 md:px-8 mb-20">
+            <section className="max-w-7xl mx-auto px-4 md:px-8 mb-16">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -137,7 +154,7 @@ function AboutUs() {
             </section>
 
             {/* Our Story */}
-            <section className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
+            <section className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
                 <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
@@ -160,7 +177,7 @@ function AboutUs() {
                         </h2>
                         <div className="space-y-4 text-white/60 text-base leading-relaxed">
                             <p>
-                                JK Executive Chauffeurs was founded with a simple vision: to redefine luxury ground transportation
+                                <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link> was founded with a simple vision: to redefine luxury ground transportation
                                 in London. What started as a small operation with a single Mercedes has grown into one of London's
                                 most trusted executive chauffeur services.
                             </p>
@@ -169,10 +186,18 @@ function AboutUs() {
                                 the journey is just as important as the destination. Every detail matters, from the temperature of
                                 the cabin to the timing of the pickup.
                             </p>
+
                             <p>
                                 Our fleet includes the finest vehicles from Mercedes-Benz, Range Rover, and Rolls Royce. Every car
                                 is maintained to showroom standards. Every chauffeur is trained to deliver an experience, not just
                                 a ride.
+                            </p>
+                            <p>
+                                Founded in 2019 and based in Middlesex, close to Heathrow Airport, we began with a single
+                                vehicle and a simple philosophy: if the client is satisfied, we are happy. Today, with over
+                                120 professional chauffeurs, our team comes from professional backgrounds, fully licensed and
+                                security checked, with a thorough knowledge of London's airports and routes. First class is
+                                always the standard — and nothing is ever too much trouble.
                             </p>
                         </div>
                     </motion.div>
@@ -187,11 +212,26 @@ function AboutUs() {
                             className="rounded-2xl overflow-hidden"
                             style={{ border: '1px solid rgba(255,255,255,0.08)' }}
                         >
-                            <img
-                                src="https://www.jkexecutivechauffeurs.com/wp-content/uploads/2024/03/Chauffeur-Service-in-London-1024x585.png"
-                                alt="JK Executive Chauffeurs luxury fleet"
-                                className="w-full h-auto object-cover"
-                            />
+                            {loading ? (
+                                <div className="w-full h-[300px] bg-white/5 animate-pulse flex items-center justify-center">
+                                    <p className="text-white/40 text-sm">Loading fleet...</p>
+                                </div>
+                            ) : fleetVehicles.length > 0 ? (
+                                <img
+                                    src={getImageUrl(fleetVehicles[0]?.image?.url || fleetVehicles[0]?.heroImage?.url)}
+                                    alt={fleetVehicles[0]?.title || 'JK Executive Chauffeurs luxury fleet'}
+                                    className="w-full h-auto object-cover"
+                                    onError={(e) => {
+                                        e.target.src = "https://via.placeholder.com/800x600?text=JK+Executive+Fleet";
+                                    }}
+                                />
+                            ) : (
+                                <img
+                                    src="https://via.placeholder.com/800x600?text=JK+Executive+Fleet"
+                                    alt="JK Executive Chauffeurs luxury fleet"
+                                    className="w-full h-auto object-cover"
+                                />
+                            )}
                         </div>
                         {/* Decorative border */}
                         <div
@@ -204,7 +244,7 @@ function AboutUs() {
 
             {/* Our Values */}
             <section
-                className="py-16 md:py-24"
+                className="py-12 md:py-16"
                 style={{
                     background: 'linear-gradient(180deg, var(--color-dark) 0%, rgba(215,183,94,0.03) 50%, var(--color-dark) 100%)',
                 }}
@@ -270,7 +310,7 @@ function AboutUs() {
             </section>
 
             {/* Why Choose Us */}
-            <section className="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-20">
+            <section className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
@@ -368,9 +408,192 @@ function AboutUs() {
                 </div>
             </section>
 
+            {/* Privacy & Discretion */}
+            <section className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-12"
+                >
+                    <span
+                        className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest mb-4"
+                        style={{
+                            backgroundColor: 'rgba(215,183,94,0.1)',
+                            color: 'var(--color-primary)',
+                            border: '1px solid rgba(215,183,94,0.2)',
+                        }}
+                    >
+                        Privacy & Discretion
+                    </span>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                        Travel in Total <span style={{ color: 'var(--color-primary)' }}>Confidence</span>
+                    </h2>
+                    <p className="text-white/50 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+                        At <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link>, we believe true luxury isn't just about a smooth ride —
+                        it's knowing you can travel with complete privacy and peace of mind.
+                    </p>
+                </motion.div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[
+                        {
+                            icon: UserCheck,
+                            title: 'Professional Chauffeurs You Can Trust',
+                            description: 'Every chauffeur is carefully selected and trained in confidentiality and etiquette. They sign strict privacy agreements and offer attentive service without being intrusive.',
+                        },
+                        {
+                            icon: EyeOff,
+                            title: 'Quiet Spaces for Your Peace of Mind',
+                            description: 'Our fleet includes vehicles with tinted windows and extra soundproofing. Whether on a call, working on the go, or simply resting, enjoy a calm and private space.',
+                        },
+                        {
+                            icon: FileLock,
+                            title: 'Secure from Booking to Drop-Off',
+                            description: 'We protect your information at every step. Special requests, pick-up times, and routes are handled with care by our discreet support team.',
+                        },
+                        {
+                            icon: Shield,
+                            title: 'Extra Security if You Need It',
+                            description: 'For those requiring added protection, we offer close-protection chauffeur teams — blending comfort and security, delivered with the same courtesy you expect.',
+                        },
+                    ].map((item, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.08 }}
+                            className="rounded-xl p-6 transition-all duration-300"
+                            style={{
+                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                border: '1px solid rgba(255,255,255,0.06)',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(215,183,94,0.25)';
+                                e.currentTarget.style.backgroundColor = 'rgba(215,183,94,0.04)';
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+                                style={{ backgroundColor: 'rgba(215,183,94,0.1)' }}
+                            >
+                                <item.icon className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+                            </div>
+                            <h3 className="text-white font-semibold text-sm mb-2">{item.title}</h3>
+                            <p className="text-white/50 text-sm leading-relaxed">{item.description}</p>
+                        </motion.div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Our Services */}
+            <section className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-10"
+                >
+                    <span
+                        className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest mb-4"
+                        style={{
+                            backgroundColor: 'rgba(215,183,94,0.1)',
+                            color: 'var(--color-primary)',
+                            border: '1px solid rgba(215,183,94,0.2)',
+                        }}
+                    >
+                        Our Services
+                    </span>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                        Customized Transportation for{' '}
+                        <span style={{ color: 'var(--color-primary)' }}>Any Occasion</span>
+                    </h2>
+                    <p className="text-white/50 text-sm max-w-xl mx-auto">
+                        From corporate roadshows to wedding days, our 120+ chauffeurs and flexible fleet
+                        are ready for any request, large or specific.
+                    </p>
+                </motion.div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[
+                        { icon: Car, title: 'Corporate & Business Travel', description: 'Executive roadshows, meetings, and conferences — we make sure you are relaxed and on time.' },
+                        { icon: MapPin, title: 'Airport Transfers', description: 'Meet & greet service with live flight tracking and on-time transfers to any London airport.' },
+                        { icon: Star, title: 'Weddings & Events', description: 'Elegant vehicles for weddings, proms, and special occasions — adding a touch of luxury to your day.' },
+                        { icon: Shield, title: 'Private Aviation & Tours', description: 'VIP transfers to/from private jets, and custom London sightseeing and shopping trips.' },
+                        { icon: Clock, title: '24/7 On-Demand', description: 'Hourly or daily hire at competitive rates — available one hour to all day, any time.' },
+                    ].map((service, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.08 }}
+                            className="rounded-xl p-6 transition-all duration-300"
+                            style={{
+                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                border: '1px solid rgba(255,255,255,0.06)',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(215,183,94,0.25)';
+                                e.currentTarget.style.backgroundColor = 'rgba(215,183,94,0.04)';
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+                                style={{ backgroundColor: 'rgba(215,183,94,0.1)' }}
+                            >
+                                <service.icon className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+                            </div>
+                            <h3 className="text-white font-semibold text-sm mb-2">{service.title}</h3>
+                            <p className="text-white/50 text-sm leading-relaxed">{service.description}</p>
+                        </motion.div>
+                    ))}
+                </div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mt-10"
+                >
+                    <Link
+                        to="/services"
+                        className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
+                        style={{
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'var(--color-dark)',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.boxShadow = '0 4px 25px rgba(215,183,94,0.4)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.boxShadow = 'none';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        Explore All Services
+                        <ArrowRight className="w-4 h-4" />
+                    </Link>
+                </motion.div>
+            </section>
+
             {/* Bottom CTA */}
             <section
-                className="py-16 md:py-20"
+                className="py-12 md:py-16"
                 style={{
                     background: 'linear-gradient(180deg, var(--color-dark) 0%, rgba(215,183,94,0.04) 50%, var(--color-dark) 100%)',
                 }}
