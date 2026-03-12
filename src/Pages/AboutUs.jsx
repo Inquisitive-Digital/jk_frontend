@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -7,8 +7,26 @@ import {
     Target, Gauge, Crown
 } from 'lucide-react';
 import Analytics from '../Utils/analytics';
+import { fleetAPI, getImageUrl } from '../Utils/api';
 
 function AboutUs() {
+    const [fleetVehicles, setFleetVehicles] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                const response = await fleetAPI.getAll(1, 3);
+                setFleetVehicles(response.fleet || []);
+            } catch (error) {
+                console.error('Error fetching vehicles:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchVehicles();
+    }, []);
+
     const values = [
         {
             icon: Crown,
@@ -183,16 +201,52 @@ function AboutUs() {
                         viewport={{ once: true }}
                         className="relative"
                     >
-                        <div
-                            className="rounded-2xl overflow-hidden"
-                            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
-                        >
-                            <img
-                                src="https://www.jkexecutivechauffeurs.com/wp-content/uploads/2024/03/Chauffeur-Service-in-London-1024x585.png"
-                                alt="JK Executive Chauffeurs luxury fleet"
-                                className="w-full h-auto object-cover"
-                            />
-                        </div>
+                        {/* Loading state */}
+                        {loading ? (
+                            <div className="w-full h-[300px] bg-white/5 animate-pulse flex items-center justify-center">
+                                <p className="text-white/40 text-sm">Loading fleet...</p>
+                            </div>
+                        ) : fleetVehicles.length > 0 && fleetVehicles[0]?.heroImage?.url ? (
+                            <>
+                                <img
+                                    src={getImageUrl(fleetVehicles[0].heroImage.url)}
+                                    alt={fleetVehicles[0]?.title || 'JK Executive Chauffeurs luxury fleet'}
+                                    className="w-full h-auto object-cover"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextElementSibling.style.display = 'flex';
+                                    }}
+                                />
+                                {/* Fallback container */}
+                                <div
+                                    className="w-full h-[300px] bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center"
+                                    style={{
+                                        display: 'none',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                    }}
+                                >
+                                    <div className="text-center p-6">
+                                        <Car className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--color-primary)' }} />
+                                        <h3 className="text-white font-semibold text-lg mb-2">Premium Fleet</h3>
+                                        <p className="text-white/50 text-sm">Executive vehicles for every occasion</p>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            /* No fleet data fallback */
+                            <div
+                                className="w-full h-[300px] bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center"
+                                style={{
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                }}
+                            >
+                                <div className="text-center p-6">
+                                    <Car className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--color-primary)' }} />
+                                    <h3 className="text-white font-semibold text-lg mb-2">Premium Fleet</h3>
+                                    <p className="text-white/50 text-sm">Executive vehicles for every occasion</p>
+                                </div>
+                            </div>
+                        )}
                         {/* Decorative border */}
                         <div
                             className="absolute -bottom-4 -right-4 w-full h-full rounded-2xl -z-10"
