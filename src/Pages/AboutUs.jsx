@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -7,8 +7,25 @@ import {
     Target, Gauge, Crown
 } from 'lucide-react';
 import Analytics from '../Utils/analytics';
+import { fleetAPI, getImageUrl } from '../Utils/api';
 
 function AboutUs() {
+    const [fleetVehicles, setFleetVehicles] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                const response = await fleetAPI.getAll(1, 3);
+                setFleetVehicles(response.fleet || []);
+            } catch (error) {
+                console.error('Error fetching vehicles:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchVehicles();
+    }, []);
     const values = [
         {
             icon: Crown,
@@ -96,7 +113,7 @@ function AboutUs() {
                             Chauffeur Service
                         </h1>
                         <p className="text-white/50 text-base md:text-lg leading-relaxed">
-                            JK Executive Chauffeurs provides first-class chauffeur services across London and the United Kingdom.
+                            <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link> provides first-class chauffeur services across London and the United Kingdom.
                             With over a decade of experience, we deliver luxury, safety, and punctuality for every journey — from
                             airport transfers and corporate travel to weddings and special events.
                         </p>
@@ -160,7 +177,7 @@ function AboutUs() {
                         </h2>
                         <div className="space-y-4 text-white/60 text-base leading-relaxed">
                             <p>
-                                JK Executive Chauffeurs was founded with a simple vision: to redefine luxury ground transportation
+                                <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link> was founded with a simple vision: to redefine luxury ground transportation
                                 in London. What started as a small operation with a single Mercedes has grown into one of London's
                                 most trusted executive chauffeur services.
                             </p>
@@ -187,11 +204,26 @@ function AboutUs() {
                             className="rounded-2xl overflow-hidden"
                             style={{ border: '1px solid rgba(255,255,255,0.08)' }}
                         >
-                            <img
-                                src="https://www.jkexecutivechauffeurs.com/wp-content/uploads/2024/03/Chauffeur-Service-in-London-1024x585.png"
-                                alt="JK Executive Chauffeurs luxury fleet"
-                                className="w-full h-auto object-cover"
-                            />
+                            {loading ? (
+                                <div className="w-full h-[300px] bg-white/5 animate-pulse flex items-center justify-center">
+                                    <p className="text-white/40 text-sm">Loading fleet...</p>
+                                </div>
+                            ) : fleetVehicles.length > 0 ? (
+                                <img
+                                    src={getImageUrl(fleetVehicles[0]?.image?.url || fleetVehicles[0]?.heroImage?.url)}
+                                    alt={fleetVehicles[0]?.title || 'JK Executive Chauffeurs luxury fleet'}
+                                    className="w-full h-auto object-cover"
+                                    onError={(e) => {
+                                        e.target.src = "https://via.placeholder.com/800x600?text=JK+Executive+Fleet";
+                                    }}
+                                />
+                            ) : (
+                                <img
+                                    src="https://via.placeholder.com/800x600?text=JK+Executive+Fleet"
+                                    alt="JK Executive Chauffeurs luxury fleet"
+                                    className="w-full h-auto object-cover"
+                                />
+                            )}
                         </div>
                         {/* Decorative border */}
                         <div
