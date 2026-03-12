@@ -759,7 +759,7 @@ function Locations({ data, updateData, onNext }) {
               <button
                 key={t}
                 onClick={() => handleServiceTypeChange(t)}
-                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-1.5 rounded text-xs font-bold uppercase transition-all duration-300 ${serviceType === t
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-1.5 rounded text-xs font-bold uppercase transition-all duration-300 cursor-pointer ${serviceType === t
                   ? "bg-[var(--color-primary)] text-black shadow-lg"
                   : "text-slate-400 hover:text-white"
                   }`}
