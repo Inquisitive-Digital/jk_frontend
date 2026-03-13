@@ -134,10 +134,11 @@ function ServicesSection() {
                 {!isLoading && services.length > 0 && (
                     <div
                         ref={scrollRef}
-                        className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
+                        className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
                         style={{
                             scrollbarWidth: 'none',
                             msOverflowStyle: 'none',
+                            touchAction: 'pan-x',
                         }}
                     >
                         {services.map((service, index) => (

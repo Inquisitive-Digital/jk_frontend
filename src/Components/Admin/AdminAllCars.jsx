@@ -154,6 +154,18 @@ const EditVehicleModal = ({ vehicle, isOpen, onClose, onSave }) => {
 
     const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isOpen]);
+
     useEffect(() => {
         if (vehicle) {
             setFormData({
@@ -281,6 +293,8 @@ const EditVehicleModal = ({ vehicle, isOpen, onClose, onSave }) => {
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                 onClick={onClose}
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
             >
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
@@ -524,6 +538,18 @@ const EditVehicleModal = ({ vehicle, isOpen, onClose, onSave }) => {
 const DeleteConfirmModal = ({ vehicle, isOpen, onClose, onConfirm }) => {
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isOpen]);
+
     const handleConfirm = async () => {
         setIsDeleting(true);
         try {
@@ -546,6 +572,8 @@ const DeleteConfirmModal = ({ vehicle, isOpen, onClose, onConfirm }) => {
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                 onClick={onClose}
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
             >
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
