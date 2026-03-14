@@ -61,6 +61,15 @@ const customStyles = `
     scrollbar-width: thin;
     scrollbar-color: rgba(215, 183, 94, 0.5) rgba(255, 255, 255, 0.05);
   }
+
+  /* Duration dropdown list */
+  .dur-list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(215,183,94,0.5) rgba(255,255,255,0.05);
+  }
+  .dur-list::-webkit-scrollbar { width: 4px; }
+  .dur-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 2px; }
+  .dur-list::-webkit-scrollbar-thumb { background: rgba(215,183,94,0.5); border-radius: 2px; }
 `;
 
 // --- HELPER: CLICK OUTSIDE HOOK ---
@@ -489,48 +498,81 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   );
 };
 
-// --- CUSTOM DURATION PICKER COMPONENT ---
-const CustomDurationPicker = ({ value, onChange, onClose }) => {
-  const wrapperRef = useRef(null);
-  useClickOutside(wrapperRef, onClose);
+// Duration options: 30 min to 24h in 30-min steps
+const DURATION_OPTIONS = [];
+for (let mins = 30; mins <= 1440; mins += 30) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  let label;
+  if (h === 0) {
+    label = `${m} Min`;
+  } else if (m === 0) {
+    label = `${h} Hour${h > 1 ? 's' : ''}`;
+  } else {
+    label = `${h} Hr ${m} Min`;
+  }
+  DURATION_OPTIONS.push({ value: mins / 60, label });
+}
 
-  const hoursOptions = Array.from({ length: 23 }, (_, i) => i + 2);
+// --- SIMPLE DURATION DROPDOWN ---
+const DurationDropdown = ({ value, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useClickOutside(ref, () => setOpen(false));
+
+  const selected = DURATION_OPTIONS.find((o) => o.value === value) || DURATION_OPTIONS[0];
 
   return (
-    <div
-      ref={wrapperRef}
-      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-4 max-h-80 overflow-hidden"
-      style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
-    >
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
+    <div ref={ref} className="relative">
+      {/* Trigger button — same height as other inputs */}
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center justify-between w-full bg-white/5 border border-white/10 hover:border-[var(--color-primary)] focus:border-[var(--color-primary)] rounded-lg py-3 pl-10 pr-4 text-sm text-white transition-colors outline-none cursor-pointer"
+        style={open ? { borderColor: 'var(--color-primary)' } : {}}
+      >
+        <span>{selected.label}</span>
+        <ChevronDown
+          size={14}
+          className="opacity-40 text-white transition-transform"
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        />
+      </button>
 
-      <h4 className="font-semibold mb-3 text-center" style={{ color: 'var(--color-primary)' }}>Select Duration</h4>
-
-      <div className="overflow-y-auto max-h-52 scrollbar-hide">
-        {hoursOptions.map((hour) => (
-          <div
-            key={hour}
-            onClick={() => {
-              onChange(hour);
-              onClose();
-            }}
-            className="py-3 px-4 cursor-pointer transition-all rounded-lg mb-1 text-center"
-            style={
-              value === hour
-                ? { backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)', fontWeight: 'bold' }
-                : { color: 'rgba(255,255,255,0.7)' }
-            }
-            onMouseEnter={(e) => {
-              if (value !== hour) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-            }}
-            onMouseLeave={(e) => {
-              if (value !== hour) e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            {hour} hours
-          </div>
-        ))}
-      </div>
+      {/* Dropdown list — constrained to 192px max height, scrollable */}
+      {open && (
+        <div
+          className="absolute left-0 right-0 top-full mt-1 rounded-lg z-50 dur-list"
+          style={{
+            backgroundColor: '#1a1a1a',
+            border: '1px solid rgba(215,183,94,0.25)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+            maxHeight: '192px',
+            overflowY: 'auto',
+          }}
+          onWheel={(e) => e.stopPropagation()}
+        >
+          {DURATION_OPTIONS.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <div
+                key={opt.value}
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className="px-4 py-2.5 text-sm cursor-pointer transition-colors"
+                style={{
+                  backgroundColor: isSelected ? 'var(--color-primary)' : 'transparent',
+                  color: isSelected ? 'var(--color-dark)' : 'rgba(255,255,255,0.8)',
+                  fontWeight: isSelected ? '600' : '400',
+                }}
+                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.07)'; }}
+                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
+              >
+                {opt.label}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
@@ -822,23 +864,13 @@ function Locations({ data, updateData, onNext }) {
                   <Flag className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-primary)]/60 group-focus-within:text-[var(--color-primary)]" size={16} />
                 </div>
               ) : (
-                <div
-                  onClick={() => setActivePicker(activePicker === 'duration' ? null : 'duration')}
-                  className="flex items-center justify-between w-full bg-white/5 border border-white/10 hover:border-[var(--color-primary)]/50 rounded-lg py-3 px-4 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Timer size={16} className="text-[var(--color-primary)]" />
-                    <span className="text-sm text-white">{data.hours || 2} Hours</span>
-                  </div>
-                  <ChevronDown size={14} className="opacity-40 text-white" />
+                <div className="relative">
+                  <Timer size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-primary)] pointer-events-none z-10" />
+                  <DurationDropdown
+                    value={data.hours !== undefined ? data.hours : 0.5}
+                    onChange={(v) => updateData("hours", v)}
+                  />
                 </div>
-              )}
-              {serviceType === "hourly" && activePicker === 'duration' && (
-                <CustomDurationPicker
-                  value={data.hours || 2}
-                  onChange={(h) => updateData("hours", h)}
-                  onClose={() => setActivePicker(null)}
-                />
               )}
               {errors.dropoff && serviceType === "oneway" && (
                 <p className="text-xs text-red-400 ml-1">{errors.dropoff}</p>
