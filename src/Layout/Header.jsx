@@ -405,7 +405,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
@@ -419,7 +419,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-[280px] bg-[#1a1a1a] z-50 lg:hidden flex flex-col"
+            className="fixed top-0 right-0 bottom-0 w-[280px] bg-[#1a1a1a] z-[10001] lg:hidden flex flex-col"
           >
             {/* Close Button */}
             <div className="flex justify-end p-4 flex-shrink-0">
