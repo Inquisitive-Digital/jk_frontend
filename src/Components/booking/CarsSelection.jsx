@@ -69,6 +69,13 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
   const vehicles = response?.data || [];
   const journeyInfo = response?.journey || {};
 
+  // Sync journeyInfo to parent state immediately when API responds
+  useEffect(() => {
+    if (journeyInfo && Object.keys(journeyInfo).length > 0) {
+      updateData("journeyInfo", journeyInfo);
+    }
+  }, [journeyInfo]);
+
   const filteredVehicles = useMemo(
     () =>
       vehicles.map((v) => ({
