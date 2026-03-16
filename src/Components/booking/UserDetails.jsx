@@ -12,6 +12,8 @@ import {
   UserPlus,
   MessageSquare,
   Check,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import StepNavBar from "./StepNavBar";
@@ -21,16 +23,21 @@ import StepNavBar from "./StepNavBar";
  * Accepts formats: 07XXX XXXXXX, 020 XXXX XXXX, 01XXXXXXXXX, +44 XXXXXXXXXX
  * Returns { isValid: boolean, errorMessage: string }
  */
-const validateUkLandline = (phoneNumber, countryCode) => {
+const validateUkPhone = (phoneNumber, countryCode) => {
   if (!phoneNumber || phoneNumber.trim() === "") {
     return { isValid: false, errorMessage: "Phone number is required" };
   }
 
   // Strip all spaces, dashes, brackets, and parentheses
-  const cleaned = phoneNumber.replace(/[\s\-\(\)\[\]]/g, "");
+  let cleaned = phoneNumber.replace(/[\s\-\(\)\[\]]/g, "");
 
   // Only validate when UK country code is selected
   if (countryCode === "+44") {
+    // Prepend country code if the number doesn't start with + or 0
+    if (!cleaned.startsWith("+") && !cleaned.startsWith("0")) {
+      cleaned = "+44" + cleaned;
+    }
+
     // Check for double prefix like +440
     if (cleaned.startsWith("+440")) {
       return { isValid: false, errorMessage: "Invalid format: do not include both +44 and leading 0" };
@@ -55,11 +62,6 @@ const validateUkLandline = (phoneNumber, countryCode) => {
 
     // Handle local format (starting with 0)
     if (cleaned.startsWith("0")) {
-      // Reject special/premium numbers
-      if (cleaned.startsWith("0800") || cleaned.startsWith("0845") || cleaned.startsWith("0870") || cleaned.startsWith("09")) {
-        return { isValid: false, errorMessage: "Special/premium rate numbers are not accepted" };
-      }
-
       // Must start with valid UK prefix (01, 02, 03, or 07)
       if (!/^(01|02|03|07)/.test(cleaned)) {
         return { isValid: false, errorMessage: "Invalid UK number: must start with valid prefix (01, 02, 03, or 07)" };
@@ -77,7 +79,53 @@ const validateUkLandline = (phoneNumber, countryCode) => {
     return { isValid: false, errorMessage: "Number must start with 0 (UK local format) or +44 (international)" };
   }
 
-  // For non-UK numbers, just basic validation
+  // India phone number validation (+91)
+  if (countryCode === "+91") {
+    // Handle international format (+91)
+    if (cleaned.startsWith("+91")) {
+      const digitsOnly = cleaned.slice(3); // Remove +91
+
+      // Indian numbers must have exactly 10 digits after +91
+      if (digitsOnly.length !== 10) {
+        return { isValid: false, errorMessage: "Invalid number length: Indian numbers must have exactly 10 digits after +91" };
+      }
+
+      // Must start with 6, 7, 8, or 9 (valid Indian mobile prefixes)
+      if (!/^[6789]/.test(digitsOnly)) {
+        return { isValid: false, errorMessage: "Invalid Indian number: must start with 6, 7, 8, or 9" };
+      }
+
+      return { isValid: true, errorMessage: "" };
+    }
+
+    // Handle local format (starting with 0)
+    if (cleaned.startsWith("0")) {
+      if (cleaned.length !== 11) {
+        return { isValid: false, errorMessage: "Invalid number length: Indian numbers must have 11 digits (including leading 0)" };
+      }
+
+      // Must start with valid prefix (06, 07, 08, or 09)
+      if (!/^(06|07|08|09)/.test(cleaned)) {
+        return { isValid: false, errorMessage: "Invalid Indian number: must start with 6, 7, 8, or 9" };
+      }
+
+      return { isValid: true, errorMessage: "" };
+    }
+
+    // Local format without leading 0 (10 digits)
+    if (cleaned.length === 10) {
+      // Must start with valid prefix (6, 7, 8, or 9)
+      if (!/^[6789]/.test(cleaned)) {
+        return { isValid: false, errorMessage: "Invalid Indian number: must start with 6, 7, 8, or 9" };
+      }
+
+      return { isValid: true, errorMessage: "" };
+    }
+
+    return { isValid: false, errorMessage: "Invalid number length: Indian numbers must have exactly 10 digits" };
+  }
+
+  // For other non-UK numbers, just basic validation
   if (!/^\d+$/.test(cleaned)) {
     return { isValid: false, errorMessage: "Phone number can only contain digits" };
   }
@@ -153,7 +201,8 @@ const CountryCodeDropdown = ({ value, onChange, id }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="absolute top-full left-0 mt-1 rounded-xl shadow-xl z-50 w-48 max-h-60 overflow-y-auto"
-            style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
+            style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', overscrollBehavior: 'contain' }}
+            onWheel={(e) => e.stopPropagation()}
           >
             {countryCodes.map((country) => (
               <button
@@ -287,7 +336,13 @@ const SelectField = ({ label, icon: Icon, required, options, error, ...props }) 
 const PhoneInput = ({ countryCode, onCountryCodeChange, phone, onPhoneChange, label, required, error }) => {
   const handlePhoneChange = (e) => {
     const value = e.target.value;
-    const digitsOnly = value.replace(/\D/g, '');
+    let digitsOnly = value.replace(/\D/g, '');
+
+    // Limit to 10 digits for Indian numbers
+    if (countryCode === "+91") {
+      digitsOnly = digitsOnly.slice(0, 10);
+    }
+
     onPhoneChange(digitsOnly);
   };
 
@@ -307,6 +362,7 @@ const PhoneInput = ({ countryCode, onCountryCodeChange, phone, onPhoneChange, la
           placeholder="Enter phone number"
           inputMode="numeric"
           pattern="[0-9]*"
+          maxLength={countryCode === "+91" ? 10 : undefined}
           className="flex-1 px-4 py-3.5 border rounded-r-xl outline-none transition-all duration-200 placeholder:opacity-30 placeholder:text-white"
           style={{
             backgroundColor: 'rgba(255,255,255,0.05)',
@@ -315,6 +371,64 @@ const PhoneInput = ({ countryCode, onCountryCodeChange, phone, onPhoneChange, la
           }}
         />
       </div>
+      {error && <p className="text-sm text-red-400">{error}</p>}
+    </div>
+  );
+};
+
+// Counter Field Component (for passengers, luggage, children)
+const CounterField = ({ label, icon: Icon, required, value, onChange, min = 0, max = 10, error }) => {
+  const handleDecrement = () => {
+    if (value > min) onChange(value - 1);
+  };
+
+  const handleIncrement = () => {
+    if (value < max) onChange(value + 1);
+  };
+
+  return (
+    <div className="space-y-2">
+      {/* Label Section */}
+      <label className="flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+        {Icon && <Icon size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />}
+        {label}
+        {required && <span style={{ color: 'var(--color-primary)' }}>*</span>}
+      </label>
+
+      {/* Control Section */}
+      <div
+        className="flex items-center justify-between px-2 py-2 border rounded-xl"
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          borderColor: error ? '#ef4444' : 'rgba(255,255,255,0.1)',
+        }}
+      >
+        {/* Minus Button */}
+        <button
+          type="button"
+          onClick={handleDecrement}
+          disabled={value <= min}
+          className="p-2 rounded-lg transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <Minus size={20} style={{ color: '#fff' }} />
+        </button>
+
+        {/* Display Value */}
+        <span className="text-lg font-semibold text-white">
+          {value}
+        </span>
+
+        {/* Plus Button */}
+        <button
+          type="button"
+          onClick={handleIncrement}
+          disabled={value >= max}
+          className="p-2 rounded-lg transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <Plus size={20} style={{ color: '#fff' }} />
+        </button>
+      </div>
+
       {error && <p className="text-sm text-red-400">{error}</p>}
     </div>
   );
@@ -330,6 +444,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
     phone: data?.passengerDetails?.phone || "",
     numberOfPassengers: data?.passengerDetails?.numberOfPassengers || 1,
     numberOfSuitcases: data?.passengerDetails?.numberOfSuitcases || 0,
+    numberOfChildren: data?.passengerDetails?.numberOfChildren || 0,
     isBookingForSomeoneElse: data?.passengerDetails?.isBookingForSomeoneElse || false,
     guestFirstName: data?.passengerDetails?.guestFirstName || "",
     guestLastName: data?.passengerDetails?.guestLastName || "",
@@ -404,7 +519,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
     } else {
-      const phoneValidation = validateUkLandline(formData.phone, formData.countryCode);
+      const phoneValidation = validateUkPhone(formData.phone, formData.countryCode);
       if (!phoneValidation.isValid) {
         newErrors.phone = phoneValidation.errorMessage;
       }
@@ -415,11 +530,11 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
     if (selectedVehicle) {
       const maxPassengers = selectedVehicle.numberOfPassengers || 0;
       const maxLuggage = selectedVehicle.numberOfBigLuggage || 0;
-      
+
       if (formData.numberOfPassengers > maxPassengers) {
         newErrors.numberOfPassengers = `Maximum ${maxPassengers} ${maxPassengers === 1 ? 'passenger' : 'passengers'} allowed for this vehicle`;
       }
-      
+
       if (formData.numberOfSuitcases > maxLuggage) {
         newErrors.numberOfSuitcases = `Maximum ${maxLuggage} ${maxLuggage === 1 ? 'suitcase' : 'suitcases'} allowed for this vehicle`;
       }
@@ -445,7 +560,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
       }
 
       if (formData.guestPhone.trim()) {
-        const guestPhoneValidation = validateUkLandline(formData.guestPhone, formData.guestCountryCode);
+        const guestPhoneValidation = validateUkPhone(formData.guestPhone, formData.guestCountryCode);
         if (!guestPhoneValidation.isValid) {
           newErrors.guestPhone = guestPhoneValidation.errorMessage;
         }
@@ -471,6 +586,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
       phone: formData.phone,
       numberOfPassengers: formData.numberOfPassengers,
       numberOfSuitcases: formData.numberOfSuitcases,
+      numberOfChildren: formData.numberOfChildren,
       isBookingForSomeoneElse: formData.isBookingForSomeoneElse,
       guestFirstName: formData.guestFirstName,
       guestLastName: formData.guestLastName,
@@ -497,16 +613,6 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
       specialInstructions: specialInstructionsData,
     });
   };
-
-  const passengerOptions = Array.from({ length: 10 }, (_, i) => ({
-    value: i + 1,
-    label: `${i + 1} ${i === 0 ? "Passenger" : "Passengers"}`,
-  }));
-
-  const suitcaseOptions = Array.from({ length: 11 }, (_, i) => ({
-    value: i,
-    label: `${i} ${i === 1 ? "Suitcase" : "Suitcases"}`,
-  }));
 
   return (
     <div className="py-2">
@@ -582,23 +688,34 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
               error={errors.email}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <SelectField
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <CounterField
                 label="Number of Passengers"
                 icon={Users}
                 required
                 value={formData.numberOfPassengers}
-                onChange={(e) => updateField("numberOfPassengers", parseInt(e.target.value))}
-                options={passengerOptions}
+                onChange={(value) => updateField("numberOfPassengers", value)}
+                min={1}
+                max={data?.selectedVehicle?.numberOfPassengers || 10}
                 error={errors.numberOfPassengers}
               />
-              <SelectField
+              <CounterField
+                label="Number of Children"
+                icon={Users}
+                value={formData.numberOfChildren}
+                onChange={(value) => updateField("numberOfChildren", value)}
+                min={0}
+                max={4}
+                error={errors.numberOfChildren}
+              />
+              <CounterField
                 label="Number of Suitcases"
                 icon={Briefcase}
                 required
                 value={formData.numberOfSuitcases}
-                onChange={(e) => updateField("numberOfSuitcases", parseInt(e.target.value))}
-                options={suitcaseOptions}
+                onChange={(value) => updateField("numberOfSuitcases", value)}
+                min={0}
+                max={data?.selectedVehicle?.numberOfBigLuggage || 10}
                 error={errors.numberOfSuitcases}
               />
             </div>

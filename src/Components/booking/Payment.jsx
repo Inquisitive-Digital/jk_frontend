@@ -22,6 +22,7 @@ import {
   TestTube2,
   Mail,
   Phone,
+  Users,
 } from "lucide-react";
 
 
@@ -338,7 +339,15 @@ function Payment({ data, clientSecret, onBack, onPaymentSuccess, onPaymentFailur
   };
 
   const pricing = data.selectedVehicle?.pricing;
-  const totalAmount = pricing?.totalPrice || 0;
+  const passengerDetails = data.passengerDetails;
+  
+  // Calculate child seat charge
+  const numberOfChildren = passengerDetails?.numberOfChildren || 0;
+  const childSeatPrice = pricing?.additionalCharges?.childSeatPrice || 0;
+  const childSeatCharge = numberOfChildren * childSeatPrice;
+  const totalAmount = (pricing?.totalPrice || 0) + childSeatCharge;
+  
+
 
   // Format date
   const formatDate = (dateStr) => {
@@ -432,6 +441,17 @@ function Payment({ data, clientSecret, onBack, onPaymentSuccess, onPaymentFailur
                       </p>
                     </div>
                   </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                      <Users size={16} style={{ color: 'var(--color-primary)' }} />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>Passengers</p>
+                      <p className="font-medium text-white text-sm">
+                        {data.passengerDetails?.numberOfPassengers || 1} passengers, {data.passengerDetails?.numberOfChildren || 0} children, {data.passengerDetails?.numberOfSuitcases || 0} suitcases
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Date/Time & Vehicle */}
@@ -473,6 +493,12 @@ function Payment({ data, clientSecret, onBack, onPaymentSuccess, onPaymentFailur
                     <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}>
                       <span>Congestion Charge</span>
                       <span className="text-white">£{pricing?.congestionCharge?.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {childSeatCharge > 0 && (
+                    <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                      <span>Child Seats ({numberOfChildren} × £{childSeatPrice})</span>
+                      <span className="text-white">£{childSeatCharge.toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}>

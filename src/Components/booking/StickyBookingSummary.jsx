@@ -7,7 +7,8 @@ import {
   Users,
   Briefcase,
   ChevronLeft,
-  Info
+  Info,
+  Route
 } from "lucide-react";
 
 const STEP_BACK_LABELS = {
@@ -26,6 +27,7 @@ function StickyBookingSummary({
   extras,
   currentStep,
   onGoBack,
+  distance,
 }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -118,6 +120,23 @@ function StickyBookingSummary({
           </div>
         </div>
       </div>
+
+      {/* Approx Distance */}
+      {distance && (
+        <div
+          className="px-5 py-3"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.02)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.04)",
+          }}
+        >
+          <div className="flex items-center gap-2 justify-center">
+            <Route size={14} style={{ color: 'var(--color-primary)' }} />
+            <span className="text-[10px] uppercase tracking-[0.15em] text-white/35 font-semibold">Approx Distance</span>
+            <span className="text-sm text-white/80 font-medium">{distance}</span>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="p-5 space-y-6">

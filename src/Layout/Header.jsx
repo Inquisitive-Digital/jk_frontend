@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Phone, Menu, X, ChevronDown, ChevronRight, LogIn } from 'lucide-react';
 import JkLogo from "../assets/JkLogo.png"
 import { serviceAPI, fleetAPI, eventAPI } from '../Utils/api';
 import Analytics from '../Utils/analytics';
@@ -189,7 +189,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${headerBg}`}
+        className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ${headerBg}`}
       >
         {/* Top Bar */}
         <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -275,6 +275,27 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                   Book Now
                 </Link>
               )}
+
+              {/* Login Button (Desktop) */}
+              <a
+                href="https://jkexecutivechauffeurs.dashboardloginapp.com/login"
+                className="hidden md:flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wider rounded transition-all duration-300 border-2"
+                style={{
+                  borderColor: 'var(--color-primary)',
+                  color: shouldBeTransparent || !isLightTheme ? 'white' : 'var(--color-primary)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                  e.currentTarget.style.color = 'black';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = shouldBeTransparent || !isLightTheme ? 'white' : 'var(--color-primary)';
+                }}
+              >
+                <LogIn className="w-4 h-4" />
+                Login
+              </a>
 
               {/* Mobile Menu Button */}
               <button
@@ -405,7 +426,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
@@ -419,7 +440,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-[280px] bg-[#1a1a1a] z-50 lg:hidden flex flex-col"
+            className="fixed top-0 right-0 bottom-0 w-[280px] bg-[#1a1a1a] z-[10001] lg:hidden flex flex-col"
           >
             {/* Close Button */}
             <div className="flex justify-end p-4 flex-shrink-0">
@@ -461,6 +482,24 @@ function Header({ isTransparent = false, theme = 'dark' }) {
               >
                 Book Now
               </Link>
+
+              {/* Mobile Login Button */}
+              <a
+                href="https://jkexecutivechauffeurs.dashboardloginapp.com/login"
+                className="block mt-4 px-6 py-3 text-white font-semibold text-center uppercase tracking-wider rounded transition-colors border-2"
+                style={{ borderColor: 'var(--color-primary)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                  e.currentTarget.style.color = 'black';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Login
+              </a>
 
               {/* Mobile Phone */}
               <a
