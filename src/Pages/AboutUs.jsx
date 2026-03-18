@@ -78,10 +78,10 @@ function AboutUs() {
     ];
 
     return (
-        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh', paddingTop: '100px' }}>
 
             {/* Hero Section */}
-            <section className="relative overflow-hidden" style={{ paddingTop: '120px', paddingBottom: '60px' }}>
+            <section className="relative overflow-hidden" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
                 {/* Background Glow */}
                 <div className="absolute inset-0 pointer-events-none">
                     <div
