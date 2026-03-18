@@ -106,6 +106,13 @@ function Footer() {
 
   const linkStyle = { transition: 'color 0.3s ease' };
 
+  const handleHomeClick = (e, href) => {
+    if (window.location.pathname === href) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="bg-[#0a0a0a] text-white/80">
       {/* Main Footer */}
@@ -156,6 +163,7 @@ function Footer() {
               </h3>
               <ul className="space-y-2.5">
                 {[
+                  { label: 'Home', href: '/', isHome: true },
                   { label: 'Book a Ride', href: '/booking' },
                   { label: 'Our Fleet', href: '/fleet' },
                   { label: 'Services', href: '/services' },
@@ -170,6 +178,7 @@ function Footer() {
                       style={linkStyle}
                       onMouseEnter={(e) => handleLinkHover(e, true)}
                       onMouseLeave={(e) => handleLinkHover(e, false)}
+                      onClick={(e) => link.isHome && handleHomeClick(e, link.href)}
                     >
                       {link.label}
                     </Link>

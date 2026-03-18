@@ -224,8 +224,9 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 }}
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
               >
-                <span className={`text-2xl md:text-3xl font-light tracking-wider whitespace-nowrap block ${logoTextColor}`}>
-                  JK Executive Chauffeurs
+                <span className={`text-2xl md:text-3xl tracking-wider whitespace-nowrap block ${logoTextColor}`}>
+                  <span className="font-semibold">JK Executive</span>{' '}
+                  <span className="font-extralight">Chauffeurs</span>
                 </span>
               </motion.div>
             </Link>
