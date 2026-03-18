@@ -20,6 +20,72 @@ import {
 } from "lucide-react";
 import { vehicleAPI, locationAPI, locationPricingAPI, getImageUrl } from "../../Utils/api";
 
+// Shimmer Field Component
+const ShimmerField = () => (
+    <div className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-200 animate-pulse" />
+);
+
+// Shimmer Loader Component
+const ShimmerLoader = () => (
+    <div className="space-y-5">
+        {/* Shimmer Header Card */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-5">
+            <div className="flex items-center gap-4">
+                <div className="w-16 h-14 bg-white/20 rounded-xl animate-pulse" />
+                <div className="flex-1 space-y-2">
+                    <div className="h-6 bg-white/30 rounded-lg w-3/4 animate-pulse" />
+                    <div className="h-4 bg-white/20 rounded-lg w-1/2 animate-pulse" />
+                </div>
+            </div>
+        </div>
+
+        {/* Shimmer Distance Tiers */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+                <div className="h-6 bg-gray-200 rounded-lg w-40 animate-pulse" />
+                <div className="h-8 bg-gray-200 rounded-lg w-24 animate-pulse" />
+            </div>
+            <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
+                        <div className="flex-1 grid grid-cols-4 gap-2">
+                            {[1, 2, 3, 4].map((j) => (
+                                <ShimmerField key={j} />
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Shimmer Additional Charges */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="h-6 bg-gray-200 rounded-lg w-48 mb-4 animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                    <div key={i}>
+                        <div className="h-4 bg-gray-200 rounded w-20 mb-2 animate-pulse" />
+                        <ShimmerField />
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Shimmer Display Options */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="h-6 bg-gray-200 rounded-lg w-40 mb-4 animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-12 bg-gray-200 rounded-xl animate-pulse" />
+                ))}
+            </div>
+        </div>
+
+        {/* Shimmer Save Button */}
+        <div className="h-14 bg-gray-200 rounded-xl animate-pulse" />
+    </div>
+);
+
 // Vehicle List Item
 const VehicleListItem = ({ vehicle, isSelected, onClick, hasPricing }) => {
     const imageUrl = getImageUrl(vehicle.image?.url);
@@ -136,6 +202,7 @@ function AdminLocationPricing() {
     const [existingPricingIds, setExistingPricingIds] = useState({}); // vehicleId -> pricingId
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isFetchingPricing, setIsFetchingPricing] = useState(false);
 
     // Pricing Form State
     const [pricingForm, setPricingForm] = useState({
@@ -198,6 +265,8 @@ function AdminLocationPricing() {
         const fetchVehiclePricing = async () => {
             if (!selectedVehicle || !locationId) return;
 
+            setIsFetchingPricing(true);
+
             try {
                 const pricingRes = await locationPricingAPI.getByLocation(locationId);
                 if (pricingRes.success && pricingRes.data) {
@@ -221,7 +290,6 @@ function AdminLocationPricing() {
                             [selectedVehicle._id]: vehiclePricing._id,
                         }));
                     } else {
-                        // Reset form for new pricing
                         setPricingForm({
                             distanceTiers: [
                                 { fromDistance: 0, toDistance: 18, price: 109.5, type: "fixed" },
@@ -246,6 +314,8 @@ function AdminLocationPricing() {
                 }
             } catch (err) {
                 console.error("Error fetching vehicle pricing:", err);
+            } finally {
+                setIsFetchingPricing(false);
             }
         };
         fetchVehiclePricing();
@@ -372,7 +442,12 @@ function AdminLocationPricing() {
                                 <Car size={18} className="text-green-600" />
                                 Select Vehicle
                             </h3>
-                            <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+                            <div
+                                className="space-y-2 max-h-[calc(100vh-220px)] overflow-y-auto pr-1"
+                                onWheel={(e) => {
+                                    e.stopPropagation();
+                                }}
+                            >
                                 {vehicles.map((vehicle) => (
                                     <VehicleListItem
                                         key={vehicle._id}
@@ -389,12 +464,16 @@ function AdminLocationPricing() {
                     {/* Right: Pricing Form */}
                     <div className="flex-1">
                         {selectedVehicle ? (
-                            <motion.div
-                                key={selectedVehicle._id}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="space-y-5"
-                            >
+                            <>
+                                {isFetchingPricing ? (
+                                    <ShimmerLoader />
+                                ) : (
+                                    <motion.div
+                                        key={selectedVehicle._id}
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="space-y-5"
+                                    >
                                 {/* Vehicle Header */}
                                 <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-5 text-white">
                                     <div className="flex items-center gap-4">
@@ -615,6 +694,8 @@ function AdminLocationPricing() {
                                     Save Pricing for {selectedVehicle.categoryName}
                                 </button>
                             </motion.div>
+                                )}
+                            </>
                         ) : (
                             <div className="bg-white rounded-2xl p-10 text-center border border-gray-100">
                                 <Car size={48} className="text-gray-300 mx-auto mb-3" />

@@ -12,6 +12,8 @@ import {
   UserPlus,
   MessageSquare,
   Check,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import StepNavBar from "./StepNavBar";
@@ -335,12 +337,12 @@ const PhoneInput = ({ countryCode, onCountryCodeChange, phone, onPhoneChange, la
   const handlePhoneChange = (e) => {
     const value = e.target.value;
     let digitsOnly = value.replace(/\D/g, '');
-    
+
     // Limit to 10 digits for Indian numbers
     if (countryCode === "+91") {
       digitsOnly = digitsOnly.slice(0, 10);
     }
-    
+
     onPhoneChange(digitsOnly);
   };
 
@@ -374,6 +376,64 @@ const PhoneInput = ({ countryCode, onCountryCodeChange, phone, onPhoneChange, la
   );
 };
 
+// Counter Field Component (for passengers, luggage, children)
+const CounterField = ({ label, icon: Icon, required, value, onChange, min = 0, max = 10, error }) => {
+  const handleDecrement = () => {
+    if (value > min) onChange(value - 1);
+  };
+
+  const handleIncrement = () => {
+    if (value < max) onChange(value + 1);
+  };
+
+  return (
+    <div className="space-y-2">
+      {/* Label Section */}
+      <label className="flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+        {Icon && <Icon size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />}
+        {label}
+        {required && <span style={{ color: 'var(--color-primary)' }}>*</span>}
+      </label>
+
+      {/* Control Section */}
+      <div
+        className="flex items-center justify-between px-2 py-2 border rounded-xl"
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          borderColor: error ? '#ef4444' : 'rgba(255,255,255,0.1)',
+        }}
+      >
+        {/* Minus Button */}
+        <button
+          type="button"
+          onClick={handleDecrement}
+          disabled={value <= min}
+          className="p-2 rounded-lg transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <Minus size={20} style={{ color: '#fff' }} />
+        </button>
+
+        {/* Display Value */}
+        <span className="text-lg font-semibold text-white">
+          {value}
+        </span>
+
+        {/* Plus Button */}
+        <button
+          type="button"
+          onClick={handleIncrement}
+          disabled={value >= max}
+          className="p-2 rounded-lg transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <Plus size={20} style={{ color: '#fff' }} />
+        </button>
+      </div>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+    </div>
+  );
+};
+
 // Main UserDetails Component
 function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
   const [formData, setFormData] = useState({
@@ -384,6 +444,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
     phone: data?.passengerDetails?.phone || "",
     numberOfPassengers: data?.passengerDetails?.numberOfPassengers || 1,
     numberOfSuitcases: data?.passengerDetails?.numberOfSuitcases || 0,
+    numberOfChildren: data?.passengerDetails?.numberOfChildren || 0,
     isBookingForSomeoneElse: data?.passengerDetails?.isBookingForSomeoneElse || false,
     guestFirstName: data?.passengerDetails?.guestFirstName || "",
     guestLastName: data?.passengerDetails?.guestLastName || "",
@@ -469,11 +530,11 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
     if (selectedVehicle) {
       const maxPassengers = selectedVehicle.numberOfPassengers || 0;
       const maxLuggage = selectedVehicle.numberOfBigLuggage || 0;
-      
+
       if (formData.numberOfPassengers > maxPassengers) {
         newErrors.numberOfPassengers = `Maximum ${maxPassengers} ${maxPassengers === 1 ? 'passenger' : 'passengers'} allowed for this vehicle`;
       }
-      
+
       if (formData.numberOfSuitcases > maxLuggage) {
         newErrors.numberOfSuitcases = `Maximum ${maxLuggage} ${maxLuggage === 1 ? 'suitcase' : 'suitcases'} allowed for this vehicle`;
       }
@@ -525,6 +586,7 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
       phone: formData.phone,
       numberOfPassengers: formData.numberOfPassengers,
       numberOfSuitcases: formData.numberOfSuitcases,
+      numberOfChildren: formData.numberOfChildren,
       isBookingForSomeoneElse: formData.isBookingForSomeoneElse,
       guestFirstName: formData.guestFirstName,
       guestLastName: formData.guestLastName,
@@ -551,16 +613,6 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
       specialInstructions: specialInstructionsData,
     });
   };
-
-  const passengerOptions = Array.from({ length: 10 }, (_, i) => ({
-    value: i + 1,
-    label: `${i + 1} ${i === 0 ? "Passenger" : "Passengers"}`,
-  }));
-
-  const suitcaseOptions = Array.from({ length: 11 }, (_, i) => ({
-    value: i,
-    label: `${i} ${i === 1 ? "Suitcase" : "Suitcases"}`,
-  }));
 
   return (
     <div className="py-2">
@@ -636,23 +688,34 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
               error={errors.email}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <SelectField
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <CounterField
                 label="Number of Passengers"
                 icon={Users}
                 required
                 value={formData.numberOfPassengers}
-                onChange={(e) => updateField("numberOfPassengers", parseInt(e.target.value))}
-                options={passengerOptions}
+                onChange={(value) => updateField("numberOfPassengers", value)}
+                min={1}
+                max={data?.selectedVehicle?.numberOfPassengers || 10}
                 error={errors.numberOfPassengers}
               />
-              <SelectField
+              <CounterField
+                label="Number of Children"
+                icon={Users}
+                value={formData.numberOfChildren}
+                onChange={(value) => updateField("numberOfChildren", value)}
+                min={0}
+                max={4}
+                error={errors.numberOfChildren}
+              />
+              <CounterField
                 label="Number of Suitcases"
                 icon={Briefcase}
                 required
                 value={formData.numberOfSuitcases}
-                onChange={(e) => updateField("numberOfSuitcases", parseInt(e.target.value))}
-                options={suitcaseOptions}
+                onChange={(value) => updateField("numberOfSuitcases", value)}
+                min={0}
+                max={data?.selectedVehicle?.numberOfBigLuggage || 10}
                 error={errors.numberOfSuitcases}
               />
             </div>

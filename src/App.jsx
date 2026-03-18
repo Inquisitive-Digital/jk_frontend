@@ -146,6 +146,10 @@ function App() {
         <Route path="/admin/edit-location/:id" element={<AdminAddLocation />} />
         <Route path="/admin/location-pricing/:locationId" element={<AdminLocationPricing />} />
 
+
+        {/* Catch undefined routes and fallback to home */}
+        <Route path="*" element={<Layout isHeroPage={false}><Home /></Layout>} />
+
       </Routes>
     </Router>
   );

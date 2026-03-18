@@ -106,6 +106,13 @@ function Footer() {
 
   const linkStyle = { transition: 'color 0.3s ease' };
 
+  const handleHomeClick = (e, href) => {
+    if (window.location.pathname === href) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="bg-[#0a0a0a] text-white/80">
       {/* Main Footer */}
@@ -156,6 +163,7 @@ function Footer() {
               </h3>
               <ul className="space-y-2.5">
                 {[
+                  { label: 'Home', href: '/', isHome: true },
                   { label: 'Book a Ride', href: '/booking' },
                   { label: 'Our Fleet', href: '/fleet' },
                   { label: 'Services', href: '/services' },
@@ -170,6 +178,7 @@ function Footer() {
                       style={linkStyle}
                       onMouseEnter={(e) => handleLinkHover(e, true)}
                       onMouseLeave={(e) => handleLinkHover(e, false)}
+                      onClick={(e) => link.isHome && handleHomeClick(e, link.href)}
                     >
                       {link.label}
                     </Link>
@@ -187,11 +196,11 @@ function Footer() {
               <ul className="space-y-2.5">
                 {[
                   { label: 'Airport Transfers', href: '/services/airport-chauffeur-service' },
-                  { label: 'Executive Chauffeur', href: '/services/executive-chauffeur-service-in-london' },
+                  { label: 'Intercity Chauffeur Service', href: '/services/intercity-chauffeur-service' },
                   { label: 'Luxury Chauffeur', href: '/services/luxury-chauffeur-service-in-london' },
                   { label: 'London Chauffeur', href: '/services/london-chauffeur-service' },
-                  { label: 'Event Chauffeur', href: '/events/event-chauffeur-service' },
-                  { label: 'Sports Events', href: '/events/chauffeur-service-for-sports' },
+                  { label: 'Event Chauffeur', href: '/services/event-chauffeur-service-in-london' },
+                  { label: 'Sports Events', href: '/events/chauffeur-service-for-sports-event' },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link

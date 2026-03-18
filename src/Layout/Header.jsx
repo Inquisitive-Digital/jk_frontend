@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Phone, Menu, X, ChevronDown, ChevronRight, LogIn } from 'lucide-react';
 import JkLogo from "../assets/JkLogo.png"
 import { serviceAPI, fleetAPI, eventAPI } from '../Utils/api';
 import Analytics from '../Utils/analytics';
@@ -196,7 +196,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
           <div className="flex items-center justify-between py-4">
             {/* Phone Number - Left on desktop, hidden on mobile */}
             <a
-              href="tel:+442012345678"
+              href="tel:+442034759906"
               onClick={() => Analytics.trackCallClick('header_desktop_phone')}
               className={`hidden md:flex items-center gap-2 transition-colors group ${textColor}`}
             >
@@ -204,7 +204,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 <Phone className="w-3.5 h-3.5" />
               </span>
               <span className="text-sm font-medium">
-                +44 (0)20 1234 5678
+                +44 (0) 203 475 9906
               </span>
             </a>
 
@@ -224,8 +224,9 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 }}
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
               >
-                <span className={`text-2xl md:text-3xl font-light tracking-wider whitespace-nowrap block ${logoTextColor}`}>
-                  JK Executive Chauffeurs
+                <span className={`text-2xl md:text-3xl tracking-wider whitespace-nowrap block ${logoTextColor}`}>
+                  <span className="font-semibold">JK Executive</span>{' '}
+                  <span className="font-extralight">Chauffeurs</span>
                 </span>
               </motion.div>
             </Link>
@@ -275,6 +276,27 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                   Book Now
                 </Link>
               )}
+
+              {/* Login Button (Desktop) */}
+              <a
+                href="https://jkexecutivechauffeurs.dashboardloginapp.com/login"
+                className="hidden md:flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wider rounded transition-all duration-300 border-2"
+                style={{
+                  borderColor: 'var(--color-primary)',
+                  color: shouldBeTransparent || !isLightTheme ? 'white' : 'var(--color-primary)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                  e.currentTarget.style.color = 'black';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = shouldBeTransparent || !isLightTheme ? 'white' : 'var(--color-primary)';
+                }}
+              >
+                <LogIn className="w-4 h-4" />
+                Login
+              </a>
 
               {/* Mobile Menu Button */}
               <button
@@ -462,14 +484,32 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 Book Now
               </Link>
 
+              {/* Mobile Login Button */}
+              <a
+                href="https://jkexecutivechauffeurs.dashboardloginapp.com/login"
+                className="block mt-4 px-6 py-3 text-white font-semibold text-center uppercase tracking-wider rounded transition-colors border-2"
+                style={{ borderColor: 'var(--color-primary)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                  e.currentTarget.style.color = 'black';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Login
+              </a>
+
               {/* Mobile Phone */}
               <a
-                href="tel:+442012345678"
+                href="tel:+442034759906"
                 onClick={() => Analytics.trackCallClick('header_mobile_menu_phone')}
                 className="flex items-center justify-center gap-2 mt-6 text-white/70 hover:text-white transition-colors"
               >
                 <Phone className="w-4 h-4" />
-                <span>+44 (0)20 1234 5678</span>
+                <span>+44 (0) 203 475 9906</span>
               </a>
             </div>
           </motion.div>

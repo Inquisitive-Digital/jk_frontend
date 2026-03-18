@@ -469,6 +469,7 @@ function Booking() {
                   extras={[]}
                   currentStep={currentStep}
                   onGoBack={() => goToStep(currentStep - 1)}
+                  distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
                 />
               </div>
             </div>

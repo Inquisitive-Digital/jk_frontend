@@ -69,6 +69,13 @@ function BookingSummary({ data, onEdit, onProceed, isLoading = false }) {
 
     const pricing = selectedVehicle?.pricing;
 
+    // Calculate child seat charge
+    const numberOfChildren = passengerDetails?.numberOfChildren || 0;
+    const childSeatPrice = pricing?.additionalCharges?.childSeatPrice || 0;
+    const childSeatCharge = numberOfChildren * childSeatPrice;
+    
+    const displayTotal = (pricing?.totalPrice || 0) + childSeatCharge;
+
     // Format date
     const formatDate = (dateStr) => {
         if (!dateStr) return "—";
@@ -213,7 +220,7 @@ function BookingSummary({ data, onEdit, onProceed, isLoading = false }) {
                             <InfoRow
                                 icon={Users}
                                 label="Passengers & Luggage"
-                                value={`${passengerDetails?.numberOfPassengers || 1} passengers, ${passengerDetails?.numberOfSuitcases || 0} suitcases`}
+                                value={`${passengerDetails?.numberOfPassengers || 1} passengers, ${passengerDetails?.numberOfChildren || 0} children, ${passengerDetails?.numberOfSuitcases || 0} suitcases`}
                             />
                         </div>
 
@@ -292,6 +299,12 @@ function BookingSummary({ data, onEdit, onProceed, isLoading = false }) {
                                     <span className="text-white font-medium">£{pricing?.congestionCharge?.toFixed(2)}</span>
                                 </div>
                             )}
+                            {childSeatCharge > 0 && (
+                                <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                                    <span>Child Seats ({numberOfChildren} × £{childSeatPrice})</span>
+                                    <span className="text-white font-medium">£{childSeatCharge.toFixed(2)}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}>
                                 <span>VAT ({pricing?.vatRate || 20}%)</span>
                                 <span className="text-white font-medium">£{pricing?.tax?.toFixed(2) || "0.00"}</span>
@@ -299,7 +312,7 @@ function BookingSummary({ data, onEdit, onProceed, isLoading = false }) {
                             <div className="my-2" style={{ borderTop: '1px solid rgba(215,183,94,0.2)' }} />
                             <div className="flex justify-between items-center">
                                 <span className="text-base font-bold">Total</span>
-                                <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>£{pricing?.totalPrice?.toFixed(2) || "0.00"}</span>
+                                <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>£{(pricing?.totalPrice || 0) + childSeatCharge}</span>
                             </div>
                         </div>
                     </motion.div>

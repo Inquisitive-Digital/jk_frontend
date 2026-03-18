@@ -351,12 +351,12 @@ function EventWrapper() {
                             <div className="text-center">
                                 <p className="text-white/40 text-xs mb-1">Or call us directly</p>
                                 <a
-                                    href="tel:+442012345678"
+                                    href="tel:+442034759906"
                                     onClick={() => Analytics.trackCallClick('event_page_phone')}
                                     className="text-sm font-medium transition-colors"
                                     style={{ color: 'var(--color-primary)' }}
                                 >
-                                    +44 (0)20 1234 5678
+                                    +44 (0) 203 475 9906
                                 </a>
                             </div>
                         </div>

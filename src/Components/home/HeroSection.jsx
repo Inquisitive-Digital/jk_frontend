@@ -125,7 +125,7 @@ function HeroSection() {
                     <button
                         onClick={() => {
                             Analytics.trackCallClick('hero_speak_to_us');
-                            window.open('tel:+442012345678', '_self');
+                            window.open('tel:+442034759906', '_self');
                         }}
                         className="px-8 py-4 border-2 border-white/30 hover:border-white/60 text-white font-medium uppercase tracking-wider rounded transition-all duration-300 hover:bg-white/5"
                     >
