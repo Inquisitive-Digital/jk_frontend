@@ -187,11 +187,11 @@ function Footer() {
               <ul className="space-y-2.5">
                 {[
                   { label: 'Airport Transfers', href: '/services/airport-chauffeur-service' },
-                  { label: 'Executive Chauffeur', href: '/services/executive-chauffeur-service-in-london' },
+                  { label: 'Intercity Chauffeur Service', href: '/services/intercity-chauffeur-service' },
                   { label: 'Luxury Chauffeur', href: '/services/luxury-chauffeur-service-in-london' },
                   { label: 'London Chauffeur', href: '/services/london-chauffeur-service' },
-                  { label: 'Event Chauffeur', href: '/events/event-chauffeur-service' },
-                  { label: 'Sports Events', href: '/events/chauffeur-service-for-sports' },
+                  { label: 'Event Chauffeur', href: '/services/event-chauffeur-service-in-london' },
+                  { label: 'Sports Events', href: '/events/chauffeur-service-for-sports-event' },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
