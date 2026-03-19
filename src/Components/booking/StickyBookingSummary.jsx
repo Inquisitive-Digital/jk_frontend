@@ -28,6 +28,7 @@ function StickyBookingSummary({
   currentStep,
   onGoBack,
   distance,
+  serviceType = "oneway",
 }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -41,6 +42,7 @@ function StickyBookingSummary({
 
   const backLabel = STEP_BACK_LABELS[currentStep];
   const showBackButton = currentStep >= 2 && !!onGoBack && !!backLabel;
+  const isHourly = serviceType === "hourly";
 
   return (
     <div
@@ -105,18 +107,20 @@ function StickyBookingSummary({
               </p>
             </div>
             
-            {/* Drop-off */}
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <div 
-                  className="w-1.5 h-1.5 rounded-full bg-white/20" 
-                />
-                <span className="text-[9px] uppercase tracking-[0.2em] text-white/35 font-semibold">Drop-off</span>
+            {/* Drop-off - Only show for non-hourly bookings */}
+            {!isHourly && (
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <div 
+                    className="w-1.5 h-1.5 rounded-full bg-white/20" 
+                  />
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-white/35 font-semibold">Drop-off</span>
+                </div>
+                <p className="text-sm text-white/95 font-medium leading-snug break-words">
+                  {to || <span className="text-white/30">Not specified</span>}
+                </p>
               </div>
-              <p className="text-sm text-white/95 font-medium leading-snug break-words">
-                {to || <span className="text-white/30">Not specified</span>}
-              </p>
-            </div>
+            )}
           </div>
         </div>
       </div>

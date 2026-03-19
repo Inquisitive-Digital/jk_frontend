@@ -665,6 +665,19 @@ function Locations({ data, updateData, onNext }) {
       }
 
       if (fullAddress) {
+        // Check if dropoff is same as pickup
+        if (data.pickup && fullAddress.toLowerCase().trim() === data.pickup.toLowerCase().trim()) {
+          setErrors((prev) => ({ 
+            ...prev, 
+            dropoff: "Pickup and dropoff locations cannot be the same" 
+          }));
+          if (dropoffInputRef.current) {
+            dropoffInputRef.current.value = "";
+          }
+          updateData("dropoff", "");
+          return;
+        }
+
         updateData("dropoff", fullAddress);
         setErrors((prev) => ({ ...prev, dropoff: null }));
         if (dropoffInputRef.current) {

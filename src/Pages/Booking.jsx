@@ -461,7 +461,7 @@ function Booking() {
               <div className="sticky top-32">
                 <StickyBookingSummary
                   from={bookingData.pickup}
-                  to={bookingData.serviceType === "hourly" ? bookingData.pickup : bookingData.dropoff}
+                  to={bookingData.dropoff}
                   date={bookingData.pickupDate}
                   time={bookingData.pickupTime}
                   vehicle={stickyVehicle}
@@ -470,6 +470,7 @@ function Booking() {
                   currentStep={currentStep}
                   onGoBack={() => goToStep(currentStep - 1)}
                   distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
+                  serviceType={bookingData.serviceType}
                 />
               </div>
             </div>
