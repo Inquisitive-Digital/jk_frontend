@@ -59,7 +59,7 @@ function HeroSection() {
             </div>
 
             {/* Content - aligned with header (max-w-7xl px-4 md:px-8) */}
-            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-24 w-full">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-32 md:pt-24 w-full">
                 {/* Two-column layout: Left content + Right booking form */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                     
@@ -118,17 +118,17 @@ function HeroSection() {
                             Your personal chauffeur, available 24/7 across London and beyond.
                         </motion.p>
 
-                        {/* CTA Buttons - Hidden on mobile */}
+                        {/* CTA Buttons */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.8 }}
-                            className="hidden sm:flex flex-col sm:flex-row items-start gap-4"
+                            className="flex flex-col sm:flex-row items-start gap-4"
                         >
                             <Link
                                 to="/booking"
                                 onClick={() => Analytics.trackBookingClick('hero_get_quote')}
-                                className="group flex items-center gap-2 px-8 py-4 text-black font-bold uppercase tracking-wider rounded transition-all duration-300"
+                                className="hidden sm:flex group items-center gap-2 px-8 py-4 text-black font-bold uppercase tracking-wider rounded transition-all duration-300"
                                 style={{
                                     backgroundColor: 'var(--color-primary)',
                                     boxShadow: 'none'

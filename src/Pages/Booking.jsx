@@ -285,7 +285,7 @@ function Booking() {
     .join(" ");
 
   return (
-    <div className="min-h-screen font-sans pb-20" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
+    <div className="min-h-screen font-sans pb-20 lg:pb-0" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
 
       {/* --- STEPS INDICATOR --- */}
       <div className="pt-32 md:pt-36 pb-6" style={{ backgroundColor: 'var(--color-dark)' }}>
@@ -348,7 +348,7 @@ function Booking() {
         <div className="flex flex-col lg:flex-row lg:gap-8">
 
           {/* LEFT: Main content */}
-          <div className={`w-full min-w-0 ${currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"}`}>
+          <div className={`w-full min-w-0 ${currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"} ${currentStep === 2 || currentStep === 3 ? "lg:pb-0 pb-24" : ""}`}>
             <AnimatePresence mode="wait">
               {currentStep === 1 && (
                 <motion.div
@@ -448,7 +448,10 @@ function Booking() {
                   extras={[]}
                   currentStep={currentStep}
                   onGoBack={() => goToStep(currentStep - 1)}
+                  onContinue={() => goToStep(currentStep + 1)}
+                  continueLabel={currentStep === 3 ? "PROCEED TO PAYMENT" : "CONTINUE"}
                   distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
+                  hours={bookingData.hours}
                   serviceType={bookingData.serviceType}
                 />
               </div>
