@@ -244,14 +244,16 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
         </div>
       )}
 
-      {/* Bottom Navigation */}
-      <StepNavBar
-        onBack={onBack}
-        onContinue={handleContinue}
-        backLabel="BACK"
-        continueLabel="CONTINUE TO BOOKING"
-        disabled={!selectedVehicle}
-      />
+      {/* Bottom Navigation - Mobile Only */}
+      <div className="lg:hidden">
+        <StepNavBar
+          onBack={onBack}
+          onContinue={handleContinue}
+          backLabel="BACK"
+          continueLabel="CONTINUE TO BOOKING"
+          disabled={!selectedVehicle}
+        />
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import Analytics from "./Utils/analytics";
 import Lenis from "lenis";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { BookingProvider } from "./Context/BookingContext";
 import Layout from "./Layout/Layout";
 import Home from "./Pages/Home";
 import Booking from "./Pages/Booking";
@@ -111,6 +112,7 @@ function App() {
 
   return (
     <Router>
+      <BookingProvider>
       <ScrollToTop />
       <TawkIntegration />
       <Routes>
@@ -151,6 +153,7 @@ function App() {
         <Route path="*" element={<Layout isHeroPage={false}><Home /></Layout>} />
 
       </Routes>
+      </BookingProvider>
     </Router>
   );
 }

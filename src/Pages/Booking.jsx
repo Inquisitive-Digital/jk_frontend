@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
+import { useBooking } from "../Context/BookingContext";
 import Locations from "../Components/booking/Locations";
 import CarsSelection from "../Components/booking/CarsSelection";
 import UserDetails from "../Components/booking/UserDetails";
@@ -53,29 +55,20 @@ function Booking() {
     libraries: LIBRARIES,
   });
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const location = useLocation();
+  const { bookingData, updateBooking, resetBooking, isFromHero, hasValidLocations } = useBooking();
+  
+  // Use context data as source of truth, initialize from context
+  const [currentStep, setCurrentStep] = useState(() => {
+    // If coming from hero with valid locations, start at step 2
+    if (location.state?.startStep === 2 && hasValidLocations()) {
+      return 2;
+    }
+    return 1;
+  });
   const [clientSecret, setClientSecret] = useState(null);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [isTestMode, setIsTestMode] = useState(false);
-  const [bookingData, setBookingData] = useState({
-    pickup: null,
-    dropoff: null,
-    pickupDate: new Date(),
-    pickupTime: getDefaultPickupTime(),
-    serviceType: "oneway",
-    hours: 2,
-    selectedVehicle: null,
-    journeyInfo: null,
-    passengerDetails: null,
-    flightDetails: null,
-    specialInstructions: "",
-    savedBookingId: null,
-    originalEmail: null,
-  });
-
-  const updateBooking = (field, value) => {
-    setBookingData((prev) => ({ ...prev, [field]: value }));
-  };
 
   const goToStep = (step) => {
     setCurrentStep(step);
@@ -292,7 +285,7 @@ function Booking() {
     .join(" ");
 
   return (
-    <div className="min-h-screen font-sans pb-20" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
+    <div className="min-h-screen font-sans pb-20 lg:pb-0" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
 
       {/* --- STEPS INDICATOR --- */}
       <div className="pt-32 md:pt-36 pb-6" style={{ backgroundColor: 'var(--color-dark)' }}>
@@ -355,7 +348,7 @@ function Booking() {
         <div className="flex flex-col lg:flex-row lg:gap-8">
 
           {/* LEFT: Main content */}
-          <div className={`w-full min-w-0 ${currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"}`}>
+          <div className={`w-full min-w-0 ${currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"} ${currentStep === 2 || currentStep === 3 ? "lg:pb-0 pb-24" : ""}`}>
             <AnimatePresence mode="wait">
               {currentStep === 1 && (
                 <motion.div
@@ -429,21 +422,7 @@ function Booking() {
                       })
                     }
                     onComplete={() => {
-                      setBookingData({
-                        pickup: null,
-                        dropoff: null,
-                        pickupDate: new Date(),
-                        pickupTime: getDefaultPickupTime(),
-                        serviceType: "oneway",
-                        hours: 2,
-                        selectedVehicle: null,
-                        journeyInfo: null,
-                        passengerDetails: null,
-                        flightDetails: null,
-                        specialInstructions: "",
-                        savedBookingId: null,
-                        originalEmail: null,
-                      });
+                      resetBooking();
                       setClientSecret(null);
                       setCurrentStep(1);
                     }}
@@ -469,7 +448,10 @@ function Booking() {
                   extras={[]}
                   currentStep={currentStep}
                   onGoBack={() => goToStep(currentStep - 1)}
+                  onContinue={() => goToStep(currentStep + 1)}
+                  continueLabel={currentStep === 3 ? "PROCEED TO PAYMENT" : "CONTINUE"}
                   distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
+                  hours={bookingData.hours}
                   serviceType={bookingData.serviceType}
                 />
               </div>
