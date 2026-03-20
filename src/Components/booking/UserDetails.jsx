@@ -15,7 +15,7 @@ import {
   Minus,
   Plus,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import StepNavBar from "./StepNavBar";
 
 /**
@@ -435,7 +435,7 @@ const CounterField = ({ label, icon: Icon, required, value, onChange, min = 0, m
 };
 
 // Main UserDetails Component
-function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
+const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, onBack, isLoading = false }, ref) {
   const [formData, setFormData] = useState({
     firstName: data?.passengerDetails?.firstName || "",
     lastName: data?.passengerDetails?.lastName || "",
@@ -714,6 +714,11 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
     });
   };
 
+  // Expose handleSubmit to parent via ref (used by desktop StickyBookingSummary)
+  useImperativeHandle(ref, () => ({
+    submit: handleSubmit,
+  }));
+
   return (
     <div className="py-2">
       <div className="w-full">
@@ -986,6 +991,6 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
       </div>
     </div>
   );
-}
+});
 
 export default UserDetails;

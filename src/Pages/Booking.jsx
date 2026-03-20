@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
@@ -69,6 +69,7 @@ function Booking() {
   const [clientSecret, setClientSecret] = useState(null);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [isTestMode, setIsTestMode] = useState(false);
+  const userDetailsRef = useRef(null);
 
   const goToStep = (step) => {
     setCurrentStep(step);
@@ -392,6 +393,7 @@ function Booking() {
                   transition={{ duration: 0.3 }}
                 >
                   <UserDetails
+                    ref={userDetailsRef}
                     data={bookingData}
                     updateData={updateBooking}
                     onNext={handleUserDetailsSubmit}
@@ -448,8 +450,13 @@ function Booking() {
                   extras={[]}
                   currentStep={currentStep}
                   onGoBack={() => goToStep(currentStep - 1)}
-                  onContinue={() => goToStep(currentStep + 1)}
+                  onContinue={
+                    currentStep === 3
+                      ? () => userDetailsRef.current?.submit()
+                      : () => goToStep(currentStep + 1)
+                  }
                   continueLabel={currentStep === 3 ? "PROCEED TO PAYMENT" : "CONTINUE"}
+                  isLoading={currentStep === 3 ? isLoadingPayment : false}
                   distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
                   hours={bookingData.hours}
                   serviceType={bookingData.serviceType}
