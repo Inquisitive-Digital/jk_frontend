@@ -169,6 +169,7 @@ function HeroSection() {
                                 data={bookingData}
                                 updateData={updateBooking}
                                 onNext={handleHeroSubmit}
+                                isOnHome={true}
                             />
                         )}
                     </motion.div>
@@ -179,13 +180,14 @@ function HeroSection() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.2 }}
-                    className="lg:hidden mt-8"
+                    className="lg:hidden mt-8 pb-8"
                 >
                     {isLoaded && (
                         <Locations
                             data={bookingData}
                             updateData={updateBooking}
                             onNext={handleHeroSubmit}
+                            isOnHome={true}
                         />
                     )}
                 </motion.div>

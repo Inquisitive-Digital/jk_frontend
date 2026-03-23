@@ -578,7 +578,7 @@ const DurationDropdown = ({ value, onChange }) => {
 };
 
 // --- MAIN COMPONENT ---
-function Locations({ data, updateData, onNext }) {
+function Locations({ data, updateData, onNext, isOnHome = false }) {
   const [serviceType, setServiceType] = useState(data.serviceType || "oneway");
   const [activePicker, setActivePicker] = useState(null); // 'date', 'time', 'duration' or null
   const [errors, setErrors] = useState({});
@@ -800,11 +800,15 @@ function Locations({ data, updateData, onNext }) {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border-b border-white/5 gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-lg shadow-inner border border-[var(--color-primary)]/20">
+            {/* <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-lg shadow-inner border border-[var(--color-primary)]/20">
               🇬🇧
-            </span>
+            </span> */}
             <h2 className="text-lg font-bold tracking-widest uppercase text-white">
-              Reservation <span className="text-[var(--color-primary)]">Details</span>
+              {isOnHome ? (
+                <>Book Your <span className="text-[var(--color-primary)]">Ride Now</span></>
+              ) : (
+                <>Reservation <span className="text-[var(--color-primary)]">Details</span></>
+              )}
             </h2>
           </div>
 

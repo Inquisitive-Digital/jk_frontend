@@ -378,7 +378,14 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: -10 }}
                                   transition={{ duration: 0.2 }}
-                                  className={`absolute left-full top-0 ml-1 min-w-[240px] rounded-lg shadow-xl overflow-hidden ${dropdownBg}`}
+                                  className={`absolute left-full top-0 ml-1 min-w-[240px] max-h-[70vh] overflow-y-auto rounded-lg shadow-xl ${dropdownBg}`}
+                                  style={{
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+                                  }}
+                                  onWheel={(e) => {
+                                    e.stopPropagation();
+                                  }}
                                 >
                                   {menuItem.children.map((child) => (
                                     <Link
