@@ -12,14 +12,31 @@ function ServicesSection() {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
 
-    // Fetch real services from the DB
+    // Fetch all services from the DB
     const { data, isLoading } = useQuery({
         queryKey: ['home-services'],
-        queryFn: () => serviceAPI.getAllServices(1, 5),
+        queryFn: async () => {
+            // Fetch all services (no pagination limit)
+            const response = await serviceAPI.getAllServices(1, 100);
+            return response;
+        },
         staleTime: 10 * 60 * 1000,
     });
 
-    const services = data?.services || [];
+    // Get first service from each category
+    const services = React.useMemo(() => {
+        const allServices = data?.services || [];
+        const categoryMap = new Map();
+        
+        allServices.forEach(service => {
+            const category = service.category || service.subtitle || 'Other';
+            if (!categoryMap.has(category)) {
+                categoryMap.set(category, service);
+            }
+        });
+        
+        return Array.from(categoryMap.values());
+    }, [data]);
 
     // Check scroll position
     const checkScroll = () => {
