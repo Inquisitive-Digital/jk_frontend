@@ -29,6 +29,7 @@ import AdminAllPricing from "./Components/Admin/AdminAllPricing";
 import AdminAllLocations from "./Components/Admin/AdminAllLocations";
 import AdminAddLocation from "./Components/Admin/AdminAddLocation";
 import AdminLocationPricing from "./Components/Admin/AdminLocationPricing";
+import EventCalendar from "./Pages/EventCalendar";
 
 // Global Lenis instance (accessible to ScrollToTop and ScrollToTopButton)
 let lenisInstance = null;
@@ -153,6 +154,7 @@ function App() {
         <Route path="/services/:slug" element={<Layout isHeroPage={false}><ServiceWrapper /></Layout>} />
         <Route path="/fleet" element={<Layout isHeroPage={false}><Fleet /></Layout>} />
         <Route path="/fleet/:slug" element={<Layout isHeroPage={false}><FleetDetail /></Layout>} />
+        <Route path="/events/event-calendar" element={<Layout isHeroPage={false}><EventCalendar /></Layout>} />
         <Route path="/events/:slug" element={<Layout isHeroPage={false}><EventWrapper /></Layout>} />
         <Route path="/blog" element={<Layout isHeroPage={false}><Blog /></Layout>} />
         <Route path="/blog/:slug" element={<Layout isHeroPage={false}><BlogWrapper /></Layout>} />
@@ -161,6 +163,7 @@ function App() {
         <Route path="/terms-and-conditions" element={<Layout isHeroPage={false}><TermsAndConditions /></Layout>} />
         <Route path="/privacy-policy" element={<Layout isHeroPage={false}><PrivacyPolicy /></Layout>} />
         <Route path="/gdpr-policy" element={<Layout isHeroPage={false}><GDPRPolicy /></Layout>} />
+        <Route path="/event-calender2" element={<Layout isHeroPage={false}><EventCalendar /></Layout>} />
 
         {/* Admin Routes (no layout wrapper) */}
         <Route path="/login-admin" element={<AdminLogin />} />
