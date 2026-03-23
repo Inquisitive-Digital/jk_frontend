@@ -129,7 +129,9 @@ function Footer() {
               />
             </Link>
             <h3 className="text-lg font-light text-white tracking-wider mb-3">
-              <span className="font-semibold">JK</span> Executive <span className="font-semibold">Chauffeur</span>
+              <span className="font-semibold">JK</span>{' '}
+              <span className="font-semibold">Executive</span>{' '}
+              <span className="font-semibold">Chauffeur</span>
             </h3>
             <p className="text-[13px] leading-relaxed text-white/50 mb-4 max-w-xs">
               London's premier chauffeur service. Experience luxury, reliability, and professionalism with every journey.
