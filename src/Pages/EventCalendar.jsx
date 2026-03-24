@@ -40,10 +40,12 @@ const eventsData = [
     {
         month: 'April',
         events: [
-            { name: "London Marathon", date: "5th April 2026" },
-            { name: "Chelsea Flower Show Preview", date: "18th April 2026" },
-            { name: "Easter Parade London", date: "5th April 2026" },
-            { name: "Grand Prix Monaco", date: "8th April 2026" },
+            { name: "Easter Weekend", date: "3rd - 6th April 2026" },
+            { name: "London Marathon", date: "26th April 2026" },
+            { name: "Grand National", date: "11th April 2026" },
+            { name: "National Wedding Show London", date: "11th - 12th April 2026" },
+            { name: "Vaisakhi Festival London", date: "14th April 2026" },
+            { name: "St George's Day", date: "23rd April 2026" },
         ],
     },
     {

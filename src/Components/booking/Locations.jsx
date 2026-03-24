@@ -790,7 +790,7 @@ function Locations({ data, updateData, onNext, isOnHome = false }) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto font-sans text-slate-200">
+    <div className="max-w-3xl mx-auto font-sans text-slate-200 pb-4 sm:pb-8">
       <style>{customStyles}</style>
 
       <div className="relative rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
@@ -823,7 +823,7 @@ function Locations({ data, updateData, onNext, isOnHome = false }) {
                   : "text-slate-400 hover:text-white"
                   }`}
               >
-                {t === "oneway" ? "Point to Point" : "Hourly"}
+                {t === "oneway" ? "One Way" : "Hourly"}
               </button>
             ))}
           </div>
@@ -970,8 +970,8 @@ function Locations({ data, updateData, onNext, isOnHome = false }) {
           </div>
 
           {/* Footer Assistance */}
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-white/5 text-[11px] text-slate-500 uppercase tracking-tighter">
-            <span>{serviceType === "hourly" ? "Chauffeur at disposal" : "15 Mins free waiting"}</span>
+          <div className="flex flex-col sm:flex-row items-center justify-between sm:justify-between pt-2 border-t border-white/5 text-[11px] text-[#9CA3AF] uppercase ">
+            <span className="text-center sm:text-left">Airport pickup includes 60 minutes free waiting, non-airport pickups include 15 minutes</span>
             <a
               href="tel:+442034759906"
               className="flex items-center gap-2 text-[var(--color-primary)] font-bold mt-2 sm:mt-0 hover:opacity-80 transition-opacity"
