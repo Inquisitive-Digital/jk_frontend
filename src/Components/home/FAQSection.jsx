@@ -117,9 +117,8 @@ export default function FAQSection() {
                   <div
                     key={faq._id || i}
                     // Mobile-first: flex layout, grid on md+ screens
-                    className={`group flex flex-col md:grid md:grid-cols-[72px_1fr] gap-4 md:gap-8 border-t border-b border-white/10 cursor-pointer relative transition-all duration-300 hover:border-[var(--color-primary)]/30 ${
-                      isOpen ? "bg-white/[0.02]" : ""
-                    }`}
+                    className={`group flex flex-col md:grid md:grid-cols-[72px_1fr] gap-4 md:gap-8 border-t border-b border-white/10 cursor-pointer relative transition-all duration-300 hover:border-[var(--color-primary)]/30 ${isOpen ? "bg-white/[0.02]" : ""
+                      }`}
                     onClick={() => toggle(i)}
                     role="button"
                     aria-expanded={isOpen}
@@ -128,11 +127,10 @@ export default function FAQSection() {
                   >
                     {/* Number - Scaled for mobile */}
                     <div
-                      className={`text-3xl md:text-5xl font-bold leading-none pt-6 md:pt-7 transition-colors duration-300 select-none px-4 md:px-0 ${
-                        isOpen
+                      className={`text-3xl md:text-5xl font-bold leading-none pt-6 md:pt-7 transition-colors duration-300 select-none px-4 md:px-0 ${isOpen
                           ? "text-[var(--color-primary)]"
                           : "text-white/10 group-hover:text-[var(--color-primary)]"
-                      }`}
+                        }`}
                     >
                       {String(i + 1).padStart(2, "0")}
                     </div>
@@ -168,11 +166,10 @@ export default function FAQSection() {
 
                       {/* Icon */}
                       <div
-                        className={`absolute right-4 md:right-0 top-6 md:top-7 w-6 h-6 md:w-7 md:h-7 rounded-full border flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
-                          isOpen
+                        className={`absolute right-4 md:right-0 top-6 md:top-7 w-6 h-6 md:w-7 md:h-7 rounded-full border flex items-center justify-center transition-all duration-300 flex-shrink-0 ${isOpen
                             ? "border-[var(--color-primary)] bg-[var(--color-primary)]"
                             : "border-white/20 group-hover:border-[var(--color-primary)] group-hover:bg-[var(--color-primary)]"
-                        }`}
+                          }`}
                       >
                         {isOpen ? (
                           <Minus size={10} strokeWidth={2.5} className="text-black" />
