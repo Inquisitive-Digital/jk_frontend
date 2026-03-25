@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 const Environment = {
     LOCAL_URL: "http://localhost:5000",
     STAGING_URL: "https://jk-frontend-nine.vercel.app",
-    PRODUCTION_URL: "https://lavender-salmon-796541.hostingersite.com",
+    PRODUCTION_URL: "https://www.jkexecutivechauffeurs.com",
 };
 
 const hostname = window.location.hostname;
