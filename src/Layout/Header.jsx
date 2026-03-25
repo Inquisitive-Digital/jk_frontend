@@ -234,27 +234,17 @@ function Header({ isTransparent = false, theme = 'dark' }) {
 
             {/* Right side container */}
             <div className="flex items-center gap-3">
-              {/* Mobile Book Now Button - Hidden on booking page */}
-              <AnimatePresence>
-                {isScrolled && !isBookingPage && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="md:hidden"
-                  >
-                    <Link
-                      to="/booking"
-                      onClick={() => Analytics.trackBookingClick('header_mobile_scrolled_book_now')}
-                      className="px-4 py-2 text-black font-semibold text-xs uppercase tracking-wider rounded transition-all duration-300 whitespace-nowrap"
-                      style={{ backgroundColor: 'var(--color-primary)' }}
-                    >
-                      Book Now
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Mobile Book Now Button - Always visible on non-booking pages */}
+              {!isBookingPage && (
+                <Link
+                  to="/booking"
+                  onClick={() => Analytics.trackBookingClick('header_mobile_scrolled_book_now')}
+                  className="md:hidden px-4 py-2 text-black font-semibold text-xs uppercase tracking-wider rounded transition-all duration-300 whitespace-nowrap"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  Book Now
+                </Link>
+              )}
 
               {/* Book Now Button (Desktop only) - Hidden on booking page */}
               {!isBookingPage && (
