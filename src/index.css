@@ -281,3 +281,17 @@ html {
   scrollbar-width: thin;
   scrollbar-color: #D7B75E rgba(255, 255, 255, 0.03);
 }
+
+/* Spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

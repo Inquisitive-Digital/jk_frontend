@@ -498,9 +498,9 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   );
 };
 
-// Duration options: 30 min to 24h in 30-min steps
+// Duration options: 3 hours to 24h in 30-min steps
 const DURATION_OPTIONS = [];
-for (let mins = 30; mins <= 1440; mins += 30) {
+for (let mins = 180; mins <= 1440; mins += 30) {
   const h = Math.floor(mins / 60);
   const m = mins % 60;
   let label;
@@ -704,7 +704,7 @@ function Locations({ data, updateData, onNext, isOnHome = false }) {
     if (type === "hourly") {
       updateData("dropoff", "");
       if (dropoffInputRef.current) dropoffInputRef.current.value = "";
-      if (!data.hours) updateData("hours", 2);
+      if (!data.hours || data.hours < 3) updateData("hours", 3);
     }
   };
 

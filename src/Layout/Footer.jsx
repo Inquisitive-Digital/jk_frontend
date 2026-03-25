@@ -39,7 +39,7 @@ const socialLinks = [
   {
     name: 'Facebook',
     icon: FacebookIcon,
-    href: 'https://www.facebook.com/jkexecutivechauffeurs',
+    href: 'https://www.facebook.com/profile.php?id=61581449520001',
     hoverColor: '#1877F2',
     hoverBg: 'rgba(24, 119, 242, 0.15)',
   },
@@ -124,14 +124,12 @@ function Footer() {
             <Link to="/" className="inline-block mb-5">
               <img
                 src={JkLogo}
-                alt="JK Executive Chauffeurs"
+                alt="JK Executive Chauffeurs logo"
                 className="w-20 h-16 object-contain"
               />
             </Link>
             <h3 className="text-lg font-light text-white tracking-wider mb-3">
-              <span className="font-semibold">JK</span>{' '}
-              <span className="font-semibold">Executive</span>{' '}
-              <span className="font-semibold">Chauffeur</span>
+              <span className="font-semibold">JK Executive Chauffeurs</span>
             </h3>
             <p className="text-[13px] leading-relaxed text-white/50 mb-4 max-w-xs">
               London's premier chauffeur service. Experience luxury, reliability, and professionalism with every journey.
