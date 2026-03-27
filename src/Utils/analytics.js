@@ -57,8 +57,11 @@ class AnalyticsWrapper {
     /**
      * Returns true when running on a real/production host.
      * Tracking is intentionally skipped on localhost / 127.0.0.1
+     * 
+     * TEMP: Set to always return true for testing
      */
     isProduction() {
+        // return true; // ← Uncomment this line to test on localhost
         const hostname = window.location.hostname;
         return (
             hostname !== "localhost" &&
@@ -111,14 +114,8 @@ class AnalyticsWrapper {
 
             // ── Google Analytics 4 (gtag.js) ──
             const gaId = import.meta.env.VITE_GA_ID || "G-ECP57JQYZD";
-            
-            // GA4 gtag.js Script
-            const gtagScript = document.createElement("script");
-            gtagScript.async = true;
-            gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-            document.head.appendChild(gtagScript);
 
-            // GA4 config script
+            // GA4 config script (must be loaded BEFORE gtag.js)
             const configScript = document.createElement("script");
             configScript.innerHTML = `
         window.dataLayer = window.dataLayer || [];
@@ -127,6 +124,12 @@ class AnalyticsWrapper {
         gtag('config', '${gaId}');
       `;
             document.head.appendChild(configScript);
+
+            // GA4 gtag.js Script (load after config)
+            const gtagScript = document.createElement("script");
+            gtagScript.async = true;
+            gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+            document.head.appendChild(gtagScript);
 
             // ── Meta Pixel <script> ──
             const pixelId = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
