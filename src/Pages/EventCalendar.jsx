@@ -1,5 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+
+// April 2026 events with blog slugs for linking
+const april2026Events = [
+    { name: "Easter Weekend", date: "3rd - 6th April 2026", slug: "easter-weekend-chauffeur-service-2026" },
+    { name: "Grand National", date: "11th April 2026", slug: "grand-national-chauffeur-service-2026" },
+    { name: "National Wedding Show London", date: "11th - 12th April 2026", slug: "national-wedding-show-chauffeur-service-2026" },
+    { name: "Vaisakhi Festival London", date: "14th April 2026", slug: "vaisakhi-festival-chauffeur-service-2026" },
+    { name: "St George's Day", date: "23rd April 2026", slug: "st-georges-day-chauffeur-service-2026" },
+    { name: "London Marathon", date: "26th April 2026", slug: "london-marathon-chauffeur-service-2026" },
+];
 
 // Complete event data from January to December 2026
 const eventsData = [
@@ -39,14 +50,7 @@ const eventsData = [
     },
     {
         month: 'April',
-        events: [
-            { name: "Easter Weekend", date: "3rd - 6th April 2026" },
-            { name: "London Marathon", date: "26th April 2026" },
-            { name: "Grand National", date: "11th April 2026" },
-            { name: "National Wedding Show London", date: "11th - 12th April 2026" },
-            { name: "Vaisakhi Festival London", date: "14th April 2026" },
-            { name: "St George's Day", date: "23rd April 2026" },
-        ],
+        events: april2026Events,
     },
     {
         month: 'May',
@@ -190,6 +194,8 @@ function EventCalendar() {
 }
 
 function EventCard({ monthData, itemVars }) {
+    const isApril = monthData.month === 'April';
+
     return (
         <div className="relative group">
             {/* Gradient Border Container */}
@@ -209,30 +215,43 @@ function EventCard({ monthData, itemVars }) {
 
                 {/* Event List - Show all events */}
                 <div className="space-y-2.5">
-                    {monthData.events.map((event, eventIndex) => (
-                        <motion.div
-                            key={eventIndex}
-                            variants={itemVars}
-                        >
+                    {monthData.events.map((event, eventIndex) => {
+                        const EventContent = (
                             <div className="text-center">
-                                <h3 className="text-zinc-100 text-[11px] md:text-xs font-medium leading-snug">
+                                <h3 className={`text-[11px] md:text-xs font-medium leading-snug ${isApril ? 'text-amber-400 hover:text-amber-300' : 'text-zinc-100'}`}>
                                     {event.name}
                                 </h3>
                                 <p className="text-amber-500/70 text-[9px] md:text-[10px] mt-0.5 font-light tracking-wide">
                                     {event.date}
                                 </p>
                             </div>
+                        );
 
-                            {/* Divider (Except last item) */}
-                            {eventIndex !== monthData.events.length - 1 && (
-                                <div className="flex items-center justify-center mt-2">
-                                    <div className="h-[0.5px] w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-                                    <div className="mx-1.5 w-1 h-1 rounded-full border border-amber-500/30 rotate-45 flex-shrink-0" />
-                                    <div className="h-[0.5px] w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-                                </div>
-                            )}
-                        </motion.div>
-                    ))}
+                        return (
+                            <motion.div
+                                key={eventIndex}
+                                variants={itemVars}
+                                className={isApril ? 'cursor-pointer' : ''}
+                            >
+                                {isApril && event.slug ? (
+                                    <Link to={`/blog/${event.slug}`}>
+                                        {EventContent}
+                                    </Link>
+                                ) : (
+                                    EventContent
+                                )}
+
+                                {/* Divider (Except last item) */}
+                                {eventIndex !== monthData.events.length - 1 && (
+                                    <div className="flex items-center justify-center mt-2">
+                                        <div className="h-[0.5px] w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
+                                        <div className="mx-1.5 w-1 h-1 rounded-full border border-amber-500/30 rotate-45 flex-shrink-0" />
+                                        <div className="h-[0.5px] w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
+                                    </div>
+                                )}
+                            </motion.div>
+                        );
+                    })}
                 </div>
 
                 {/* Glossy Overlay */}
