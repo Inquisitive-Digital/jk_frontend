@@ -76,6 +76,7 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
     }
   }, [journeyInfo]);
 
+
   const filteredVehicles = useMemo(
     () =>
       vehicles.map((v) => ({
@@ -94,6 +95,15 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
       ),
     [filteredVehicles]
   );
+
+  // Auto-select the first available (non-disabled) vehicle when the list loads
+  useEffect(() => {
+    if (sortedVehicles.length > 0 && !selectedVehicle) {
+      const firstAvailable = sortedVehicles.find((v) => !v.isDisabled) || sortedVehicles[0];
+      setSelectedVehicle(firstAvailable);
+      updateData("selectedVehicle", firstAvailable);
+    }
+  }, [sortedVehicles]);
 
   const handleSelectVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);

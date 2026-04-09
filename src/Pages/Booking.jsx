@@ -212,8 +212,8 @@ function Booking() {
         }
       }
 
-      // Create payment intent and go to payment
-      await createPaymentIntentAndProceed();
+      // Create payment intent and go to payment — pass formData so Stripe gets fresh customer info
+      await createPaymentIntentAndProceed(existingBookingId, formData);
       return;
     }
 
@@ -242,8 +242,8 @@ function Booking() {
 
       console.log("Lead saved with ID:", savedBookingId);
 
-      // Step 2: Create payment intent and proceed
-      await createPaymentIntentAndProceed(savedBookingId);
+      // Step 2: Create payment intent and proceed — pass formData so Stripe gets fresh customer info
+      await createPaymentIntentAndProceed(savedBookingId, formData);
     } catch (error) {
       console.error("Error creating lead:", error);
       alert("Something went wrong. Please try again.");
@@ -253,7 +253,8 @@ function Booking() {
   };
 
   // Helper function to create payment intent and navigate to payment step
-  const createPaymentIntentAndProceed = async (bookingId = null) => {
+  // formData is passed directly from UserDetails so we don't rely on potentially-stale React state
+  const createPaymentIntentAndProceed = async (bookingId = null, formData = null) => {
     const totalAmount = bookingData.selectedVehicle?.pricing?.totalPrice;
     const savedBookingId = bookingId || bookingData.savedBookingId;
 
@@ -267,11 +268,40 @@ function Booking() {
       return;
     }
 
+    // Merge fresh formData into bookingData so Stripe gets up-to-date customer info.
+    // React state (bookingData) may still be stale at this point because updateData() is async.
+    const mergedBookingData = formData
+      ? {
+          ...bookingData,
+          passengerDetails: formData.passengerDetails || bookingData.passengerDetails,
+          specialInstructions: formData.specialInstructions ?? bookingData.specialInstructions,
+          isAirportPickup: formData.flightDetails?.isAirportPickup || bookingData.isAirportPickup,
+          isBookingForSomeoneElse:
+            formData.passengerDetails?.isBookingForSomeoneElse ||
+            bookingData.isBookingForSomeoneElse,
+          guestDetails: formData.passengerDetails?.isBookingForSomeoneElse
+            ? {
+                firstName: formData.passengerDetails?.guestFirstName,
+                lastName: formData.passengerDetails?.guestLastName,
+                email: formData.passengerDetails?.guestEmail,
+                countryCode: formData.passengerDetails?.guestCountryCode,
+                phone: formData.passengerDetails?.guestPhone,
+              }
+            : bookingData.guestDetails,
+          flightDetails: formData.flightDetails?.isAirportPickup
+            ? {
+                flightNumber: formData.flightDetails?.flightNumber,
+                nameBoard: formData.flightDetails?.nameBoard,
+              }
+            : bookingData.flightDetails,
+        }
+      : bookingData;
+
     try {
       const response = await paymentAPI.createPaymentIntent({
         amount: totalAmount,
         currency: "gbp",
-        bookingData: bookingData,
+        bookingData: mergedBookingData,
         bookingId: savedBookingId,
       });
 

@@ -98,7 +98,7 @@ function TawkIntegration() {
 // Component to add canonical URL on every page
 function CanonicalUpdater() {
   const location = useLocation();
-  const baseUrl = 'https://jkexecutivechauffeurs.com';
+  const baseUrl = 'https://www.jkexecutivechauffeurs.com';
 
   return (
     <Helmet>

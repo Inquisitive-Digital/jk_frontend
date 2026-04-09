@@ -1,15 +1,5 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Allow: /
-
-# Block all admin/backend routes from indexing
-Disallow:
-Disallow: /login-admin
-Disallow: /admin-dashboard
-Disallow: /admin/
 Disallow: /*tag
 Disallow: /*category
-Disallow: /*?
 Disallow: /*feed
-
-Sitemap: https://jkexecutivechauffeurs.com/sitemap.xml
+https://www.jkexecutivechauffeurs.com/sitemap.xml
