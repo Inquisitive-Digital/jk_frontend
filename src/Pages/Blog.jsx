@@ -117,6 +117,8 @@ function Blog() {
                         {JSON.stringify(blogFeedSchema)}
                     </script>
                 )}
+                <title>Chauffeur Service Blog | JK Executive Chauffeurs</title>
+                <meta name="description" content="Expert tips, travel guides & news from JK Executive Chauffeurs. Luxury travel in London made easy. Explore our latest chauffeur service articles." />
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             {/* Hero Section */}

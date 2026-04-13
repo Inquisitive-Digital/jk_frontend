@@ -6,6 +6,7 @@ import {
     Car, Award, Star, CheckCircle, AlertCircle
 } from 'lucide-react';
 import { contactAPI } from '../Utils/api';
+import { Helmet } from 'react-helmet-async';
 
 // ─── Validators ────────────────────────────────────────────────────────────────
 const nameRegex = /^[A-Za-z\s'-]{2,}$/;
@@ -160,6 +161,12 @@ function ContactUs() {
     };
 
     return (
+
+        <>
+        <Helmet>
+            <title>Contact Us | JK Executive Chauffeurs London</title>
+            <meta name="description" content="Get in touch with JK Executive Chauffeurs. Call +44 203 475 9906, email or book online. Available 24/7 for luxury chauffeur service in London." />
+        </Helmet>
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
 
             {/* ── Hero ────────────────────────────────────────────────────── */}
@@ -535,6 +542,8 @@ function ContactUs() {
                 </div>
             </section>
         </main>
+        </>
+        
     );
 }
 

@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /*tag
 Disallow: /*category
 Disallow: /*feed
-https://www.jkexecutivechauffeurs.com/sitemap.xml
+sitemap: https://www.jkexecutivechauffeurs.com/sitemap.xml

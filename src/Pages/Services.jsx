@@ -109,6 +109,7 @@ function Services() {
         })),
     };
 
+
     return (
         <>
             <Helmet>
@@ -120,6 +121,11 @@ function Services() {
                         {JSON.stringify(itemListSchema)}
                     </script>
                 )}
+
+                <title>Chauffeur Services in London – Executive Travel Solutions | JK Executive</title>
+                <meta name="description" content="Explore all our premium chauffeur services in London — airport transfers, corporate travel, weddings, events & more. Book online or call us today." />
+
+
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             {/* Hero Banner */}

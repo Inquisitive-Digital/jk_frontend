@@ -95,6 +95,8 @@ function Fleet() {
                         {JSON.stringify(itemListSchema)}
                     </script>
                 )}
+                <title>Luxury Chauffeur Fleet in London – Explore Premium Vehicles | JK Executive</title>
+                <meta name="description" content="Browse our premium chauffeur fleet in London — Mercedes S/E/V Class, Rolls Royce, Range Rover & EV options. Find your perfect vehicle today." />
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             {/* Hero Banner */}

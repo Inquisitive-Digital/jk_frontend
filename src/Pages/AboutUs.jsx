@@ -155,6 +155,9 @@ function AboutUs() {
                 <script type="application/ld+json">
                     {JSON.stringify(localBusinessSchema)}
                 </script>
+                
+                <title>About Us | JK Executive Chauffeurs London</title>
+                <meta name="description" content="Learn about JK Executive Chauffeurs — London's trusted luxury chauffeur company. 120+ professional chauffeurs, premium fleet & 5-star service." />
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh', paddingTop: '100px' }}>
 
