@@ -223,7 +223,7 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
   return (
     <div
       ref={wrapperRef}
-      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-5"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-[10000] p-5"
       style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
     >
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
@@ -414,7 +414,7 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   return (
     <div
       ref={wrapperRef}
-      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-5"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-[10000] p-5"
       style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
     >
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>

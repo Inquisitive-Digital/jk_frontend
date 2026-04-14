@@ -83,6 +83,8 @@ function ServiceWrapper() {
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             <Helmet>
+                <title>{service.meta_title || service.title}</title>
+                <meta name="description" content={service.meta_description || service.description} />
                 <script type="application/ld+json">
                     {JSON.stringify(breadcrumbSchema)}
                 </script>
