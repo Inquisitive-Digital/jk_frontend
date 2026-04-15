@@ -189,7 +189,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 ${isHomePage && !isScrolled ? 'z-[40]' : 'z-[9999]'} transition-all duration-500 ${headerBg}`}
+        className={`fixed top-0 left-0 right-0 ${isHomePage && !isScrolled && !activeDropdown ? 'z-[40]' : 'z-[9999]'} transition-all duration-500 ${headerBg}`}
       >
         {/* Top Bar */}
         <div className="max-w-7xl mx-auto px-4 md:px-8">
