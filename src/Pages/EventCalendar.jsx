@@ -55,11 +55,15 @@ const eventsData = [
     {
         month: 'May',
         events: [
-            { name: "FA Cup Final - Women's", date: "May 5 (Tue) • Wembley Stadium" },
-            { name: "FA Cup Final - Men's", date: "May 9 (Sat) • Wembley Stadium" },
-            { name: "Hackney Half Marathon", date: "May TBC • East London" },
-            { name: "RHS Chelsea Flower Show", date: "May 19–23 • Royal Hospital Chelsea" },
-            { name: "Chelsea in Bloom", date: "May 18–24 • Chelsea & Belgravia" },
+            { name: "Badminton Horse Trials", date: "6th – 10th May 2026" },
+            { name: "Royal Windsor Horse Show", date: "14th – 17th May 2026" },
+            { name: "FA Cup Final", date: "16th May 2026 • Wembley Stadium" },
+            { name: "Glyndebourne Festival Opera", date: "16th May – 23rd August 2026" },
+            { name: "RHS Chelsea Flower Show", date: "19th – 23rd May 2026 • Royal Hospital Chelsea" },
+            { name: "Hay Festival", date: "21st – 30th May 2026" },
+            { name: "Garsington Opera", date: "28th May – 19th July 2026" },
+            { name: "Nevill Holt Opera – Summer Festival", date: "30th May – 21st June 2026" },
+            { name: "UEFA Champions League Final", date: "30th May 2026" },
         ],
     },
     {

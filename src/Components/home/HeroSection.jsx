@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useJsApiLoader } from '@react-google-maps/api';
-import heroImage from '../../assets/heroImage.png';
+// import heroImage from '../../assets/heroImage.png';
+// Import WebP version after you convert it (heroImage.webp)
+import heroImageWebp from '../../assets/heroImage.webp';
 import Analytics from '../../Utils/analytics';
 import { useBooking } from '../../Context/BookingContext';
 import Locations from '../booking/Locations';
@@ -47,11 +49,18 @@ function HeroSection() {
         <section className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
             {/* Image Background */}
             <div className="absolute inset-0 z-0">
-                <img
-                    src={heroImage}
-                    alt="Hero background"
-                    className="w-full h-full object-cover"
-                />
+                <picture>
+                    {/* WebP format loading */}
+                    <source srcSet={heroImageWebp} type="image/webp" />
+                    <img
+                        src={heroImageWebp}
+                        alt="Luxury Chauffeur Service Hero Background"
+                        className="w-full h-full object-cover"
+                        fetchPriority="high"
+                        loading="eager"
+                        decoding="async"
+                    />
+                </picture>
                 {/* Dark Overlay */}
                 <div className="absolute inset-0 bg-black/60" />
                 {/* Gradient Overlay for depth */}
@@ -88,16 +97,25 @@ function HeroSection() {
                                 <span className="block mb-1">Chauffeurs for</span>
                                 {/* Rotating Text - indented to the right */}
                                 <span className="block pl-8 md:pl-16 lg:pl-24">
-                                    <span className="relative inline-block h-[1.4em] overflow-hidden">
-                                        <AnimatePresence mode="wait">
+                                    <span
+                                        className="relative inline-block"
+                                        style={{ height: '1.4em', minWidth: '12ch' }}
+                                    >
+                                        <AnimatePresence mode="popLayout">
                                             <motion.span
                                                 key={currentTextIndex}
-                                                initial={{ y: '100%', opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: '-100%', opacity: 0 }}
-                                                transition={{ duration: 0.5, ease: 'easeInOut' }}
-                                                className="block font-semibold"
-                                                style={{ color: 'var(--color-primary)' }}
+                                                initial={{ opacity: 0, y: 15 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -15 }}
+                                                transition={{
+                                                    duration: 0.5,
+                                                    ease: [0.33, 1, 0.68, 1] // Premium cubic-bezier easing (feels elegant)
+                                                }}
+                                                className="absolute inset-0 font-semibold whitespace-nowrap"
+                                                style={{
+                                                    color: 'var(--color-primary)',
+                                                    willChange: 'transform, opacity',
+                                                }}
                                             >
                                                 {ROTATING_TEXTS[currentTextIndex]}
                                             </motion.span>
