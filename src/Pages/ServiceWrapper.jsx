@@ -91,6 +91,11 @@ function ServiceWrapper() {
                 <script type="application/ld+json">
                     {JSON.stringify(serviceSchema)}
                 </script>
+                {service.script && (
+                    <script type="application/ld+json">
+                        {service.script}
+                    </script>
+                )}
             </Helmet>
             {/* Hero Image Section */}
             <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
