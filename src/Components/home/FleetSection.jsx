@@ -161,7 +161,7 @@ function FleetSection() {
         {!isLoading && fleetItems.length > 0 && (
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
+            className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-proximity pb-4 -mx-4 px-4 md:mx-0 md:px-0"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -181,89 +181,86 @@ function FleetSection() {
                 >
                   <Link to={`/fleet/${vehicle.slug}`} className="block h-full">
                     <div className="group cursor-pointer h-full flex flex-col transition-transform duration-500 hover:-translate-y-2">
-                      {/* Card Container */}
+                      {/* Image Container */}
+                      <div className="relative aspect-[16/10] rounded-t-xl overflow-hidden flex-shrink-0">
+                        <img
+                          src={imageUrl}
+                          alt={vehicle.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/400x250?text=Vehicle";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
+                      </div>
+
+                      {/* Content - Bottom section */}
                       <div
-                        className="relative rounded-2xl overflow-hidden h-full flex flex-col"
+                        className="p-4 flex flex-col flex-grow rounded-b-xl"
                         style={{
                           backgroundColor: "rgba(255,255,255,0.05)",
                         }}
                       >
-                        {/* Image Container */}
-                        <div className="relative aspect-[16/10] overflow-hidden flex-shrink-0">
-                          <img
-                            src={imageUrl}
-                            alt={vehicle.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            loading="lazy"
-                            onError={(e) => {
-                              e.target.src =
-                                "https://via.placeholder.com/400x250?text=Vehicle";
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
+                        {/* Subtitle */}
+                        <p
+                          className="text-xs font-medium uppercase tracking-wider mb-1"
+                          style={{ color: "var(--color-primary)" }}
+                        >
+                          {vehicle.subtitle || "Luxury Vehicle"}
+                        </p>
+
+                        {/* Vehicle Name */}
+                        <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors mb-2 line-clamp-1">
+                          {vehicle.title}
+                        </h3>
+
+                        {/* Capacity badges */}
+                        <div className="flex items-center gap-4 text-white/50 text-sm mb-2 flex-grow">
+                          {vehicle.passengers > 0 && (
+                            <div className="flex items-center gap-1.5">
+                              <Users className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }} />
+                              <span>{vehicle.passengers}</span>
+                            </div>
+                          )}
+                          {vehicle.luggage > 0 && (
+                            <div className="flex items-center gap-1.5">
+                              <Briefcase className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }} />
+                              <span>{vehicle.luggage}</span>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Content - Bottom section */}
-                        <div className="p-4 space-y-2 flex flex-col flex-grow">
-                          {/* Subtitle */}
-                          <p
-                            className="text-xs font-medium uppercase tracking-wider"
-                            style={{ color: "var(--color-primary)" }}
-                          >
-                            {vehicle.subtitle || "Luxury Vehicle"}
-                          </p>
-
-                          {/* Vehicle Name */}
-                          <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors">
-                            {vehicle.title}
-                          </h3>
-
-                          {/* Capacity badges */}
-                          <div className="flex items-center gap-4 text-white/50 text-sm">
-                            {vehicle.passengers > 0 && (
-                              <div className="flex items-center gap-1.5">
-                                <Users className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }} />
-                                <span>{vehicle.passengers}</span>
-                              </div>
-                            )}
-                            {vehicle.luggage > 0 && (
-                              <div className="flex items-center gap-1.5">
-                                <Briefcase className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }} />
-                                <span>{vehicle.luggage}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* View / Book Link */}
-                          <div className="flex items-center justify-between pt-2 mt-auto">
-                            <div className="inline-flex items-center gap-2 text-sm font-medium group/link">
-                              <span
-                                className="group-hover/link:underline transition-all"
-                                style={{ color: "var(--color-primary)" }}
-                              >
-                                VIEW DETAILS
-                              </span>
-                              <ArrowRight
-                                className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
-                                style={{ color: "var(--color-primary)" }}
-                              />
-                            </div>
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                Analytics.trackBookingClick('fleet_section_book_now', { vehicle_name: vehicle.title });
-                                navigate("/booking");
-                              }}
-                              className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300"
-                              style={{
-                                backgroundColor: "var(--color-primary)",
-                                color: "var(--color-dark)",
-                              }}
+                        {/* View / Book Link */}
+                        <div className="flex items-center justify-between pt-3 mt-auto">
+                          <div className="inline-flex items-center gap-2 text-sm font-medium group/link">
+                            <span
+                              className="group-hover/link:underline transition-all"
+                              style={{ color: "var(--color-primary)" }}
                             >
-                              Book Now
-                            </button>
+                              VIEW DETAILS
+                            </span>
+                            <ArrowRight
+                              className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
+                              style={{ color: "var(--color-primary)" }}
+                            />
                           </div>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              Analytics.trackBookingClick('fleet_section_book_now', { vehicle_name: vehicle.title });
+                              navigate("/booking");
+                            }}
+                            className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 hover:opacity-90"
+                            style={{
+                              backgroundColor: "var(--color-primary)",
+                              color: "var(--color-dark)",
+                            }}
+                          >
+                            Book Now
+                          </button>
                         </div>
                       </div>
                     </div>

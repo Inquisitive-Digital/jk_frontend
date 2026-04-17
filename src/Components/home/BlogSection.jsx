@@ -84,7 +84,7 @@ function BlogSection() {
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="text-2xl md:text-3xl lg:text-4xl font-light text-white"
                         >
-                            LATEST <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>BLOGS</span>
+                            LATEST <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>UPDATES</span>
                         </motion.h2>
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
@@ -152,11 +152,10 @@ function BlogSection() {
                 {!isLoading && blogs.length > 0 && (
                     <div
                         ref={scrollRef}
-                        className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
+                        className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-proximity pb-4 -mx-4 px-4 md:mx-0 md:px-0"
                         style={{
                             scrollbarWidth: 'none',
                             msOverflowStyle: 'none',
-                            touchAction: 'pan-x',
                         }}
                     >
                         {blogs.map((blog, index) => (
