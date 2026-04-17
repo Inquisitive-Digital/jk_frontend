@@ -181,13 +181,6 @@ function BlogSection() {
                                                 }}
                                             />
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
-
-                                            {/* Category Tag */}
-                                            {blog.category && (
-                                                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-white border border-white/10">
-                                                    {blog.category}
-                                                </div>
-                                            )}
                                         </div>
 
                                         {/* Content */}
