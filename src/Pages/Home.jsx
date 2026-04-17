@@ -6,6 +6,7 @@ import FleetSection from '../Components/home/FleetSection';
 import WhySetsUsApart from '../Components/home/WhySetsUsApart';
 import TestimonialsSection from '../Components/home/TestimonialsSection';
 import FAQSection from '../Components/home/FAQSection';
+import BlogSection from '../Components/home/BlogSection';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -94,6 +95,7 @@ function Home() {
                 <WhySetsUsApart />
                 <TestimonialsSection />
                 <FleetSection />
+                <BlogSection />
                 <FAQSection />
             </main>
         </>
@@ -101,3 +103,4 @@ function Home() {
 }
 
 export default Home;
+

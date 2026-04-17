@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { FileText, ArrowLeft, Scale, Shield, Clock, CreditCard, AlertTriangle, Car } from 'lucide-react';
 
 const sections = [
@@ -215,6 +216,10 @@ const sections = [
 function TermsAndConditions() {
     return (
         <main style={{ backgroundColor: '#0e0e10', minHeight: '100vh' }}>
+            <Helmet>
+                <title>Terms and Conditions JK Executive Chauffeurs Legal</title>
+                <meta name="description" content="Read the Terms and Conditions of JK Executive Chauffeurs. Understand our booking policies, cancellations, payments, and passenger conduct rules." />
+            </Helmet>
             {/* Hero */}
             <section className="relative overflow-hidden" style={{ paddingTop: '140px', paddingBottom: '50px' }}>
                 <div className="absolute inset-0 pointer-events-none">

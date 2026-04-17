@@ -1,44 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ArrowRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { serviceAPI, getImageUrl } from '../../Utils/api';
+import { blogAPI, getImageUrl } from '../../Utils/api';
 import ServiceCardSkeleton from '../extras/ServiceCardSkeleton';
-import ServicesGhostCard from '../extras/ServicesGhostCard';
 
-function ServicesSection() {
+function BlogSection() {
     const scrollRef = useRef(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
 
-    // Fetch all services from the DB
-    const { data, isLoading } = useQuery({
-        queryKey: ['home-services'],
-        queryFn: async () => {
-            // Fetch all services (no pagination limit)
-            const response = await serviceAPI.getAllServices(1, 100);
-            return response;
-        },
+    // Fetch first 3 blogs
+    const { data: blogResponse, isLoading } = useQuery({
+        queryKey: ['home-blogs'],
+        queryFn: () => blogAPI.getAll(1, 3),
         staleTime: 10 * 60 * 1000,
     });
 
-    // Get first service from each category
-    const services = React.useMemo(() => {
-        const allServices = data?.services || [];
-        const categoryMap = new Map();
+    const blogs = blogResponse?.blogs || [];
 
-        allServices.forEach(service => {
-            const category = service.category || service.subtitle || 'Other';
-            if (!categoryMap.has(category)) {
-                categoryMap.set(category, service);
-            }
-        });
-
-        return Array.from(categoryMap.values());
-    }, [data]);
-
-    // Check scroll position
+    // Check scroll position for mobile/carousel
     const checkScroll = () => {
         if (scrollRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -54,19 +36,29 @@ function ServicesSection() {
             scrollEl.addEventListener('scroll', checkScroll);
             return () => scrollEl.removeEventListener('scroll', checkScroll);
         }
-    }, [services.length]);
+    }, [blogs.length]);
 
     // Scroll by cards
     const scroll = (direction) => {
         if (scrollRef.current) {
-            const cardWidth = scrollRef.current.querySelector('.service-card')?.offsetWidth || 400;
+            const cardWidth = scrollRef.current.querySelector('.blog-card')?.offsetWidth || 400;
             const gap = 24;
-            const scrollAmount = (cardWidth + gap) * 2;
+            const scrollAmount = (cardWidth + gap);
             scrollRef.current.scrollBy({
                 left: direction === 'left' ? -scrollAmount : scrollAmount,
                 behavior: 'smooth',
             });
         }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
     };
 
     return (
@@ -83,7 +75,7 @@ function ServicesSection() {
                             className="text-sm font-medium tracking-[0.2em] uppercase mb-3"
                             style={{ color: 'var(--color-primary)' }}
                         >
-                            What We Offer
+                            Insights & News
                         </motion.p>
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
@@ -92,7 +84,7 @@ function ServicesSection() {
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="text-2xl md:text-3xl lg:text-4xl font-light text-white"
                         >
-                            OUR <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>SERVICES</span>
+                            LATEST <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>UPDATES</span>
                         </motion.h2>
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
@@ -101,44 +93,53 @@ function ServicesSection() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="text-white/60 mt-3 max-w-xl"
                         >
-                            Tailor made travel solutions just for you
+                            Stay updated with our latest travels and luxury chauffeur insights
                         </motion.p>
                     </div>
 
-                    {/* Navigation Arrows - Desktop Only */}
+                    {/* Navigation Arrows - Desktop Only (if more than 3) */}
                     <div className="hidden md:flex items-center gap-3">
-                        <button
-                            onClick={() => scroll('left')}
-                            disabled={!canScrollLeft}
-                            className="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300"
-                            style={{
-                                borderColor: canScrollLeft ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
-                                color: canScrollLeft ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)',
-                                cursor: canScrollLeft ? 'pointer' : 'not-allowed',
-                                backgroundColor: 'transparent'
-                            }}
-                            aria-label="Previous services"
+                        <Link
+                            to="/blog"
+                            className="flex items-center gap-2 text-sm font-medium mr-4 hover:underline transition-all"
+                            style={{ color: 'var(--color-primary)' }}
                         >
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={() => scroll('right')}
-                            disabled={!canScrollRight}
-                            className="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300"
-                            style={{
-                                borderColor: canScrollRight ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
-                                color: canScrollRight ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)',
-                                cursor: canScrollRight ? 'pointer' : 'not-allowed',
-                                backgroundColor: 'transparent'
-                            }}
-                            aria-label="Next services"
-                        >
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
+                            VIEW ALL <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        {blogs.length > 3 && (
+                            <>
+                                <button
+                                    onClick={() => scroll('left')}
+                                    disabled={!canScrollLeft}
+                                    className="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                                    style={{
+                                        borderColor: canScrollLeft ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
+                                        color: canScrollLeft ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)',
+                                        cursor: canScrollLeft ? 'pointer' : 'not-allowed',
+                                        backgroundColor: 'transparent'
+                                    }}
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={() => scroll('right')}
+                                    disabled={!canScrollRight}
+                                    className="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                                    style={{
+                                        borderColor: canScrollRight ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
+                                        color: canScrollRight ? 'var(--color-primary)' : 'rgba(255,255,255,0.3)',
+                                        cursor: canScrollRight ? 'pointer' : 'not-allowed',
+                                        backgroundColor: 'transparent'
+                                    }}
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                {/* Skeleton Loading State - 3 Cards */}
+                {/* Loading State */}
                 {isLoading && (
                     <div className="flex gap-6 overflow-x-hidden pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                         {[0, 1, 2].map((i) => (
@@ -147,8 +148,8 @@ function ServicesSection() {
                     </div>
                 )}
 
-                {/* Services Carousel */}
-                {!isLoading && services.length > 0 && (
+                {/* Blogs Grid/Carousel */}
+                {!isLoading && blogs.length > 0 && (
                     <div
                         ref={scrollRef}
                         className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-proximity pb-4 -mx-4 px-4 md:mx-0 md:px-0"
@@ -157,53 +158,56 @@ function ServicesSection() {
                             msOverflowStyle: 'none',
                         }}
                     >
-                        {services.map((service, index) => (
+                        {blogs.map((blog, index) => (
                             <motion.div
-                                key={service._id}
+                                key={blog._id}
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="service-card flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(33.333%-16px)] snap-center"
+                                className="blog-card flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[calc(33.333%-16px)] snap-center"
                             >
-                                <Link to={`/services/${service.slug}`} className="block h-full">
+                                <Link to={`/blog/${blog.slug}`} className="block h-full">
                                     <div className="group cursor-pointer h-full flex flex-col transition-transform duration-500 hover:-translate-y-2">
                                         {/* Image Container */}
                                         <div className="relative aspect-[16/10] rounded-t-xl overflow-hidden flex-shrink-0">
                                             <img
-                                                src={getImageUrl(service.image?.url)}
-                                                alt={service.title}
+                                                src={getImageUrl(blog.heroImage?.url || blog.heroImageUrl)}
+                                                alt={blog.title}
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 loading="lazy"
+                                                onError={(e) => {
+                                                    e.target.src = 'https://via.placeholder.com/600x400?text=JK+Executive+Blog';
+                                                }}
                                             />
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
                                         </div>
 
                                         {/* Content */}
                                         <div
-                                            className="p-4 rounded-b-xl flex flex-col flex-grow"
+                                            className="p-5 rounded-b-xl flex flex-col flex-grow"
                                             style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
                                         >
-                                            <p
-                                                className="text-xs font-medium uppercase tracking-wider mb-1"
-                                                style={{ color: 'var(--color-primary)' }}
-                                            >
-                                                {service.category || service.subtitle}
-                                            </p>
-                                            <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors mb-2 line-clamp-1">
-                                                {service.title}
+                                            <div className="flex items-center gap-2 mb-3 text-white/40 text-[11px] uppercase tracking-wider font-medium">
+                                                <Calendar className="w-3.5 h-3.5" style={{ color: 'var(--color-primary)' }} />
+                                                <span>{formatDate(blog.publishDate || blog.createdAt)}</span>
+                                            </div>
+
+                                            <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-white/90 transition-colors mb-3 line-clamp-2">
+                                                {blog.title}
                                             </h3>
-                                            <p className="text-white/60 text-sm leading-relaxed line-clamp-2 flex-grow">
-                                                {service.description}
+
+                                            <p className="text-white/60 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">
+                                                {blog.excerpt || blog.intro}
                                             </p>
 
-                                            {/* Learn More Link */}
-                                            <div className="inline-flex items-center gap-2 text-sm font-medium pt-3 mt-auto group/link">
+                                            {/* Read More Link */}
+                                            <div className="inline-flex items-center gap-2 text-xs font-semibold pt-4 mt-auto border-t border-white/5 group/link">
                                                 <span
-                                                    className="group-hover/link:underline transition-all"
+                                                    className="uppercase tracking-widest"
                                                     style={{ color: 'var(--color-primary)' }}
                                                 >
-                                                    VIEW SERVICE
+                                                    READ ARTICLE
                                                 </span>
                                                 <ArrowRight
                                                     className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
@@ -215,12 +219,19 @@ function ServicesSection() {
                                 </Link>
                             </motion.div>
                         ))}
-                        <ServicesGhostCard delay={services.length * 0.1} />
                     </div>
                 )}
 
-                {/* Mobile Scroll Indicator */}
-
+                {/* View All button for mobile */}
+                <div className="flex md:hidden justify-center mt-6">
+                    <Link
+                        to="/blog"
+                        className="px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 border border-white/10 hover:bg-white/5"
+                        style={{ color: 'var(--color-primary)' }}
+                    >
+                        VIEW ALL BLOGS
+                    </Link>
+                </div>
             </div>
 
             {/* Custom CSS for hiding scrollbar */}
@@ -238,4 +249,5 @@ function ServicesSection() {
     );
 }
 
-export default ServicesSection;
+export default BlogSection;
+

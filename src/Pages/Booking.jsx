@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
 import { useBooking } from "../Context/BookingContext";
 import Locations from "../Components/booking/Locations";
 import CarsSelection from "../Components/booking/CarsSelection";
@@ -272,29 +273,29 @@ function Booking() {
     // React state (bookingData) may still be stale at this point because updateData() is async.
     const mergedBookingData = formData
       ? {
-          ...bookingData,
-          passengerDetails: formData.passengerDetails || bookingData.passengerDetails,
-          specialInstructions: formData.specialInstructions ?? bookingData.specialInstructions,
-          isAirportPickup: formData.flightDetails?.isAirportPickup || bookingData.isAirportPickup,
-          isBookingForSomeoneElse:
-            formData.passengerDetails?.isBookingForSomeoneElse ||
-            bookingData.isBookingForSomeoneElse,
-          guestDetails: formData.passengerDetails?.isBookingForSomeoneElse
-            ? {
-                firstName: formData.passengerDetails?.guestFirstName,
-                lastName: formData.passengerDetails?.guestLastName,
-                email: formData.passengerDetails?.guestEmail,
-                countryCode: formData.passengerDetails?.guestCountryCode,
-                phone: formData.passengerDetails?.guestPhone,
-              }
-            : bookingData.guestDetails,
-          flightDetails: formData.flightDetails?.isAirportPickup
-            ? {
-                flightNumber: formData.flightDetails?.flightNumber,
-                nameBoard: formData.flightDetails?.nameBoard,
-              }
-            : bookingData.flightDetails,
-        }
+        ...bookingData,
+        passengerDetails: formData.passengerDetails || bookingData.passengerDetails,
+        specialInstructions: formData.specialInstructions ?? bookingData.specialInstructions,
+        isAirportPickup: formData.flightDetails?.isAirportPickup || bookingData.isAirportPickup,
+        isBookingForSomeoneElse:
+          formData.passengerDetails?.isBookingForSomeoneElse ||
+          bookingData.isBookingForSomeoneElse,
+        guestDetails: formData.passengerDetails?.isBookingForSomeoneElse
+          ? {
+            firstName: formData.passengerDetails?.guestFirstName,
+            lastName: formData.passengerDetails?.guestLastName,
+            email: formData.passengerDetails?.guestEmail,
+            countryCode: formData.passengerDetails?.guestCountryCode,
+            phone: formData.passengerDetails?.guestPhone,
+          }
+          : bookingData.guestDetails,
+        flightDetails: formData.flightDetails?.isAirportPickup
+          ? {
+            flightNumber: formData.flightDetails?.flightNumber,
+            nameBoard: formData.flightDetails?.nameBoard,
+          }
+          : bookingData.flightDetails,
+      }
       : bookingData;
 
     try {
@@ -375,6 +376,10 @@ function Booking() {
 
   return (
     <div className="min-h-screen font-sans pb-20 lg:pb-0" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
+      <Helmet>
+        <title>Book Chauffeur Service London Easy Online Booking</title>
+        <meta name="description" content="Book your luxury chauffeur service in London with JK Executive Chauffeurs. Fast, easy online booking for airport transfers, corporate travel & events." />
+      </Helmet>
 
       {/* --- STEPS INDICATOR --- */}
       <div className="pt-32 md:pt-36 pb-6" style={{ backgroundColor: 'var(--color-dark)' }}>

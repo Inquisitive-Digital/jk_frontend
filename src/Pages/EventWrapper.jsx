@@ -114,9 +114,14 @@ function EventWrapper() {
         },
     };
 
+    const seoTitle = event.seoTitle || event.title;
+    const seoDesc = event.seoDescription || (event.description ? event.description.replace(/<[^>]+>/g, '').slice(0, 160) : '');
+
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
             <Helmet>
+                <title>{seoTitle}</title>
+                <meta name="description" content={seoDesc} />
                 <script type="application/ld+json">
                     {JSON.stringify(breadcrumbSchema)}
                 </script>
