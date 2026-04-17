@@ -6,16 +6,13 @@ import {
   Car,
   Users,
   Briefcase,
-  ChevronLeft,
   Info,
-  Route
+  Route,
+  ArrowLeft,
+  ArrowRight,
+  Loader2,
 } from "lucide-react";
-
-const STEP_BACK_LABELS = {
-  2: "Edit Location",
-  3: "Edit Vehicle",
-  4: "Edit Details",
-};
+import { motion } from "framer-motion";
 
 function StickyBookingSummary({
   from,
@@ -27,7 +24,15 @@ function StickyBookingSummary({
   extras,
   currentStep,
   onGoBack,
+  onContinue,
   distance,
+  hours,
+  serviceType = "oneway",
+  disabled = false,
+  isLoading = false,
+  hideBack = false,
+  hideContinue = false,
+  continueLabel = "CONTINUE",
 }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -39,8 +44,8 @@ function StickyBookingSummary({
     });
   };
 
-  const backLabel = STEP_BACK_LABELS[currentStep];
-  const showBackButton = currentStep >= 2 && !!onGoBack && !!backLabel;
+  const isHourly = serviceType === "hourly";
+  const isPtp = serviceType === "ptp";
 
   return (
     <div
@@ -105,44 +110,29 @@ function StickyBookingSummary({
               </p>
             </div>
             
-            {/* Drop-off */}
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <div 
-                  className="w-1.5 h-1.5 rounded-full bg-white/20" 
-                />
-                <span className="text-[9px] uppercase tracking-[0.2em] text-white/35 font-semibold">Drop-off</span>
+            {/* Drop-off - Only show for non-hourly bookings */}
+            {!isHourly && (
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <div 
+                    className="w-1.5 h-1.5 rounded-full bg-white/20" 
+                  />
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-white/35 font-semibold">Drop-off</span>
+                </div>
+                <p className="text-sm text-white/95 font-medium leading-snug break-words">
+                  {to || <span className="text-white/30">Not specified</span>}
+                </p>
               </div>
-              <p className="text-sm text-white/95 font-medium leading-snug break-words">
-                {to || <span className="text-white/30">Not specified</span>}
-              </p>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Approx Distance */}
-      {distance && (
-        <div
-          className="px-5 py-3"
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.02)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.04)",
-          }}
-        >
-          <div className="flex items-center gap-2 justify-center">
-            <Route size={14} style={{ color: 'var(--color-primary)' }} />
-            <span className="text-[10px] uppercase tracking-[0.15em] text-white/35 font-semibold">Approx Distance</span>
-            <span className="text-sm text-white/80 font-medium">{distance}</span>
-          </div>
-        </div>
-      )}
-
       {/* Main Content Area */}
       <div className="p-5 space-y-6">
 
-        {/* DateTime Group - Side by Side */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* DateTime Group - 3 Column Layout */}
+        <div className="grid grid-cols-3 gap-3">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 text-white/40">
               <Calendar size={14} style={{ color: 'var(--color-primary)' }} />
@@ -156,6 +146,17 @@ function StickyBookingSummary({
               <span className="text-[10px] uppercase tracking-wider">Time</span>
             </div>
             <p className="text-sm text-white font-medium pl-5">{time || "—"}</p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-white/40">
+              <Route size={14} style={{ color: 'var(--color-primary)' }} />
+              <span className="text-[10px] uppercase tracking-wider">
+                {isHourly ? "Duration" : "Distance"}
+              </span>
+            </div>
+            <p className="text-sm text-white font-medium pl-5">
+              {isHourly ? (hours ? `${hours}h` : "—") : (distance || "—")}
+            </p>
           </div>
         </div>
 
@@ -232,22 +233,89 @@ function StickyBookingSummary({
           </div>
         </div>
 
-        {/* Navigation */}
-        {showBackButton && (
-          <button
-            onClick={onGoBack}
-            className="group w-full flex cursor-pointer items-center justify-center gap-2 py-3 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "white",
-              cursor: "pointer",
-            }}
-          >
-            <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-            {backLabel}
-          </button>
-        )}
+        {/* Navigation - StepNavBar Style */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-stretch gap-3 pt-6 sticky bottom-0 pb-6 z-10 w-full px-0"
+          style={{
+            background: "transparent",
+          }}
+        >
+          {/* Back Button */}
+          {!hideBack && currentStep >= 2 && onGoBack && (
+            <button
+              onClick={onGoBack}
+              type="button"
+              className="flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shrink-0 whitespace-nowrap"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.7)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.11)";
+                e.currentTarget.style.color = "#fff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.06)";
+                e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+              }}
+            >
+              <ArrowLeft size={15} />
+              <span>BACK</span>
+            </button>
+          )}
+
+          {/* Continue Button */}
+          {!hideContinue && onContinue && (
+            <button
+              onClick={onContinue}
+              type="button"
+              disabled={disabled || isLoading}
+              className="flex-1 min-w-0 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300"
+              style={
+                disabled || isLoading
+                  ? {
+                      backgroundColor: "rgba(255,255,255,0.04)",
+                      color: "rgba(255,255,255,0.3)",
+                      cursor: disabled ? "not-allowed" : "default",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }
+                  : {
+                      backgroundColor: "var(--color-primary)",
+                      color: "var(--color-dark)",
+                      boxShadow: "0 8px 24px rgba(215,183,94,0.28)",
+                      cursor: "pointer",
+                    }
+              }
+              onMouseEnter={(e) => {
+                if (!disabled && !isLoading) {
+                  e.currentTarget.style.boxShadow = "0 12px 32px rgba(215,183,94,0.4)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!disabled && !isLoading) {
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(215,183,94,0.28)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin shrink-0" />
+                  <span className="truncate">Please wait...</span>
+                </>
+              ) : (
+                <>
+                  <span className="truncate">{continueLabel}</span>
+                  <ArrowRight size={15} className="shrink-0" />
+                </>
+              )}
+            </button>
+          )}
+        </motion.div>
       </div>
     </div>
   );

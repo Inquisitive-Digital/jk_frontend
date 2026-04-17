@@ -1,10 +1,13 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { serviceAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+
+const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
 function ServiceWrapper() {
     const { slug } = useParams();
@@ -48,8 +51,52 @@ function ServiceWrapper() {
         );
     }
 
+    const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+            { '@type': 'ListItem', position: 2, name: 'Services', item: `${BASE_URL}/services` },
+            { '@type': 'ListItem', position: 3, name: service.title, item: `${BASE_URL}/services/${service.slug}` },
+        ],
+    };
+
+    const serviceSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        name: service.title,
+        description: service.description,
+        url: `${BASE_URL}/services/${service.slug}`,
+        image: getImageUrl(service.image?.url),
+        provider: {
+            '@type': 'LocalBusiness',
+            name: 'JK Executive Chauffeurs',
+            url: BASE_URL,
+            telephone: '+442034759906',
+        },
+        areaServed: {
+            '@type': 'Place',
+            name: 'London, United Kingdom',
+        },
+    };
+
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+            <Helmet>
+                <title>{service.meta_title || service.title}</title>
+                <meta name="description" content={service.meta_description || service.description} />
+                <script type="application/ld+json">
+                    {JSON.stringify(breadcrumbSchema)}
+                </script>
+                <script type="application/ld+json">
+                    {JSON.stringify(serviceSchema)}
+                </script>
+                {service.script && (
+                    <script type="application/ld+json">
+                        {service.script}
+                    </script>
+                )}
+            </Helmet>
             {/* Hero Image Section */}
             <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
                 <motion.img

@@ -189,7 +189,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ${headerBg}`}
+        className={`fixed top-0 left-0 right-0 ${isHomePage && !isScrolled && !activeDropdown ? 'z-[40]' : 'z-[9999]'} transition-all duration-500 ${headerBg}`}
       >
         {/* Top Bar */}
         <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -225,40 +225,30 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
               >
                 <span className={`text-2xl md:text-3xl tracking-wider whitespace-nowrap block ${logoTextColor}`}>
-                  <span className="font-semibold">JK Executive</span>{' '}
-                  <span className="font-extralight">Chauffeurs</span>
+                  <span className="font-semibold">JK Executive Chauffeurs</span>
                 </span>
               </motion.div>
             </Link>
 
             {/* Right side container */}
             <div className="flex items-center gap-3">
-              {/* Mobile Book Now Button - Hidden on booking page */}
-              <AnimatePresence>
-                {isScrolled && !isBookingPage && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="md:hidden"
-                  >
-                    <Link
-                      to="/booking"
-                      onClick={() => Analytics.trackBookingClick('header_mobile_scrolled_book_now')}
-                      className="px-4 py-2 text-black font-semibold text-xs uppercase tracking-wider rounded transition-all duration-300 whitespace-nowrap"
-                      style={{ backgroundColor: 'var(--color-primary)' }}
-                    >
-                      Book Now
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Mobile Book Now Button - Always visible on non-booking pages */}
+              {!isBookingPage && (
+                <Link
+                  to="/booking"
+                  onClick={() => Analytics.trackBookingClick('header_mobile_scrolled_book_now')}
+                  className="md:hidden px-4 py-2 text-black font-semibold text-xs uppercase tracking-wider rounded transition-all duration-300 whitespace-nowrap"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  Book Now
+                </Link>
+              )}
 
               {/* Book Now Button (Desktop only) - Hidden on booking page */}
               {!isBookingPage && (
                 <Link
                   to="/booking"
+                  onClick={() => Analytics.trackBookingClick('header_desktop_book_now')}
                   className="hidden md:block px-4 py-2.5 md:px-6 text-black font-semibold text-sm uppercase tracking-wider rounded transition-all duration-300"
                   style={{
                     backgroundColor: 'var(--color-primary)',
@@ -280,6 +270,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
               {/* Login Button (Desktop) */}
               <a
                 href="https://jkexecutivechauffeurs.dashboardloginapp.com/login"
+                onClick={() => Analytics.trackLoginClick({ source: 'header_desktop' })}
                 className="hidden md:flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wider rounded transition-all duration-300 border-2"
                 style={{
                   borderColor: 'var(--color-primary)',
@@ -378,7 +369,14 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: -10 }}
                                   transition={{ duration: 0.2 }}
-                                  className={`absolute left-full top-0 ml-1 min-w-[240px] rounded-lg shadow-xl overflow-hidden ${dropdownBg}`}
+                                  className={`absolute left-full top-0 ml-1 min-w-[240px] max-h-[70vh] overflow-y-auto rounded-lg shadow-xl ${dropdownBg}`}
+                                  style={{
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+                                  }}
+                                  onWheel={(e) => {
+                                    e.stopPropagation();
+                                  }}
                                 >
                                   {menuItem.children.map((child) => (
                                     <Link
@@ -497,7 +495,10 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                   e.currentTarget.style.backgroundColor = 'transparent';
                   e.currentTarget.style.color = 'white';
                 }}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => {
+                  Analytics.trackLoginClick({ source: 'header_mobile' });
+                  setIsMobileMenuOpen(false);
+                }}
               >
                 Login
               </a>

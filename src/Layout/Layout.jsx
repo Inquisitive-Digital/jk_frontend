@@ -5,7 +5,7 @@ import WhatsAppButton from './WhatsAppButton';
 import ContactForm from './ContactForm';
 import ScrollToTopButton from '../Components/extras/ScrollToTopButton';
 
-function Layout({ children, isHeroPage = false, headerTheme = 'dark', showContactForm = true }) {
+function Layout({ children, isHeroPage = false, headerTheme = 'dark', showContactForm = true, showWhatsApp = true, showScrollToTop = true }) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header isTransparent={isHeroPage} theme={headerTheme} />
@@ -14,8 +14,8 @@ function Layout({ children, isHeroPage = false, headerTheme = 'dark', showContac
       </div>
       {showContactForm && <ContactForm />}
       <Footer />
-      <WhatsAppButton />
-      <ScrollToTopButton />
+      {showWhatsApp && <WhatsAppButton />}
+      {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
 }

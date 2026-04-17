@@ -1,0 +1,590 @@
+# =============================================================================
+# .htaccess - 301 Redirects for JK Executive Chauffeurs
+# =============================================================================
+# This file handles permanent (301) redirects from old URLs to new URLs.
+# Place this file in the root directory of your Apache web server.
+# =============================================================================
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # =============================================================================
+    # SERVICES REDIRECTS
+    # =============================================================================
+
+    # Corporate Chauffeur Service
+    RewriteRule ^mercedes-benz-eqe$ https://www.jkexecutivechauffeurs.com/services/corporate-chauffeur-service [R=301,L]
+
+    # London Chauffeur Service
+    RewriteRule ^london-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/london-chauffeur-service [R=301,L]
+
+    # Cruise Chauffeur Service
+    RewriteRule ^cruise-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/cruise-chauffeur-service [R=301,L]
+
+    # London Sightseeing
+    RewriteRule ^london-sightseeing/?$ https://www.jkexecutivechauffeurs.com/services/london-sightseeing [R=301,L]
+
+    # Shopping Chauffeur Service
+    RewriteRule ^shopping-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/shopping-chauffeur-service [R=301,L]
+
+    # Event Chauffeur Service in London
+    RewriteRule ^event-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/services/event-chauffeur-service-in-london [R=301,L]
+
+    # Airport Chauffeur Service
+    RewriteRule ^airport-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/airport-chauffeur-service [R=301,L]
+
+    # Heathrow Airport Chauffeur Service
+    RewriteRule ^heathrow-airport/?$ https://www.jkexecutivechauffeurs.com/services/heathrow-airport-chauffeur-service [R=301,L]
+
+    # Intercity Chauffeur Service
+    RewriteRule ^intercity-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/intercity-chauffeur-service [R=301,L]
+
+    # As Directed Hourly Chauffeur Service
+    RewriteRule ^as-directed-hourly-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/as-directed-hourly-chauffeur-service [R=301,L]
+
+    # School Chauffeur Service in London
+    RewriteRule ^school-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/services/school-chauffeur-service-in-london [R=301,L]
+
+    # Close Protection Chauffeur in London
+    RewriteRule ^close-protection-chauffeur-in-london/?$ https://www.jkexecutivechauffeurs.com/services/close-protection-chauffeur-in-london [R=301,L]
+
+    # Evening Car Hire Service in London
+    RewriteRule ^evening-car-hire-service-in-london/?$ https://www.jkexecutivechauffeurs.com/services/evening-car-hire-service-in-london [R=301,L]
+
+    # =============================================================================
+    # LUXURY CHAUFFEUR SERVICE REDIRECT
+    # =============================================================================
+
+    RewriteRule ^services/luxury-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/hire-luxury-chauffeur-service-london/ [R=301,L]
+
+    # =============================================================================
+    # WEDDING CHAUFFEUR SERVICE
+    # =============================================================================
+
+    RewriteRule ^wedding-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/wedding-chauffeur-service [R=301,L]
+
+    # =============================================================================
+    # HOME PAGE REDIRECTS
+    # =============================================================================
+
+    # Chauffeur Hire London
+    RewriteRule ^chauffeur-hire-london/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
+
+    # Executive Car Hire London
+    RewriteRule ^executive-car-hire-london/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
+
+    # Terms & Conditions
+    RewriteRule ^terms-conditions/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
+
+    # =============================================================================
+    # FLEET REDIRECTS
+    # =============================================================================
+
+    # Our Fleet (general)
+    RewriteRule ^our-fleet/?$ https://www.jkexecutivechauffeurs.com/fleet [R=301,L]
+
+    # Mercedes E Class
+    RewriteRule ^fleets-mercedes-e-class/?$ https://www.jkexecutivechauffeurs.com/fleet/fleets-mercedes-e-class [R=301,L]
+
+    # Mercedes EQE
+    RewriteRule ^mercedes-benz-eqe/?$ https://www.jkexecutivechauffeurs.com/fleet/mercedes-benz-eqe [R=301,L]
+
+    # Mercedes S Class
+    RewriteRule ^fleets-mercedes-s-class/?$ https://www.jkexecutivechauffeurs.com/fleet/fleets-mercedes-s-class [R=301,L]
+
+    # Mercedes V Class
+    RewriteRule ^fleets-mercedes-v-class/?$ https://www.jkexecutivechauffeurs.com/fleet/fleets-mercedes-v-class [R=301,L]
+    RewriteRule ^mercedes-v-class/?$ https://www.jkexecutivechauffeurs.com/fleet/fleets-mercedes-v-class [R=301,L]
+
+    # Rolls Royce
+    RewriteRule ^rolls-royce-chauffeur-hire-london/?$ https://www.jkexecutivechauffeurs.com/fleet/rolls-royce-chauffeur-hire-london [R=301,L]
+
+    # Range Rover
+    RewriteRule ^range-rover-chauffeur-hire-london/?$ https://www.jkexecutivechauffeurs.com/fleet/range-rover-chauffeur-hire-london [R=301,L]
+
+    # Mini Coach
+    RewriteRule ^mini-coach-chauffeur-hire-london/?$ https://www.jkexecutivechauffeurs.com/fleet/mini-coach-chauffeur-hire-london [R=301,L]
+
+    # Luxury Coaches
+    RewriteRule ^luxury-coaches/?$ https://www.jkexecutivechauffeurs.com/fleet/coaches-hire-london [R=301,L]
+
+    # =============================================================================
+    # EVENTS REDIRECTS
+    # =============================================================================
+
+    # Chauffeur Service for Sports Event
+    RewriteRule ^chauffeur-service-for-sports-event/?$ https://www.jkexecutivechauffeurs.com/events/chauffeur-service-for-sports-event [R=301,L]
+
+    # Event Calendar
+    RewriteRule ^event-calendar/?$ https://www.jkexecutivechauffeurs.com/events/event-calendar [R=301,L]
+
+    # Event Services
+    RewriteRule ^event-services/?$ https://www.jkexecutivechauffeurs.com/events/event-chauffeur-service-in-london [R=301,L]
+
+    # =============================================================================
+    # ABOUT & CONTACT REDIRECTS
+    # =============================================================================
+
+    # About Us
+    RewriteRule ^about-us/?$ https://www.jkexecutivechauffeurs.com/about [R=301,L]
+
+    # Contact Us
+    RewriteRule ^contact-us/?$ https://www.jkexecutivechauffeurs.com/contact [R=301,L]
+
+    # Get Quote
+    RewriteRule ^get-quote/?$ https://www.jkexecutivechauffeurs.com/booking [R=301,L]
+
+    # =============================================================================
+    # SERVICES PAGE
+    # =============================================================================
+
+    RewriteRule ^our-services/?$ https://www.jkexecutivechauffeurs.com/services [R=301,L]
+
+    # =============================================================================
+    # BLOG REDIRECTS
+    # =============================================================================
+
+    # Cowdray Gold Cup
+    RewriteRule ^cowdray-gold-cup-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/cowdray-gold-cup-chauffeur-service/ [R=301,L]
+
+    # Private Aviation Chauffeur
+    RewriteRule ^private-jet-chauffeur-hire-london/?$ https://www.jkexecutivechauffeurs.com/services/private-aviation-chauffeur [R=301,L]
+
+    # Corporate Chauffeur Service (Blog)
+    RewriteRule ^corporate-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/corporate-chauffeur-service/ [R=301,L]
+
+    # Wimbledon Chauffeur Service
+    RewriteRule ^wimbledon-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
+
+    # Mercedes Vito Chauffeur Car Hire
+    RewriteRule ^mercedes-vito-chauffeur-car-hire/?$ https://www.jkexecutivechauffeurs.com/blog/mercedes-vito-chauffeur-car-hire/ [R=301,L]
+
+    # Wembley Stadium Chauffeur Service
+    RewriteRule ^wembley-stadium-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/wembley-stadium-chauffeur-service/ [R=301,L]
+
+    # Experience the Best in the Capital
+    RewriteRule ^experience-the-best-in-the-capital-with-luxury-chauffeur-car/?$ https://www.jkexecutivechauffeurs.com/blog/experience-the-best-in-the-capital-with-luxury-chauffeur-car/ [R=301,L]
+
+    # July Festival Newmarket
+    RewriteRule ^july-festival-newmarket/?$ https://www.jkexecutivechauffeurs.com/blog/july-festival-newmarket/ [R=301,L]
+
+    # Professional Chauffeurs Manchester
+    RewriteRule ^professional-chauffeurs-manchester-hire-a-chauffeur-in-manchester-today/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
+
+    # Farnborough Airshow Chauffeur
+    RewriteRule ^farnborough-airshow-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/farnborough-airshow-chauffeur/ [R=301,L]
+
+    # Vito Chauffeur 8 Seater
+    RewriteRule ^vito-chauffeur-8-seater-car-hire-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/vito-chauffeur-8-seater-car-hire-in-london/ [R=301,L]
+
+    # Mercedes Vito Hire with Driver
+    RewriteRule ^mercedes-vito-hire-with-driver-for-events-transfers-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/mercedes-vito-hire-with-driver-for-events-transfers-in-london/ [R=301,L]
+
+    # Private Aviation Chauffeur (Blog)
+    RewriteRule ^private-aviation-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
+
+    # Grand National Aintree
+    RewriteRule ^hiring-a-chauffeur-for-grand-national-aintree-racecourse/?$ https://www.jkexecutivechauffeurs.com/blog/hiring-a-chauffeur-for-grand-national-aintree-racecourse/ [R=301,L]
+
+    # London Heathrow Airport
+    RewriteRule ^london-heathrow-airport/?$ https://www.jkexecutivechauffeurs.com/blog/london-heathrow-airport/ [R=301,L]
+
+    # Queen's Club Championships
+    RewriteRule ^queens-club-championships/?$ https://www.jkexecutivechauffeurs.com/blog/queens-club-championships/ [R=301,L]
+
+    # Airport Transfer Service in London
+    RewriteRule ^airport-transfer-service-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/airport-transfer-service-in-london/ [R=301,L]
+
+    # Half Day Chauffeur Hire
+    RewriteRule ^half-day-chauffeur-hire-and-the-benefits/?$ https://www.jkexecutivechauffeurs.com/blog/half-day-chauffeur-hire-and-the-benefits/ [R=301,L]
+
+    # Glyndebourne Festival
+    RewriteRule ^hire-a-chauffeur-for-glyndebourne-festival-and-travel-in-style-to-the-world-renowned-event/?$ https://www.jkexecutivechauffeurs.com/blog/hire-a-chauffeur-for-glyndebourne-festival-and-travel-in-style-to-the-world-renowned-event/ [R=301,L]
+
+    # Cowboy Carter Tour
+    RewriteRule ^cowboy-carter-tour/?$ https://www.jkexecutivechauffeurs.com/blog/cowboy-carter-tour/ [R=301,L]
+
+    # Lady Gaga Concert
+    RewriteRule ^lady-gaga-concert-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/lady-gaga-concert-chauffeur/ [R=301,L]
+
+    # Coldplay Concert
+    RewriteRule ^coldplay-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/coldplay-chauffeur-service/ [R=301,L]
+
+    # October Half Term
+    RewriteRule ^october-half-term-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/october-half-term-chauffeur-service/ [R=301,L]
+
+    # Glyndebourne Chauffeur Service
+    RewriteRule ^glyndebourne-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/glyndebourne-chauffeur-service/ [R=301,L]
+
+    # Canary Wharf Winter Lights
+    RewriteRule ^canary-wharf-winter-lights-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/canary-wharf-winter-lights-chauffeur/ [R=301,L]
+
+    # Six Nations 2025 Rugby
+    RewriteRule ^chauffeur-for-six-nations-2025-rugby/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-for-six-nations-2025-rugby/ [R=301,L]
+
+    # London Fashion Week Chauffeur
+    RewriteRule ^book-your-london-fashion-week-chauffeur-now-for-elegance/?$ https://www.jkexecutivechauffeurs.com/blog/book-your-london-fashion-week-chauffeur-now-for-elegance/ [R=301,L]
+
+    # Executive Airport Transfers over Taxi
+    RewriteRule ^executive-airport-transfers-over-taxi/?$ https://www.jkexecutivechauffeurs.com/blog/executive-airport-transfers-over-taxi/ [R=301,L]
+
+    # Difference Between Driver and Chauffeur
+    RewriteRule ^what-is-the-difference-between-a-driver-and-a-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/what-is-the-difference-between-a-driver-and-a-chauffeur/ [R=301,L]
+
+    # Frieze Art Fairs
+    RewriteRule ^frieze-art-fairs-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/frieze-art-fairs-chauffeur-service/ [R=301,L]
+
+    # Bonfire Night
+    RewriteRule ^bonfire-night-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/bonfire-night-chauffeur-service/ [R=301,L]
+
+    # Experience Unmatched Luxury
+    RewriteRule ^experience-unmatched-luxury-with-our-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/experience-unmatched-luxury-with-our-chauffeur-service-in-london/ [R=301,L]
+
+    # Events Chauffeur Service
+    RewriteRule ^events-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/events-chauffeur-service/ [R=301,L]
+
+    # Transportation for Top Executives
+    RewriteRule ^transportation-for-top-executives/?$ https://www.jkexecutivechauffeurs.com/blog/transportation-for-top-executives/ [R=301,L]
+
+    # Remembrance Day
+    RewriteRule ^remembrance-day-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/remembrance-day-chauffeur-service/ [R=301,L]
+
+    # Guards Polo Club
+    RewriteRule ^guards-polo-club-chauffeur-service-windsor-car-hire/?$ https://www.jkexecutivechauffeurs.com/blog/guards-polo-club-chauffeur-service-windsor-car-hire/ [R=301,L]
+
+    # Luxury Airport Transfers
+    RewriteRule ^luxury-airport-transfers-in-london-your-gateway-to-elegance/?$ https://www.jkexecutivechauffeurs.com/blog/luxury-airport-transfers-in-london-your-gateway-to-elegance/ [R=301,L]
+
+    # Benefits of Hiring Luxury Chauffeur Cars
+    RewriteRule ^the-benefits-of-hiring-luxury-chauffeur-cars/?$ https://www.jkexecutivechauffeurs.com/blog/the-benefits-of-hiring-luxury-chauffeur-cars/ [R=301,L]
+
+    # Business Chauffeur Hire in London
+    RewriteRule ^business-chauffeur-hire-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/business-chauffeur-hire-in-london/ [R=301,L]
+
+    # Six Nations Rugby 2026
+    RewriteRule ^six-nations-rugby-2026/?$ https://www.jkexecutivechauffeurs.com/blog/six-nations-rugby-2026/ [R=301,L]
+
+    # Christmas at Kew
+    RewriteRule ^chauffeur-service-for-christmas-at-kew/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-service-for-christmas-at-kew/ [R=301,L]
+
+    # Wembley Stadium UEFA Champions League
+    RewriteRule ^chauffeur-car-to-wembley-stadium-for-uefa-champions-league/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-car-to-wembley-stadium-for-uefa-champions-league/ [R=301,L]
+
+    # Royal Ascot
+    RewriteRule ^royal-ascot-chauffeur-service-london/?$ https://www.jkexecutivechauffeurs.com/blog/royal-ascot-chauffeur-service-london/ [R=301,L]
+
+    # Heathrow Airport Chauffeur
+    RewriteRule ^heathrow-airport-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/heathrow-airport-chauffeur/ [R=301,L]
+
+    # 12 Seater Mercedes Sprinter
+    RewriteRule ^discover-luxury-travel-with-12-seater-mercedes-sprinter-hire-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/discover-luxury-travel-with-12-seater-mercedes-sprinter-hire-in-london/ [R=301,L]
+
+    # Mercedes Sprinter for Heathrow
+    RewriteRule ^book-mercedes-sprinter-chauffeur-car-for-heathrow-airport-transfers/?$ https://www.jkexecutivechauffeurs.com/blog/book-mercedes-sprinter-chauffeur-car-for-heathrow-airport-transfers/ [R=301,L]
+
+    # Ultimate Guide to Hiring London Chauffeur
+    RewriteRule ^the-ultimate-guide-to-hiring-a-london-chauffeur-for-airport-transfers/?$ https://www.jkexecutivechauffeurs.com/blog/the-ultimate-guide-to-hiring-a-london-chauffeur-for-airport-transfers/ [R=301,L]
+
+    # England v New Zealand Rugby
+    RewriteRule ^england-v-new-zealand-rugby/?$ https://www.jkexecutivechauffeurs.com/blog/england-v-new-zealand-rugby/ [R=301,L]
+
+    # Dua Lipa Concert
+    RewriteRule ^dua-lipa-concert-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/dua-lipa-concert-chauffeur-service/ [R=301,L]
+
+    # Henley Royal Regatta
+    RewriteRule ^henley-royal-regatta-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/henley-royal-regatta-chauffeur/ [R=301,L]
+
+    # Cartier Queen's Cup Final
+    RewriteRule ^cartier-queens-cup-final/?$ https://www.jkexecutivechauffeurs.com/blog/cartier-queens-cup-final/ [R=301,L]
+
+    # Lord Mayor's Show
+    RewriteRule ^lord-mayors-show/?$ https://www.jkexecutivechauffeurs.com/blog/lord-mayors-show/ [R=301,L]
+
+    # Burn Light in London
+    RewriteRule ^chauffeur-service-for-burn-light-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-service-for-burn-light-in-london/ [R=301,L]
+
+    # Royal Windsor Horse Show
+    RewriteRule ^royal-windsor-horse-show/?$ https://www.jkexecutivechauffeurs.com/blog/royal-windsor-horse-show/ [R=301,L]
+
+    # FA Cup Matches
+    RewriteRule ^fa-cup-matches-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/fa-cup-matches-chauffeur-service/ [R=301,L]
+
+    # Chauffeur Service London 4
+    RewriteRule ^chauffeur-service-london-4/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-service-london-4/ [R=301,L]
+
+    # Superior Choice over Ride Sharing
+    RewriteRule ^is-chauffeur-service-in-london-the-superior-choice-over-ride-sharing-apps/?$ https://www.jkexecutivechauffeurs.com/blog/is-chauffeur-service-in-london-the-superior-choice-over-ride-sharing-apps/ [R=301,L]
+
+    # England vs Australia Rugby
+    RewriteRule ^england-vs-australia-rugby/?$ https://www.jkexecutivechauffeurs.com/blog/england-vs-australia-rugby/ [R=301,L]
+
+    # Luxury Chauffeur Service Epitome
+    RewriteRule ^luxury-chauffeur-service-in-london-the-epitome-of-style-and-comfort/?$ https://www.jkexecutivechauffeurs.com/blog/luxury-chauffeur-service-in-london-the-epitome-of-style-and-comfort/ [R=301,L]
+
+    # Diwali Festival Trafalgar Square
+    RewriteRule ^diwali-festival-trafalgar-square-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/diwali-festival-trafalgar-square-chauffeur/ [R=301,L]
+
+    # EFG London Jazz Festival
+    RewriteRule ^efg-london-jazz-festival/?$ https://www.jkexecutivechauffeurs.com/blog/efg-london-jazz-festival/ [R=301,L]
+
+    # BAFTA Awards
+    RewriteRule ^bafta-awards/?$ https://www.jkexecutivechauffeurs.com/blog/bafta-awards/ [R=301,L]
+
+    # London Fashion Week
+    RewriteRule ^london-fashion-week/?$ https://www.jkexecutivechauffeurs.com/blog/london-fashion-week/ [R=301,L]
+
+    # What Makes a Professional Chauffeur
+    RewriteRule ^what-makes-a-professional-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/what-makes-a-professional-chauffeur/ [R=301,L]
+
+    # Corporate Chauffeur
+    RewriteRule ^corporate-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/corporate-chauffeur/ [R=301,L]
+
+    # Chelsea Flower Show
+    RewriteRule ^chelsea-flower-show/?$ https://www.jkexecutivechauffeurs.com/blog/chelsea-flower-show/ [R=301,L]
+
+    # Southampton Boat Show
+    RewriteRule ^southampton-boat-show-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/southampton-boat-show-chauffeur-service/ [R=301,L]
+
+    # Airport Transfers in London
+    RewriteRule ^airport-transfers-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/airport-transfers-in-london/ [R=301,L]
+
+    # Car Service from Heathrow to London
+    RewriteRule ^car-service-from-heathrow-to-london-benefits-and-more/?$ https://www.jkexecutivechauffeurs.com/blog/car-service-from-heathrow-to-london-benefits-and-more/ [R=301,L]
+
+    # Goodwood Revival
+    RewriteRule ^goodwood-revival-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/goodwood-revival-chauffeur-service/ [R=301,L]
+
+    # Heathrow Airport Transfers in London
+    RewriteRule ^heathrow-airport-transfers-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/heathrow-airport-transfers-in-london/ [R=301,L]
+
+    # Cheltenham Festival
+    RewriteRule ^cheltenham-festival-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/cheltenham-festival-chauffeur-service/ [R=301,L]
+
+    # Hire Chauffeur for Chelsea Flower Show
+    RewriteRule ^hire-a-chauffeur-for-rhs-chelsea-flower-show/?$ https://www.jkexecutivechauffeurs.com/blog/hire-a-chauffeur-for-rhs-chelsea-flower-show/ [R=301,L]
+
+    # Hiring Chauffeur Service London
+    RewriteRule ^hiring-chauffeur-service-london/?$ https://www.jkexecutivechauffeurs.com/blog/hiring-chauffeur-service-london/ [R=301,L]
+
+    # London Chauffeur Services UK
+    RewriteRule ^london-chauffeur-services-uk-your-gateway-to-refined-travel/?$ https://www.jkexecutivechauffeurs.com/blog/london-chauffeur-services-uk-your-gateway-to-refined-travel/ [R=301,L]
+
+    # Cowes Week
+    RewriteRule ^cowes-week-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/cowes-week-chauffeur-service/ [R=301,L]
+
+    # Barbarians v World XV
+    RewriteRule ^attending-barbarians-v-world-xv-match-at-twickenham-stadium/?$ https://www.jkexecutivechauffeurs.com/blog/attending-barbarians-v-world-xv-match-at-twickenham-stadium/ [R=301,L]
+
+    # Harry Potter Tour
+    RewriteRule ^harry-potter-tour/?$ https://www.jkexecutivechauffeurs.com/blog/harry-potter-tour/ [R=301,L]
+
+    # Hire Chauffeur for Goodwood Festival
+    RewriteRule ^hire-a-chauffeur-for-goodwood-festival/?$ https://www.jkexecutivechauffeurs.com/blog/hire-a-chauffeur-for-goodwood-festival/ [R=301,L]
+
+    # Top Benefits of Hiring a Chauffeur
+    RewriteRule ^the-top-benefits-of-hiring-a-chauffeur-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/the-top-benefits-of-hiring-a-chauffeur-in-london/ [R=301,L]
+
+    # Derby Festival
+    RewriteRule ^derby-festival-chauffeur-car-hire/?$ https://www.jkexecutivechauffeurs.com/blog/derby-festival-chauffeur-car-hire/ [R=301,L]
+
+    # Newmarket Chauffeur Service
+    RewriteRule ^newmarket-chauffeur-service-moet-chandon-july-festival/?$ https://www.jkexecutivechauffeurs.com/blog/newmarket-chauffeur-service-moet-chandon-july-festival/ [R=301,L]
+
+    # London New Year's Eve Events
+    RewriteRule ^london-new-years-eve-events/?$ https://www.jkexecutivechauffeurs.com/blog/london-new-years-eve-events/ [R=301,L]
+
+    # Hourly Chauffeur Service in London
+    RewriteRule ^hourly-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/hourly-chauffeur-service-in-london/ [R=301,L]
+
+    # Best London Chauffeur Service
+    RewriteRule ^best-london-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/best-london-chauffeur-service/ [R=301,L]
+
+    # BFI London Film Festival
+    RewriteRule ^bfi-london-film-festival/?$ https://www.jkexecutivechauffeurs.com/blog/bfi-london-film-festival/ [R=301,L]
+
+    # Cheltenham Chauffeur Service
+    RewriteRule ^cheltenham-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/cheltenham-chauffeur-service/ [R=301,L]
+
+    # Business Travel Executive Chauffeur
+    RewriteRule ^business-travel-executive-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/business-travel-executive-chauffeur/ [R=301,L]
+
+    # Things to Know Before Booking
+    RewriteRule ^things-to-know-before-booking-a-luxury-chauffeur-driven-car/?$ https://www.jkexecutivechauffeurs.com/blog/things-to-know-before-booking-a-luxury-chauffeur-driven-car/ [R=301,L]
+
+    # Halloween Chauffeur Service
+    RewriteRule ^halloween-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/halloween-chauffeur-service/ [R=301,L]
+
+    # Hire Chauffeur for Royal Windsor Horse Show
+    RewriteRule ^hire-a-chauffeur-for-royal-windsor-horse-show/?$ https://www.jkexecutivechauffeurs.com/blog/hire-a-chauffeur-for-royal-windsor-horse-show/ [R=301,L]
+
+    # England v Fiji Rugby
+    RewriteRule ^england-v-fiji-rugby/?$ https://www.jkexecutivechauffeurs.com/blog/england-v-fiji-rugby/ [R=301,L]
+
+    # Salon Prive London Royal Hospital
+    RewriteRule ^salon-prive-london-royal-hospital/?$ https://www.jkexecutivechauffeurs.com/blog/salon-prive-london-royal-hospital/ [R=301,L]
+
+    # The Boat Race 2025
+    RewriteRule ^the-boat-race-2025-oxford-vs-cambridge-13th-april-2025/?$ https://www.jkexecutivechauffeurs.com/blog/the-boat-race-2025-oxford-vs-cambridge-13th-april-2025/ [R=301,L]
+
+    # London Cocktail Week
+    RewriteRule ^london-cocktail-week-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/london-cocktail-week-chauffeur-service/ [R=301,L]
+
+    # Rugby Chauffeur Service
+    RewriteRule ^rugby-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/rugby-chauffeur-service/ [R=301,L]
+
+    # Hiring a Chauffeur in London
+    RewriteRule ^hiring-a-chauffeur-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/hiring-a-chauffeur-in-london/ [R=301,L]
+
+    # NFL London Games
+    RewriteRule ^nfl-london-games-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/nfl-london-games-chauffeur-service/ [R=301,L]
+
+    # Best Chauffeur Cars London
+    RewriteRule ^presenting-the-best-chauffeur-cars-london-has-to-offer/?$ https://www.jkexecutivechauffeurs.com/blog/presenting-the-best-chauffeur-cars-london-has-to-offer/ [R=301,L]
+
+    # Airport Transfer
+    RewriteRule ^airport-transfer/?$ https://www.jkexecutivechauffeurs.com/services/airport-chauffeur-service [R=301,L]
+
+    # Oasis Concert
+    RewriteRule ^chauffeur-for-oasis-concert/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-for-oasis-concert/ [R=301,L]
+
+    # Top 10 Events in London
+    RewriteRule ^the-top-10-events-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/the-top-10-events-in-london/ [R=301,L]
+
+    # Best Chauffeur Service in London
+    RewriteRule ^best-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/best-chauffeur-service-in-london/ [R=301,L]
+
+    # Discover Unmatched Elegance
+    RewriteRule ^discover-unmatched-elegance-with-chauffeur-services-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/discover-unmatched-elegance-with-chauffeur-services-in-london/ [R=301,L]
+
+    # Event Transportation Tips
+    RewriteRule ^event-transportation-in-london-tips-and-tricks-for-a-successful-experience/?$ https://www.jkexecutivechauffeurs.com/blog/event-transportation-in-london-tips-and-tricks-for-a-successful-experience/ [R=301,L]
+
+    # Airport Transfers Service
+    RewriteRule ^airport-transfers-service/?$ https://www.jkexecutivechauffeurs.com/blog/airport-transfers-service/ [R=301,L]
+
+    # Luxury Chauffeur Garsington Opera
+    RewriteRule ^luxury-chauffeur-garsington-opera/?$ https://www.jkexecutivechauffeurs.com/blog/luxury-chauffeur-garsington-opera/ [R=301,L]
+
+    # Cheltenham Festival Chauffeur Service 2
+    RewriteRule ^cheltenham-festival-chauffeur-service-2/?$ https://www.jkexecutivechauffeurs.com/blog/cheltenham-festival-chauffeur-service-2/ [R=301,L]
+
+    # England v Argentina Rugby
+    RewriteRule ^england-v-s-argentina-rugby/?$ https://www.jkexecutivechauffeurs.com/blog/england-v-s-argentina-rugby/ [R=301,L]
+
+    # Why Choose Range Rover
+    RewriteRule ^why-choose-our-chauffeur-driven-range-rover-for-event-transfers/?$ https://www.jkexecutivechauffeurs.com/blog/why-choose-our-chauffeur-driven-range-rover-for-event-transfers/ [R=301,L]
+
+    # Notting Hill Chauffeur Service
+    RewriteRule ^notting-hill-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/notting-hill-chauffeur-service/ [R=301,L]
+
+    # London Fashion Week Chauffeur Service
+    RewriteRule ^london-fashion-week-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/london-fashion-week-chauffeur-service/ [R=301,L]
+
+    # 10 Private Airports in London
+    RewriteRule ^10-private-airports-in-london-hire-transfers-for-private-jet-transfers/?$ https://www.jkexecutivechauffeurs.com/blog/10-private-airports-in-london-hire-transfers-for-private-jet-transfers/ [R=301,L]
+
+    # Event Chauffeur Service Elevate
+    RewriteRule ^event-chauffeur-service-elevate-your-occasion-with-style/?$ https://www.jkexecutivechauffeurs.com/blog/event-chauffeur-service-elevate-your-occasion-with-style/ [R=301,L]
+
+    # British Open Chauffeur
+    RewriteRule ^british-open-chauffeur-the-open-championship-chauffeurs/?$ https://www.jkexecutivechauffeurs.com/blog/british-open-chauffeur-the-open-championship-chauffeurs/ [R=301,L]
+
+    # Executive Chauffeurs
+    RewriteRule ^executive-chauffeurs/?$ https://www.jkexecutivechauffeurs.com/blog/executive-chauffeurs/ [R=301,L]
+
+    # Chauffeur Service in London 2
+    RewriteRule ^chauffeur-service-in-london-2/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-service-in-london-2/ [R=301,L]
+
+    # Kew Garden Chauffeur
+    RewriteRule ^kew-garden-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/kew-garden-chauffeur/ [R=301,L]
+
+    # Chauffeur Hire London Ultimate
+    RewriteRule ^chauffeur-hire-london-the-ultimate-way-to-travel-in-style-and-comfort/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-hire-london-the-ultimate-way-to-travel-in-style-and-comfort/ [R=301,L]
+
+    # Chauffeur Glastonbury Festival
+    RewriteRule ^chauffeur-glastonbury-festival/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-glastonbury-festival/ [R=301,L]
+
+    # England vs Ireland Six Nations
+    RewriteRule ^england-vs-ireland-six-nations/?$ https://www.jkexecutivechauffeurs.com/blog/england-vs-ireland-six-nations/ [R=301,L]
+
+    # Executive Airport Transfers
+    RewriteRule ^executive-airport-transfers/?$ https://www.jkexecutivechauffeurs.com/blog/executive-airport-transfers/ [R=301,L]
+
+    # Executive Chauffeur Service in London
+    RewriteRule ^executive-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/executive-chauffeur-service-in-london/ [R=301,L]
+
+    # Benefits of Mercedes S Class
+    RewriteRule ^benefits-of-choosing-mercedes-s-class-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/benefits-of-choosing-mercedes-s-class-chauffeur-service/ [R=301,L]
+
+    # Luxury Car Chauffeur Service Local
+    RewriteRule ^luxury-car-chauffeur-service-for-local-travel-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/luxury-car-chauffeur-service-for-local-travel-in-london/ [R=301,L]
+
+    # Why Book Mercedes Vito Hire
+    RewriteRule ^why-book-mercedes-vito-hire-with-driver-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/why-book-mercedes-vito-hire-with-driver-in-london/ [R=301,L]
+
+    # How to Choose the Right Car
+    RewriteRule ^how-to-choose-the-right-car-for-your-chauffeur-driven-tour/?$ https://www.jkexecutivechauffeurs.com/blog/how-to-choose-the-right-car-for-your-chauffeur-driven-tour/ [R=301,L]
+
+    # Concours of Elegance
+    RewriteRule ^concours-of-elegance-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/concours-of-elegance-chauffeur/ [R=301,L]
+
+    # Hire Executive Airport Transfers
+    RewriteRule ^hire-executive-airport-transfer/?$ https://www.jkexecutivechauffeurs.com/blog/hire-executive-airport-transfer/ [R=301,L]
+
+    # Luxury Chauffeur for Hay Festival
+    RewriteRule ^luxury-chauffeur-for-hay-festival/?$ https://www.jkexecutivechauffeurs.com/blog/luxury-chauffeur-for-hay-festival/ [R=301,L]
+
+    # Top 10 Places to Visit in London
+    RewriteRule ^top-10-places-to-visit-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/top-10-places-to-visit-in-london/ [R=301,L]
+
+    # Christmas in London
+    RewriteRule ^christmas-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/christmas-in-london/ [R=301,L]
+
+    # England vs Italy Six Nation Rugby
+    RewriteRule ^england-vs-italy-six-nation-rugby/?$ https://www.jkexecutivechauffeurs.com/blog/england-vs-italy-six-nation-rugby/ [R=301,L]
+
+    # Heathrow Airport Chauffeur Guide
+    RewriteRule ^heathrow-airport-chauffeur-your-guide-for-seamless-passage-and-smooth-transfers/?$ https://www.jkexecutivechauffeurs.com/blog/heathrow-airport-chauffeur-your-guide-for-seamless-passage-and-smooth-transfers/ [R=301,L]
+
+    # The Masters Snooker
+    RewriteRule ^the-masters-snooker/?$ https://www.jkexecutivechauffeurs.com/blog/the-masters-snooker/ [R=301,L]
+
+    # Hire Chauffeur for Full Day Trip
+    RewriteRule ^hire-a-chauffeur-for-a-full-day-trip-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/hire-a-chauffeur-for-a-full-day-trip-in-london/ [R=301,L]
+
+    # 6 Tips for Efficient Heathrow Service
+    RewriteRule ^6-tips-for-an-efficient-heathrow-airport-service/?$ https://www.jkexecutivechauffeurs.com/blog/6-tips-for-an-efficient-heathrow-airport-service/ [R=301,L]
+
+    # Wimbledon Chauffeur Service 1
+    RewriteRule ^wimbledon-chauffeur-service-1/?$ https://www.jkexecutivechauffeurs.com/blog/wimbledon-chauffeur-service-1/ [R=301,L]
+
+    # Best Executive Chauffeur Hire
+    RewriteRule ^best-executive-chauffeur-hire/?$ https://www.jkexecutivechauffeurs.com/blog/best-executive-chauffeur-hire/ [R=301,L]
+
+    # Event Chauffeurs London Service
+    RewriteRule ^event-chauffeurs-london-service/?$ https://www.jkexecutivechauffeurs.com/blog/event-chauffeurs-london-service/ [R=301,L]
+
+    # Book Chauffeur Car Hire in London
+    RewriteRule ^book-chauffeur-car-hire-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/book-chauffeur-car-hire-in-london/ [R=301,L]
+
+    # Hire Luxury Chauffeur Service London
+    RewriteRule ^hire-luxury-chauffeur-service-london/?$ https://www.jkexecutivechauffeurs.com/blog/hire-luxury-chauffeur-service-london/ [R=301,L]
+
+    # Chauffeurs for Events in London
+    RewriteRule ^chauffeurs-for-events-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeurs-for-events-in-london/ [R=301,L]
+
+    # Hire Chauffeur Service
+    RewriteRule ^hire-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/hire-chauffeur-service/ [R=301,L]
+
+    # Valentine's Getaway
+    RewriteRule ^valentines-getaway/?$ https://www.jkexecutivechauffeurs.com/blog/valentines-getaway/ [R=301,L]
+
+    # Best Executive Chauffeur
+    RewriteRule ^best-executive-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/best-executive-chauffeur/ [R=301,L]
+
+</IfModule>
+
+# =============================================================================
+# END OF .htaccess FILE
+# =============================================================================

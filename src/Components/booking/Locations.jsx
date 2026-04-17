@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Autocomplete } from "@react-google-maps/api";
+import Analytics from "../../Utils/analytics";
 import {
   MapPin,
   Flag,
@@ -222,7 +223,7 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
   return (
     <div
       ref={wrapperRef}
-      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-5"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-[10000] p-5"
       style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
     >
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
@@ -413,7 +414,7 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   return (
     <div
       ref={wrapperRef}
-      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-50 p-5"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)] shadow-2xl rounded-xl z-[10000] p-5"
       style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
     >
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 transform rotate-45" style={{ backgroundColor: '#1a1a1a', borderRight: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
@@ -498,9 +499,9 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   );
 };
 
-// Duration options: 30 min to 24h in 30-min steps
+// Duration options: 3 hours to 24h in 30-min steps
 const DURATION_OPTIONS = [];
-for (let mins = 30; mins <= 1440; mins += 30) {
+for (let mins = 180; mins <= 1440; mins += 30) {
   const h = Math.floor(mins / 60);
   const m = mins % 60;
   let label;
@@ -578,7 +579,7 @@ const DurationDropdown = ({ value, onChange }) => {
 };
 
 // --- MAIN COMPONENT ---
-function Locations({ data, updateData, onNext }) {
+function Locations({ data, updateData, onNext, isOnHome = false }) {
   const [serviceType, setServiceType] = useState(data.serviceType || "oneway");
   const [activePicker, setActivePicker] = useState(null); // 'date', 'time', 'duration' or null
   const [errors, setErrors] = useState({});
@@ -665,6 +666,19 @@ function Locations({ data, updateData, onNext }) {
       }
 
       if (fullAddress) {
+        // Check if dropoff is same as pickup
+        if (data.pickup && fullAddress.toLowerCase().trim() === data.pickup.toLowerCase().trim()) {
+          setErrors((prev) => ({
+            ...prev,
+            dropoff: "Pickup and dropoff locations cannot be the same"
+          }));
+          if (dropoffInputRef.current) {
+            dropoffInputRef.current.value = "";
+          }
+          updateData("dropoff", "");
+          return;
+        }
+
         updateData("dropoff", fullAddress);
         setErrors((prev) => ({ ...prev, dropoff: null }));
         if (dropoffInputRef.current) {
@@ -691,7 +705,7 @@ function Locations({ data, updateData, onNext }) {
     if (type === "hourly") {
       updateData("dropoff", "");
       if (dropoffInputRef.current) dropoffInputRef.current.value = "";
-      if (!data.hours) updateData("hours", 2);
+      if (!data.hours || data.hours < 3) updateData("hours", 3);
     }
   };
 
@@ -772,12 +786,14 @@ function Locations({ data, updateData, onNext }) {
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
+      // Fire GET_PRICE event only when validation passes (user actually proceeds)
+      Analytics.trackGetPrice({ source: 'booking_step_1_search' });
       onNext();
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto font-sans text-slate-200">
+    <div className="max-w-3xl mx-auto font-sans text-slate-200 pb-4 sm:pb-8">
       <style>{customStyles}</style>
 
       <div className="relative rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
@@ -787,11 +803,15 @@ function Locations({ data, updateData, onNext }) {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border-b border-white/5 gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-lg shadow-inner border border-[var(--color-primary)]/20">
+            {/* <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-lg shadow-inner border border-[var(--color-primary)]/20">
               🇬🇧
-            </span>
+            </span> */}
             <h2 className="text-lg font-bold tracking-widest uppercase text-white">
-              Reservation <span className="text-[var(--color-primary)]">Details</span>
+              {isOnHome ? (
+                <>Book Your <span className="text-[var(--color-primary)]">Ride Now</span></>
+              ) : (
+                <>Reservation <span className="text-[var(--color-primary)]">Details</span></>
+              )}
             </h2>
           </div>
 
@@ -806,7 +826,7 @@ function Locations({ data, updateData, onNext }) {
                   : "text-slate-400 hover:text-white"
                   }`}
               >
-                {t === "oneway" ? "Point to Point" : "Hourly"}
+                {t === "oneway" ? "One Way" : "Hourly"}
               </button>
             ))}
           </div>
@@ -953,11 +973,12 @@ function Locations({ data, updateData, onNext }) {
           </div>
 
           {/* Footer Assistance */}
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-white/5 text-[11px] text-slate-500 uppercase tracking-tighter">
-            <span>{serviceType === "hourly" ? "Chauffeur at disposal" : "15 Mins free waiting"}</span>
+          <div className={`flex ${isOnHome ? 'flex-col' : 'flex-col sm:flex-row'} items-center ${isOnHome ? 'text-center' : 'justify-between'} ${isOnHome ? 'pt-0' : 'pt-0'}  border-t border-white/5 text-[11px] text-[#9CA3AF] uppercase `}>
+            <span className={`${isOnHome ? 'text-center' : 'text-center sm:text-left'}`}>Airport pickup includes 60 minutes free waiting, non-airport pickups include 15 minutes</span>
             <a
               href="tel:+442034759906"
-              className="flex items-center gap-2 text-[var(--color-primary)] font-bold mt-2 sm:mt-0 hover:opacity-80 transition-opacity"
+              onClick={() => Analytics.trackCallClick('booking_form_footer_phone')}
+              className={`flex items-center gap-2 text-[var(--color-primary)] font-bold hover:opacity-80 transition-opacity ${isOnHome ? 'mt-2' : 'mt-2 sm:mt-0'}`}
             >
               <Phone size={12} /> +44 (0) 203 475 9906
             </a>

@@ -76,6 +76,7 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
     }
   }, [journeyInfo]);
 
+
   const filteredVehicles = useMemo(
     () =>
       vehicles.map((v) => ({
@@ -94,6 +95,15 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
       ),
     [filteredVehicles]
   );
+
+  // Auto-select the first available (non-disabled) vehicle when the list loads
+  useEffect(() => {
+    if (sortedVehicles.length > 0 && !selectedVehicle) {
+      const firstAvailable = sortedVehicles.find((v) => !v.isDisabled) || sortedVehicles[0];
+      setSelectedVehicle(firstAvailable);
+      updateData("selectedVehicle", firstAvailable);
+    }
+  }, [sortedVehicles]);
 
   const handleSelectVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);
@@ -244,14 +254,16 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
         </div>
       )}
 
-      {/* Bottom Navigation */}
-      <StepNavBar
-        onBack={onBack}
-        onContinue={handleContinue}
-        backLabel="BACK"
-        continueLabel="CONTINUE TO BOOKING"
-        disabled={!selectedVehicle}
-      />
+      {/* Bottom Navigation - Mobile Only */}
+      <div className="lg:hidden">
+        <StepNavBar
+          onBack={onBack}
+          onContinue={handleContinue}
+          backLabel="BACK"
+          continueLabel="CONTINUE TO BOOKING"
+          disabled={!selectedVehicle}
+        />
+      </div>
     </div>
   );
 }

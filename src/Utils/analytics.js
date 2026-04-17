@@ -1,308 +1,321 @@
-/**
- * ============================================================
- * JK Executive — Analytics Tracking Service
- * ============================================================
- * Singleton wrapper for Google Tag Manager + Meta Pixel.
- * Loads scripts dynamically — only in production to keep dev clean.
- *
- * Usage:
- *   import Analytics from './analytics';
- *   Analytics.track(Analytics.EVENTS.BUTTON_CLICK_BOOKING, { button_name: 'hero_get_quote' });
- * ============================================================
- */
-
 class AnalyticsWrapper {
-    static instance = null;
+  static instance = null;
 
-    // ── Event Registry ─────────────────────────────────────────
-    EVENTS = {
-        // Customer journey
-        BUTTON_CLICK_BOOKING: "button_click_booking",   // Any CTA → /booking
-        CALL_BUTTON_CLICK: "call_button_click",       // Any tel: link / call button
-        INITIATE_CHECKOUT: "initiate_checkout",       // "Proceed to Payment" on summary
-        PURCHASE: "purchase",               // Successful Stripe payment
-        PAYMENT_FAILURE: "payment_failure",        // Stripe error / page abandon
+  // ── Allowed Events — central registry (acts like enum) ──────
+  ALLOWED_EVENTS = {
+    BOOK_NOW_BUTTON_CLICK: "Book_now_button_click",
+    LOGIN_BUTTON_CLICK: "Login_button_click",
+    CALL_BUTTON_CLICK: "Call_button_click",
+    GET_PRICE_BUTTON_CLICK: "Get_price_button_click",
+    INQUIRY_GENERATED: "Inquiry_generated",
+    PURCHASE: "purchase",
+    PAYMENT_FAILURE: "Payment_failure",
+    PAGE_VIEW: "page_view",
+  };
 
-        // General
-        PAGE_VIEW: "page_view",
-        FORM_SUBMIT: "form_submit",
-    };
+  defaultParams = {
+    app_version: "1.0.0",
+    platform: "web",
+    user_agent: navigator.userAgent,
+  };
 
-    // ── Internal state ─────────────────────────────────────────
-    #isInitialized = false;
-    #scriptsLoaded = false;
-    #gtmId = null;
-    #pixelId = null;
+  isInitialized = false;
+  scriptsLoaded = false;
+  gtmId = null;
+  pixelId = null;
 
-    defaultParams = {
-        app_version: "1.0.0",
-        platform: "web",
-    };
+  // ── Singleton guard ──────────────────────────────────────────
+  constructor() {
+    if (AnalyticsWrapper.instance) {
+      throw new Error(
+        "Use Analytics (default export) — do NOT call new AnalyticsWrapper()",
+      );
+    }
+  }
 
-    // ── Singleton guard ────────────────────────────────────────
-    constructor() {
-        if (AnalyticsWrapper.instance) {
-            throw new Error("Use Analytics (default export) — do NOT call new AnalyticsWrapper()");
-        }
+  static getInstance() {
+    if (!AnalyticsWrapper.instance) {
+      AnalyticsWrapper.instance = new AnalyticsWrapper();
+    }
+    return AnalyticsWrapper.instance;
+  }
+
+  // ── Environment check
+  isProduction() {
+    const hostname = window.location.hostname;
+    return hostname !== "localhost" && hostname !== "127.0.0.1";
+  }
+
+  // ── Dynamically inject tracking scripts (production only) ────
+  loadTrackingScripts() {
+    if (!this.isProduction()) {
+      console.log("[Analytics] Skipped — not in production");
+      return Promise.resolve();
     }
 
-    static getInstance() {
-        if (!AnalyticsWrapper.instance) {
-            AnalyticsWrapper.instance = new AnalyticsWrapper();
-        }
-        return AnalyticsWrapper.instance;
-    }
+    if (this.scriptsLoaded) return Promise.resolve();
 
-    // ── Environment check ──────────────────────────────────────
-    /**
-     * Returns true when running on a real/production host.
-     * Tracking is intentionally skipped on localhost / 127.0.0.1
-     */
-    isProduction() {
-        const hostname = window.location.hostname;
-        return (
-            hostname !== "localhost" &&
-            hostname !== "127.0.0.1"
-        );
-    }
+    return new Promise((resolve) => {
+      const gtmIdVal = "GTM-WMZR9JNW";
+      const pixelIdVal = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
 
-    // ── Script loading ─────────────────────────────────────────
-    /**
-     * Dynamically injects GTM into <head> / <body>.
-     * Safe to call multiple times — only loads once.
-     */
-    loadTrackingScripts() {
-        if (!this.isProduction()) {
-            console.log("[Analytics] Skipped — running on dev/localhost");
-            return Promise.resolve();
-        }
-
-        if (this.#scriptsLoaded) return Promise.resolve();
-
-        return new Promise((resolve) => {
-            // ── GTM <script> ──
-            const gtmScript = document.createElement("script");
-            gtmScript.innerHTML = `
+      // ── Google Tag Manager <script> ──────────────────────────
+      const gtmScript = document.createElement("script");
+      gtmScript.innerHTML = `
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','${import.meta.env.VITE_GTM_ID || "GTM-K6TCGLZS"}');
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','${gtmIdVal}');
       `;
-            document.head.appendChild(gtmScript);
+      document.head.appendChild(gtmScript);
 
-            // ── GTM <noscript> fallback ──
-            const gtmNoscript = document.createElement("noscript");
-            gtmNoscript.innerHTML = `
-        <iframe src="https://www.googletagmanager.com/ns.html?id=${import.meta.env.VITE_GTM_ID || "GTM-K6TCGLZS"}"
-        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+      // ── GTM <noscript> fallback ──────────────────────────────
+      const gtmNoscript = document.createElement("noscript");
+      gtmNoscript.innerHTML = `
+        <iframe src="https://www.googletagmanager.com/ns.html?id=${gtmIdVal}"
+          height="0" width="0" style="display:none;visibility:hidden"></iframe>
       `;
-            if (document.body.firstChild) {
-                document.body.insertBefore(gtmNoscript, document.body.firstChild);
-            } else {
-                document.body.appendChild(gtmNoscript);
-            }
+      if (document.body.firstChild) {
+        document.body.insertBefore(gtmNoscript, document.body.firstChild);
+      } else {
+        document.body.appendChild(gtmNoscript);
+      }
 
-            // ── Meta Pixel <script> ──
-            const pixelId = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
-            const pixelScript = document.createElement("script");
-            pixelScript.innerHTML = `
+      // ── Meta Pixel <script> ──────────────────────────────────
+      const pixelScript = document.createElement("script");
+      pixelScript.innerHTML = `
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
         n.callMethod.apply(n,arguments):n.queue.push(arguments)};
         if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
         n.queue=[];t=b.createElement(e);t.async=!0;
         t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        s.parentNode.insertBefore(t,s)}(window,document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '${pixelIdVal}');
+        fbq('track', 'PageView');
       `;
-            document.head.appendChild(pixelScript);
+      document.head.appendChild(pixelScript);
 
-            // ── Meta Pixel <noscript> fallback ──
-            const pixelNoscript = document.createElement("noscript");
-            pixelNoscript.innerHTML = `<img height="1" width="1" style="display:none"
-        src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1"/>`;
-            document.body.appendChild(pixelNoscript);
+      // ── Meta Pixel <noscript> fallback ──────────────────────
+      const pixelNoscript = document.createElement("noscript");
+      pixelNoscript.innerHTML = `
+        <img height="1" width="1" style="display:none"
+          src="https://www.facebook.com/tr?id=${pixelIdVal}&ev=PageView&noscript=1"/>
+      `;
+      document.body.appendChild(pixelNoscript);
 
-            this.#scriptsLoaded = true;
+      this.scriptsLoaded = true;
 
-            // Give scripts a moment to bootstrap
-            setTimeout(resolve, 150);
-        });
+      // Give scripts a moment to bootstrap before resolving
+      setTimeout(resolve, 150);
+    });
+  }
+
+  safeTrack(trackerName, ...args) {
+    if (typeof window[trackerName] === "function") {
+      window[trackerName](...args);
+    } else if (trackerName === "gtag" && window.dataLayer) {
+      window.dataLayer.push({ event: args[1], ...args[2] });
+    }
+  }
+
+  async initialize() {
+    if (this.isInitialized) {
+      console.warn("[Analytics] Already initialized.");
+      return;
     }
 
-    // ── Safe wrapper around window.gtag ───────────────────────
-    #safeGtag(...args) {
-        if (typeof window.gtag === "function") {
-            window.gtag(...args);
-        } else if (window.dataLayer) {
-            window.dataLayer.push(arguments);
-        } else {
-            console.warn("[Analytics] gtag not available:", ...args);
-        }
+    await this.loadTrackingScripts();
+
+    this.gtmId = import.meta.env.VITE_GTM_ID || "GTM-WMZR9JNW";
+    this.pixelId = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
+    this.isInitialized = true;
+
+    console.log(
+      `[Analytics] Initialized → GTM(${this.gtmId}) | Pixel(${this.pixelId})`,
+    );
+  }
+
+  track(eventName, data = {}) {
+    if (!this.isInitialized) {
+      console.warn("[Analytics] Not initialized. Event skipped:", eventName);
+      return;
     }
 
-    // ── Safe wrapper around window.fbq (Meta Pixel) ──────────
-    #safeFbq(type, eventName, payload = {}) {
-        if (typeof window.fbq === "function") {
-            window.fbq(type, eventName, payload);
-        }
+    // Validate against whitelist
+    const allowedEventValues = Object.values(this.ALLOWED_EVENTS);
+    if (!allowedEventValues.includes(eventName)) {
+      console.error(
+        `[Analytics] Invalid event "${eventName}". Allowed: ${allowedEventValues.join(", ")}`,
+      );
+      return;
     }
 
-    // ── Initialize ─────────────────────────────────────────────
-    /**
-     * Call once in App.jsx useEffect.
-     * Safely skips if already initialized or not in production.
-     */
-    async initialize(gtmId) {
-        if (this.#isInitialized) return;
+    // Build full payload
+    const payload = {
+      ...this.defaultParams,
+      page_path: window.location.pathname,
+      ...data,
+    };
 
-        await this.loadTrackingScripts();
-
-        this.#gtmId = gtmId || import.meta.env.VITE_GTM_ID || "GTM-K6TCGLZS";
-        this.#pixelId = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
-        this.#isInitialized = true;
-
-        // Init Meta Pixel + fire PageView
-        if (this.isProduction()) {
-            this.#safeFbq("init", this.#pixelId);
-            this.#safeFbq("track", "PageView");
-        }
-
-        console.log(`[Analytics] Initialized → GTM(${this.#gtmId}) | Pixel(${this.#pixelId})`);
+    // Purchase field normalization
+    if (eventName === this.ALLOWED_EVENTS.PURCHASE) {
+      if (payload.amount && !payload.value) payload.value = payload.amount;
+      if (!payload.currency) payload.currency = "GBP";
+      if (payload.vehicle && !payload.content_name)
+        payload.content_name = payload.vehicle;
+      if (payload.orderId && !payload.transaction_id)
+        payload.transaction_id = payload.orderId;
     }
 
-    // ── Main track() method ────────────────────────────────────
-    /**
-     * Fire a tracking event.
-     * @param {string} eventName  — Must be one of Analytics.EVENTS
-     * @param {object} data       — Extra payload merged with defaultParams
-     */
-    track(eventName, data = {}) {
-        // Validate event name
-        const allowed = Object.values(this.EVENTS);
-        if (!allowed.includes(eventName)) {
-            console.error(
-                `[Analytics] Unknown event "${eventName}". Allowed:`, allowed
-            );
-            return;
-        }
-
-        // Build payload
-        const payload = {
-            ...this.defaultParams,
-            page_path: window.location.pathname,
-            ...data,
-        };
-
-        // Purchase normalization
-        if (eventName === this.EVENTS.PURCHASE) {
-            if (payload.amount && !payload.value) payload.value = payload.amount;
-            if (!payload.currency) payload.currency = "GBP";
-            if (payload.vehicle && !payload.content_name) payload.content_name = payload.vehicle;
-        }
-
-        // Initiate Checkout normalization
-        if (eventName === this.EVENTS.INITIATE_CHECKOUT) {
-            if (payload.amount && !payload.value) payload.value = payload.amount;
-            if (!payload.currency) payload.currency = "GBP";
-        }
-
-        // Send to dataLayer (GTM picks it up)
-        if (window.dataLayer) {
-            window.dataLayer.push({ event: eventName, ...payload });
-        }
-
-        // Also fire via gtag if available
-        this.#safeGtag("event", eventName, payload);
-
-        // ── Meta Pixel event mapping ──────────────────────────
-        if (this.isProduction()) {
-            const fbqPayload = {};
-            if (payload.value) fbqPayload.value = payload.value;
-            if (payload.currency) fbqPayload.currency = payload.currency;
-            if (payload.vehicle) fbqPayload.content_name = payload.vehicle;
-
-            switch (eventName) {
-                case this.EVENTS.PURCHASE:
-                    // Standard Pixel Purchase event
-                    this.#safeFbq("track", "Purchase", fbqPayload);
-                    break;
-                case this.EVENTS.INITIATE_CHECKOUT:
-                    // Standard Pixel InitiateCheckout event
-                    this.#safeFbq("track", "InitiateCheckout", fbqPayload);
-                    break;
-                case this.EVENTS.BUTTON_CLICK_BOOKING:
-                    // Standard Pixel Lead — someone showed interest in booking
-                    this.#safeFbq("track", "Lead", { content_name: payload.button_name });
-                    break;
-                case this.EVENTS.CALL_BUTTON_CLICK:
-                    // Custom Pixel event for call clicks
-                    this.#safeFbq("trackCustom", "CallClick", { call_source: payload.call_source });
-                    break;
-                case this.EVENTS.PAYMENT_FAILURE:
-                    // Custom Pixel event for payment failures
-                    this.#safeFbq("trackCustom", "PaymentFailure", { reason: payload.error_description });
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // Always log in dev for easy debugging
-        if (!this.isProduction()) {
-            console.log(`[Analytics] ${eventName}`, payload);
-        }
+    // Inquiry normalization
+    if (eventName === this.ALLOWED_EVENTS.INQUIRY_GENERATED) {
+      if (payload.amount && !payload.value) payload.value = payload.amount;
+      if (!payload.currency) payload.currency = "GBP";
     }
 
-    // ────────────────────────────────────────────────────────────
-    // Convenience shortcut methods
-    // ────────────────────────────────────────────────────────────
-
-    trackBookingClick(buttonName, extra = {}) {
-        this.track(this.EVENTS.BUTTON_CLICK_BOOKING, {
-            button_name: buttonName,
-            ...extra,
-        });
+    // Push to GTM dataLayer
+    if (window.dataLayer) {
+      window.dataLayer.push({ event: eventName, ...payload });
     }
 
-    trackCallClick(source, extra = {}) {
-        this.track(this.EVENTS.CALL_BUTTON_CLICK, {
-            call_source: source,
-            ...extra,
-        });
-    }
+    // Also fire via gtag if available
+    this.safeTrack("gtag", "event", eventName, payload);
 
-    trackInitiateCheckout(bookingData = {}) {
-        this.track(this.EVENTS.INITIATE_CHECKOUT, {
-            amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+    // Meta Pixel event mapping (production only)
+    if (this.isProduction()) {
+      switch (eventName) {
+        case this.ALLOWED_EVENTS.PURCHASE:
+          this.safeTrack("fbq", "track", "Purchase", {
+            value: payload.value,
+            currency: payload.currency || "GBP",
+            content_name: payload.content_name || payload.vehicle,
+          });
+          break;
+
+        case this.ALLOWED_EVENTS.INQUIRY_GENERATED:
+          this.safeTrack("fbq", "track", "Lead", {
+            value: payload.amount,
             currency: "GBP",
-            vehicle: bookingData.selectedVehicle?.categoryName,
-            service_type: bookingData.serviceType,
-            pickup: bookingData.pickup,
-            dropoff: bookingData.dropoff,
-            pickup_date: bookingData.pickupDate,
-        });
+          });
+          break;
+
+        case this.ALLOWED_EVENTS.BOOK_NOW_BUTTON_CLICK:
+          this.safeTrack("fbq", "track", "BookNowClick", {
+            content_name: payload.button_name || "book_now",
+          });
+          break;
+
+        case this.ALLOWED_EVENTS.GET_PRICE_BUTTON_CLICK:
+          this.safeTrack("fbq", "track", "GetPriceClick", {
+            source: payload.source,
+          });
+          break;
+
+        case this.ALLOWED_EVENTS.CALL_BUTTON_CLICK:
+          this.safeTrack("fbq", "track", "CallClick", {
+            call_source: payload.call_source,
+          });
+          break;
+
+        case this.ALLOWED_EVENTS.LOGIN_BUTTON_CLICK:
+          this.safeTrack("fbq", "track", "LoginClick", {});
+          break;
+
+        case this.ALLOWED_EVENTS.PAYMENT_FAILURE:
+          this.safeTrack("fbq", "track", "PaymentFailure", {
+            reason: payload.error_description,
+          });
+          break;
+
+        default:
+          break;
+      }
     }
 
-    trackPurchase(paymentIntent, bookingData = {}) {
-        this.track(this.EVENTS.PURCHASE, {
-            transaction_id: paymentIntent?.id,
-            amount: bookingData.selectedVehicle?.pricing?.totalPrice,
-            currency: "GBP",
-            vehicle: bookingData.selectedVehicle?.categoryName,
-            service_type: bookingData.serviceType,
-            payment_method: "stripe",
-        });
+    // Always log in dev for debugging
+    if (!this.isProduction()) {
+      console.log(`[Analytics] Event fired: ${eventName}`, payload);
     }
+  }
 
-    trackPaymentFailure(reason, extra = {}) {
-        this.track(this.EVENTS.PAYMENT_FAILURE, {
-            error_description: reason,
-            currency: "GBP",
-            ...extra,
-        });
-    }
+  /** Book Now / Get a Quote button clicked anywhere on the site */
+  trackBookingClick(buttonName, extra = {}) {
+    this.track(this.ALLOWED_EVENTS.BOOK_NOW_BUTTON_CLICK, {
+      button_name: buttonName,
+      ...extra,
+    });
+  }
+
+  /** Call / Speak to Us button clicked */
+  trackCallClick(source, extra = {}) {
+    this.track(this.ALLOWED_EVENTS.CALL_BUTTON_CLICK, {
+      call_source: source,
+      ...extra,
+    });
+  }
+
+  /** Login button clicked */
+  trackLoginClick(extra = {}) {
+    this.track(this.ALLOWED_EVENTS.LOGIN_BUTTON_CLICK, extra);
+  }
+
+  trackGetPrice(extra = {}) {
+    this.track(this.ALLOWED_EVENTS.GET_PRICE_BUTTON_CLICK, {
+      source: "booking_step",
+      ...extra,
+    });
+  }
+
+  trackInquiryGenerated(bookingData = {}) {
+    this.track(this.ALLOWED_EVENTS.INQUIRY_GENERATED, {
+      amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+      currency: "GBP",
+      vehicle: bookingData.selectedVehicle?.categoryName,
+      service_type: bookingData.serviceType,
+      pickup: bookingData.pickup,
+      dropoff: bookingData.dropoff,
+      pickup_date: bookingData.pickupDate,
+    });
+  }
+
+  trackPurchase(paymentIntent, bookingData = {}) {
+    this.track(this.ALLOWED_EVENTS.PURCHASE, {
+      transaction_id: paymentIntent?.id,
+      amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+      value: bookingData.selectedVehicle?.pricing?.totalPrice,
+      currency: "GBP",
+      vehicle: bookingData.selectedVehicle?.categoryName,
+      content_name: bookingData.selectedVehicle?.categoryName,
+      service_type: bookingData.serviceType,
+      payment_method: "stripe",
+    });
+  }
+
+  /**
+   * Payment failed, cancelled, or user abandoned the payment step
+   * @param {string} reason - e.g. "card_declined", "payment_page_abandoned"
+   * @param {object} extra  - stripe error code, amount, vehicle, etc.
+   */
+  trackPaymentFailure(reason, extra = {}) {
+    this.track(this.ALLOWED_EVENTS.PAYMENT_FAILURE, {
+      error_description: reason,
+      currency: "GBP",
+      ...extra,
+    });
+  }
+
+  /** Track a page view — called on every route change */
+  trackPageView(path, extra = {}) {
+    this.track(this.ALLOWED_EVENTS.PAGE_VIEW, {
+      page_path: path || window.location.pathname,
+      page_title: document.title,
+      page_location: window.location.href,
+      ...extra,
+    });
+  }
 }
 
 // Export the singleton

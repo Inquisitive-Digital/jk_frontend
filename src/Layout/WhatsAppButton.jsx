@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import Analytics from '../Utils/analytics';
 
 // SVG WhatsApp Icon (same as Footer)
 const WhatsAppIcon = () => (
@@ -28,6 +29,7 @@ function WhatsAppButton() {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => Analytics.trackCallClick('whatsapp_floating_button')}
       className="fixed bottom-6 left-6 z-50 w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300"
       style={{
         backgroundColor: hovered ? hoverBg : defaultBg,

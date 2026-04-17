@@ -15,7 +15,7 @@ import {
   Minus,
   Plus,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import StepNavBar from "./StepNavBar";
 
 /**
@@ -435,7 +435,7 @@ const CounterField = ({ label, icon: Icon, required, value, onChange, min = 0, m
 };
 
 // Main UserDetails Component
-function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
+const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, onBack, isLoading = false }, ref) {
   const [formData, setFormData] = useState({
     firstName: data?.passengerDetails?.firstName || "",
     lastName: data?.passengerDetails?.lastName || "",
@@ -576,7 +576,107 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
   };
 
   const handleSubmit = () => {
-    if (!validateForm()) return;
+    const newErrors = {};
+
+    const namePattern = /^[A-Za-z\s\-']+$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validate first name
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    } else if (!namePattern.test(formData.firstName.trim())) {
+      newErrors.firstName = "First name can only contain letters";
+    }
+
+    // Validate last name
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    } else if (!namePattern.test(formData.lastName.trim())) {
+      newErrors.lastName = "Last name can only contain letters";
+    }
+
+    // Validate email
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailPattern.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    // Validate phone
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else {
+      const phoneValidation = validateUkPhone(formData.phone, formData.countryCode);
+      if (!phoneValidation.isValid) {
+        newErrors.phone = phoneValidation.errorMessage;
+      }
+    }
+
+    // Validate passengers and suitcases against selected vehicle capacity
+    const selectedVehicle = data?.selectedVehicle;
+    if (selectedVehicle) {
+      const maxPassengers = selectedVehicle.numberOfPassengers || 0;
+      const maxLuggage = selectedVehicle.numberOfBigLuggage || 0;
+
+      if (formData.numberOfPassengers > maxPassengers) {
+        newErrors.numberOfPassengers = `Maximum ${maxPassengers} ${maxPassengers === 1 ? 'passenger' : 'passengers'} allowed for this vehicle`;
+      }
+
+      if (formData.numberOfSuitcases > maxLuggage) {
+        newErrors.numberOfSuitcases = `Maximum ${maxLuggage} ${maxLuggage === 1 ? 'suitcase' : 'suitcases'} allowed for this vehicle`;
+      }
+    }
+
+    // Validate guest details if booking for someone else
+    if (formData.isBookingForSomeoneElse) {
+      if (!formData.guestFirstName.trim()) {
+        newErrors.guestFirstName = "Passenger's first name is required";
+      } else if (!namePattern.test(formData.guestFirstName.trim())) {
+        newErrors.guestFirstName = "First name can only contain letters";
+      }
+
+      if (!formData.guestLastName.trim()) {
+        newErrors.guestLastName = "Passenger's last name is required";
+      } else if (!namePattern.test(formData.guestLastName.trim())) {
+        newErrors.guestLastName = "Last name can only contain letters";
+      }
+
+      if (!formData.guestEmail.trim()) {
+        newErrors.guestEmail = "Passenger's email is required";
+      } else if (!emailPattern.test(formData.guestEmail)) {
+        newErrors.guestEmail = "Please enter a valid email address";
+      }
+
+      if (formData.guestPhone.trim()) {
+        const guestPhoneValidation = validateUkPhone(formData.guestPhone, formData.guestCountryCode);
+        if (!guestPhoneValidation.isValid) {
+          newErrors.guestPhone = guestPhoneValidation.errorMessage;
+        }
+      }
+    }
+
+    // Validate flight details if airport pickup
+    if (formData.isAirportPickup) {
+      if (!formData.flightNumber.trim()) newErrors.flightNumber = "Flight number is required";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      // Scroll to first error
+      const firstErrorField = Object.keys(newErrors)[0];
+      console.log("Validation failed. Errors:", newErrors);
+      
+      setTimeout(() => {
+        const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`);
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return;
+    }
+
+    console.log("Validation passed. Submitting...");
 
     const passengerDetailsData = {
       firstName: formData.firstName,
@@ -614,6 +714,11 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
     });
   };
 
+  // Expose handleSubmit to parent via ref (used by desktop StickyBookingSummary)
+  useImperativeHandle(ref, () => ({
+    submit: handleSubmit,
+  }));
+
   return (
     <div className="py-2">
       <div className="w-full">
@@ -645,48 +750,56 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <InputField
-                label="First Name"
-                icon={User}
+              <div data-field="firstName">
+                <InputField
+                  label="First Name"
+                  icon={User}
+                  required
+                  placeholder="Enter first name"
+                  value={formData.firstName}
+                  onChange={(e) => updateField("firstName", e.target.value)}
+                  error={errors.firstName}
+                  filterType="name"
+                />
+              </div>
+              <div data-field="lastName">
+                <InputField
+                  label="Last Name"
+                  icon={User}
+                  required
+                  placeholder="Enter last name"
+                  value={formData.lastName}
+                  onChange={(e) => updateField("lastName", e.target.value)}
+                  error={errors.lastName}
+                  filterType="name"
+                />
+              </div>
+            </div>
+
+            <div data-field="phone">
+              <PhoneInput
+                countryCode={formData.countryCode}
+                onCountryCodeChange={(code) => updateField("countryCode", code)}
+                phone={formData.phone}
+                onPhoneChange={(phone) => updateField("phone", phone)}
+                label="Contact Number"
                 required
-                placeholder="Enter first name"
-                value={formData.firstName}
-                onChange={(e) => updateField("firstName", e.target.value)}
-                error={errors.firstName}
-                filterType="name"
-              />
-              <InputField
-                label="Last Name"
-                icon={User}
-                required
-                placeholder="Enter last name"
-                value={formData.lastName}
-                onChange={(e) => updateField("lastName", e.target.value)}
-                error={errors.lastName}
-                filterType="name"
+                error={errors.phone}
               />
             </div>
 
-            <PhoneInput
-              countryCode={formData.countryCode}
-              onCountryCodeChange={(code) => updateField("countryCode", code)}
-              phone={formData.phone}
-              onPhoneChange={(phone) => updateField("phone", phone)}
-              label="Contact Number"
-              required
-              error={errors.phone}
-            />
-
-            <InputField
-              label="Email Address"
-              icon={Mail}
-              required
-              type="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              error={errors.email}
-            />
+            <div data-field="email">
+              <InputField
+                label="Email Address"
+                icon={Mail}
+                required
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={(e) => updateField("email", e.target.value)}
+                error={errors.email}
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <CounterField
@@ -865,17 +978,19 @@ function UserDetails({ data, updateData, onNext, onBack, isLoading = false }) {
           </div>
         </motion.div>
 
-        {/* Action Buttons */}
-        <StepNavBar
-          onBack={onBack}
-          onContinue={handleSubmit}
-          backLabel="BACK"
-          continueLabel="PROCEED TO PAYMENT"
-          isLoading={isLoading}
-        />
+        {/* Action Buttons - Mobile Only */}
+        <div className="lg:hidden">
+          <StepNavBar
+            onBack={onBack}
+            onContinue={handleSubmit}
+            backLabel="BACK"
+            continueLabel="PROCEED TO PAYMENT"
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
-}
+});
 
 export default UserDetails;

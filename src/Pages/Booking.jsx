@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
+import { useBooking } from "../Context/BookingContext";
 import Locations from "../Components/booking/Locations";
 import CarsSelection from "../Components/booking/CarsSelection";
 import UserDetails from "../Components/booking/UserDetails";
@@ -53,29 +56,76 @@ function Booking() {
     libraries: LIBRARIES,
   });
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const location = useLocation();
+  const { bookingData, updateBooking, resetBooking, isFromHero, hasValidLocations } = useBooking();
+
+  // Use context data as source of truth, initialize from context
+  const [currentStep, setCurrentStep] = useState(() => {
+    // If coming from hero with valid locations, start at step 2
+    if (location.state?.startStep === 2 && hasValidLocations()) {
+      return 2;
+    }
+    return 1;
+  });
   const [clientSecret, setClientSecret] = useState(null);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [isTestMode, setIsTestMode] = useState(false);
-  const [bookingData, setBookingData] = useState({
-    pickup: null,
-    dropoff: null,
-    pickupDate: new Date(),
-    pickupTime: getDefaultPickupTime(),
-    serviceType: "oneway",
-    hours: 2,
-    selectedVehicle: null,
-    journeyInfo: null,
-    passengerDetails: null,
-    flightDetails: null,
-    specialInstructions: "",
-    savedBookingId: null,
-    originalEmail: null,
-  });
+  const userDetailsRef = useRef(null);
 
-  const updateBooking = (field, value) => {
-    setBookingData((prev) => ({ ...prev, [field]: value }));
-  };
+  // ── Payment failure tracking refs ──────────────────────────────
+  const paymentCompletedRef = useRef(false);  // true when Stripe payment succeeds
+  const failureFiredRef = useRef(false);      // true when any failure event already fired (prevents duplicates)
+  const currentStepRef = useRef(currentStep); // latest step (for unmount cleanup)
+  const bookingDataRef = useRef(bookingData); // latest data  (for unmount cleanup)
+
+  // Keep refs in sync with state
+  useEffect(() => { currentStepRef.current = currentStep; }, [currentStep]);
+  useEffect(() => { bookingDataRef.current = bookingData; }, [bookingData]);
+
+  // Reset guards when entering step 4
+  useEffect(() => {
+    if (currentStep === 4) {
+      paymentCompletedRef.current = false;
+      failureFiredRef.current = false;
+    }
+  }, [currentStep]);
+
+  // Track step-4 abandonment via browser Back button (popstate)
+  useEffect(() => {
+    if (currentStep !== 4 || !clientSecret) return;
+
+    const handlePopState = () => {
+      if (!paymentCompletedRef.current && !failureFiredRef.current) {
+        failureFiredRef.current = true;
+        Analytics.trackPaymentFailure("user_navigated_back_from_payment", {
+          amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+          vehicle: bookingData.selectedVehicle?.categoryName,
+          reason: "browser_back_button",
+        });
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentStep, clientSecret, bookingData]);
+
+  // Fire payment_failure when Booking page unmounts while on step 4
+  // Covers: user clicks header nav link, types a new URL, or any React Router navigation
+  useEffect(() => {
+    return () => {
+      if (
+        currentStepRef.current === 4 &&
+        !paymentCompletedRef.current &&
+        !failureFiredRef.current
+      ) {
+        Analytics.trackPaymentFailure("payment_abandoned", {
+          amount: bookingDataRef.current?.selectedVehicle?.pricing?.totalPrice,
+          vehicle: bookingDataRef.current?.selectedVehicle?.categoryName,
+          reason: "user_navigated_away_from_payment",
+        });
+      }
+    };
+  }, []);
 
   const goToStep = (step) => {
     setCurrentStep(step);
@@ -135,6 +185,9 @@ function Booking() {
 
   // Handle UserDetails form submission - CREATE LEAD + CREATE PAYMENT INTENT + GO TO PAYMENT
   const handleUserDetailsSubmit = async (formData = null) => {
+    //  TRACK: Inquiry Generated — user clicked "Proceed to Payment"
+    Analytics.trackInquiryGenerated(bookingData);
+
     const existingBookingId = bookingData.savedBookingId;
     const currentPassengerDetails = formData?.passengerDetails || bookingData.passengerDetails;
 
@@ -160,8 +213,8 @@ function Booking() {
         }
       }
 
-      // Create payment intent and go to payment
-      await createPaymentIntentAndProceed();
+      // Create payment intent and go to payment — pass formData so Stripe gets fresh customer info
+      await createPaymentIntentAndProceed(existingBookingId, formData);
       return;
     }
 
@@ -190,8 +243,8 @@ function Booking() {
 
       console.log("Lead saved with ID:", savedBookingId);
 
-      // Step 2: Create payment intent and proceed
-      await createPaymentIntentAndProceed(savedBookingId);
+      // Step 2: Create payment intent and proceed — pass formData so Stripe gets fresh customer info
+      await createPaymentIntentAndProceed(savedBookingId, formData);
     } catch (error) {
       console.error("Error creating lead:", error);
       alert("Something went wrong. Please try again.");
@@ -201,7 +254,8 @@ function Booking() {
   };
 
   // Helper function to create payment intent and navigate to payment step
-  const createPaymentIntentAndProceed = async (bookingId = null) => {
+  // formData is passed directly from UserDetails so we don't rely on potentially-stale React state
+  const createPaymentIntentAndProceed = async (bookingId = null, formData = null) => {
     const totalAmount = bookingData.selectedVehicle?.pricing?.totalPrice;
     const savedBookingId = bookingId || bookingData.savedBookingId;
 
@@ -215,11 +269,40 @@ function Booking() {
       return;
     }
 
+    // Merge fresh formData into bookingData so Stripe gets up-to-date customer info.
+    // React state (bookingData) may still be stale at this point because updateData() is async.
+    const mergedBookingData = formData
+      ? {
+        ...bookingData,
+        passengerDetails: formData.passengerDetails || bookingData.passengerDetails,
+        specialInstructions: formData.specialInstructions ?? bookingData.specialInstructions,
+        isAirportPickup: formData.flightDetails?.isAirportPickup || bookingData.isAirportPickup,
+        isBookingForSomeoneElse:
+          formData.passengerDetails?.isBookingForSomeoneElse ||
+          bookingData.isBookingForSomeoneElse,
+        guestDetails: formData.passengerDetails?.isBookingForSomeoneElse
+          ? {
+            firstName: formData.passengerDetails?.guestFirstName,
+            lastName: formData.passengerDetails?.guestLastName,
+            email: formData.passengerDetails?.guestEmail,
+            countryCode: formData.passengerDetails?.guestCountryCode,
+            phone: formData.passengerDetails?.guestPhone,
+          }
+          : bookingData.guestDetails,
+        flightDetails: formData.flightDetails?.isAirportPickup
+          ? {
+            flightNumber: formData.flightDetails?.flightNumber,
+            nameBoard: formData.flightDetails?.nameBoard,
+          }
+          : bookingData.flightDetails,
+      }
+      : bookingData;
+
     try {
       const response = await paymentAPI.createPaymentIntent({
         amount: totalAmount,
         currency: "gbp",
-        bookingData: bookingData,
+        bookingData: mergedBookingData,
         bookingId: savedBookingId,
       });
 
@@ -292,7 +375,11 @@ function Booking() {
     .join(" ");
 
   return (
-    <div className="min-h-screen font-sans pb-20" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
+    <div className="min-h-screen font-sans pb-20 lg:pb-0" style={{ backgroundColor: 'var(--color-dark)', color: '#fff' }}>
+      <Helmet>
+        <title>Book Chauffeur Service London Easy Online Booking</title>
+        <meta name="description" content="Book your luxury chauffeur service in London with JK Executive Chauffeurs. Fast, easy online booking for airport transfers, corporate travel & events." />
+      </Helmet>
 
       {/* --- STEPS INDICATOR --- */}
       <div className="pt-32 md:pt-36 pb-6" style={{ backgroundColor: 'var(--color-dark)' }}>
@@ -355,7 +442,7 @@ function Booking() {
         <div className="flex flex-col lg:flex-row lg:gap-8">
 
           {/* LEFT: Main content */}
-          <div className={`w-full min-w-0 ${currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"}`}>
+          <div className={`w-full min-w-0 ${currentStep === 4 || currentStep === 1 ? "" : "lg:w-[60%]"} ${currentStep === 2 || currentStep === 3 ? "lg:pb-0 pb-24" : ""}`}>
             <AnimatePresence mode="wait">
               {currentStep === 1 && (
                 <motion.div
@@ -399,6 +486,7 @@ function Booking() {
                   transition={{ duration: 0.3 }}
                 >
                   <UserDetails
+                    ref={userDetailsRef}
                     data={bookingData}
                     updateData={updateBooking}
                     onNext={handleUserDetailsSubmit}
@@ -419,8 +507,23 @@ function Booking() {
                   <Payment
                     data={bookingData}
                     clientSecret={clientSecret}
-                    onBack={() => goToStep(3)}
-                    onPaymentSuccess={handlePaymentSuccess}
+                    onBack={() => {
+                      // TRACK: user clicked "Edit Details" — going back from payment step
+                      if (!paymentCompletedRef.current && !failureFiredRef.current) {
+                        failureFiredRef.current = true;
+                        Analytics.trackPaymentFailure("user_went_back_from_payment", {
+                          amount: bookingData.selectedVehicle?.pricing?.totalPrice,
+                          vehicle: bookingData.selectedVehicle?.categoryName,
+                          reason: "user_clicked_back_button",
+                        });
+                      }
+                      goToStep(3);
+                    }}
+                    onPaymentSuccess={(paymentIntent) => {
+                      paymentCompletedRef.current = true;
+                      failureFiredRef.current = true; // prevent unmount cleanup from firing
+                      handlePaymentSuccess(paymentIntent);
+                    }}
                     onPaymentFailure={(reason, extra) =>
                       Analytics.trackPaymentFailure(reason, {
                         amount: bookingData.selectedVehicle?.pricing?.totalPrice,
@@ -429,21 +532,7 @@ function Booking() {
                       })
                     }
                     onComplete={() => {
-                      setBookingData({
-                        pickup: null,
-                        dropoff: null,
-                        pickupDate: new Date(),
-                        pickupTime: getDefaultPickupTime(),
-                        serviceType: "oneway",
-                        hours: 2,
-                        selectedVehicle: null,
-                        journeyInfo: null,
-                        passengerDetails: null,
-                        flightDetails: null,
-                        specialInstructions: "",
-                        savedBookingId: null,
-                        originalEmail: null,
-                      });
+                      resetBooking();
                       setClientSecret(null);
                       setCurrentStep(1);
                     }}
@@ -461,7 +550,7 @@ function Booking() {
               <div className="sticky top-32">
                 <StickyBookingSummary
                   from={bookingData.pickup}
-                  to={bookingData.serviceType === "hourly" ? bookingData.pickup : bookingData.dropoff}
+                  to={bookingData.dropoff}
                   date={bookingData.pickupDate}
                   time={bookingData.pickupTime}
                   vehicle={stickyVehicle}
@@ -469,7 +558,16 @@ function Booking() {
                   extras={[]}
                   currentStep={currentStep}
                   onGoBack={() => goToStep(currentStep - 1)}
+                  onContinue={
+                    currentStep === 3
+                      ? () => userDetailsRef.current?.submit()
+                      : () => goToStep(currentStep + 1)
+                  }
+                  continueLabel={currentStep === 3 ? "PROCEED TO PAYMENT" : "CONTINUE"}
+                  isLoading={currentStep === 3 ? isLoadingPayment : false}
                   distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
+                  hours={bookingData.hours}
+                  serviceType={bookingData.serviceType}
                 />
               </div>
             </div>

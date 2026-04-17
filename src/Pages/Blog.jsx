@@ -1,10 +1,22 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Loader2, Calendar, User, ArrowRight } from 'lucide-react';
 import { blogAPI, getImageUrl } from '../Utils/api';
 import BlogCardSkeleton from '../Components/extras/BlogCardSkeleton';
+
+const BASE_URL = 'https://jkexecutivechauffeurs.com';
+
+const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${BASE_URL}/blog` },
+    ],
+};
 
 const ITEMS_PER_PAGE = 12;
 
@@ -63,8 +75,52 @@ function Blog() {
         });
     };
 
+    const blogFeedSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Blog',
+        name: 'JK Executive Chauffeurs Blog',
+        description:
+            'Stay updated with the latest from JK Executive Chauffeurs — events, tips, and luxury travel insights.',
+        url: `${BASE_URL}/blog`,
+        publisher: {
+            '@type': 'Organization',
+            name: 'JK Executive Chauffeurs',
+            url: BASE_URL,
+        },
+        blogPost: blogs.map((blog) => ({
+            '@type': 'BlogPosting',
+            headline: blog.title,
+            image: getImageUrl(blog.heroImage?.url || blog.heroImageUrl),
+            datePublished: blog.publishDate || blog.createdAt,
+            dateModified: blog.updatedAt || blog.createdAt,
+            author: {
+                '@type': 'Person',
+                name: blog.author || 'JK Executive Chauffeurs',
+            },
+            description: blog.excerpt || '',
+            url: `${BASE_URL}/blog/${blog.slug}`,
+            mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': `${BASE_URL}/blog/${blog.slug}`,
+            },
+        })),
+    };
+
     return (
-        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+        <>
+            <Helmet>
+                <script type="application/ld+json">
+                    {JSON.stringify(breadcrumbSchema)}
+                </script>
+                {blogs.length > 0 && (
+                    <script type="application/ld+json">
+                        {JSON.stringify(blogFeedSchema)}
+                    </script>
+                )}
+                <title>Chauffeur Service Blog | JK Executive Chauffeurs</title>
+                <meta name="description" content="Expert tips, travel guides & news from JK Executive Chauffeurs. Luxury travel in London made easy. Explore our latest chauffeur service articles." />
+            </Helmet>
+            <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             {/* Hero Section */}
             <section className="pt-36 md:pt-44 pb-12 md:pb-16 px-4 md:px-8">
                 <div className="max-w-6xl mx-auto text-center">
@@ -242,7 +298,8 @@ function Blog() {
                     )}
                 </div>
             </section>
-        </main>
+            </main>
+        </>
     );
 }
 

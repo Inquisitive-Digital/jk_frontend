@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft, Users, Briefcase, CheckCircle2, ChevronLeft, ChevronRight,
@@ -8,6 +9,8 @@ import {
 } from 'lucide-react';
 import { fleetAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+
+const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
 function FleetDetail() {
     const { slug } = useParams();
@@ -62,8 +65,54 @@ function FleetDetail() {
         );
     }
 
+    const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+            { '@type': 'ListItem', position: 2, name: 'Our Fleet', item: `${BASE_URL}/fleet` },
+            { '@type': 'ListItem', position: 3, name: fleet.title, item: `${BASE_URL}/fleet/${fleet.slug}` },
+        ],
+    };
+
+    const vehicleSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: fleet.title,
+        description: fleet.description,
+        url: `${BASE_URL}/fleet/${fleet.slug}`,
+        image: getImageUrl(fleet.heroImage?.url),
+        brand: {
+            '@type': 'Brand',
+            name: 'JK Executive Chauffeurs',
+        },
+        ...(fleet.basePrice && {
+            offers: {
+                '@type': 'Offer',
+                price: fleet.basePrice,
+                priceCurrency: 'GBP',
+                availability: 'https://schema.org/InStock',
+                url: `${BASE_URL}/booking`,
+            },
+        }),
+        additionalProperty: [
+            ...(fleet.passengers ? [{ '@type': 'PropertyValue', name: 'Passengers', value: fleet.passengers }] : []),
+            ...(fleet.luggage ? [{ '@type': 'PropertyValue', name: 'Luggage', value: fleet.luggage }] : []),
+        ],
+    };
+
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+            <Helmet>
+                <title>{fleet.meta_title || fleet.seoTitle || fleet.title}</title>
+                <meta name="description" content={fleet.meta_description || fleet.seoDescription || fleet.description} />
+                <script type="application/ld+json">
+                    {JSON.stringify(breadcrumbSchema)}
+                </script>
+                <script type="application/ld+json">
+                    {JSON.stringify(vehicleSchema)}
+                </script>
+            </Helmet>
             {/* Hero Section */}
             <div
                 className="relative pt-32 pb-8 md:pt-40 md:pb-12"

@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Loader2, Users, Briefcase } from 'lucide-react';
 import { fleetAPI, getImageUrl } from '../Utils/api';
+
+const BASE_URL = 'https://jkexecutivechauffeurs.com';
+
+const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+        { '@type': 'ListItem', position: 2, name: 'Our Fleet', item: `${BASE_URL}/fleet` },
+    ],
+};
 
 const DESKTOP_PER_PAGE = 9;
 const MOBILE_INITIAL = 5;
@@ -59,8 +71,34 @@ function Fleet() {
         return pages;
     };
 
+    const itemListSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: 'JK Executive Chauffeurs — Our Fleet',
+        itemListElement: allFleet.map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: item.title,
+            url: `${BASE_URL}/fleet/${item.slug}`,
+            image: getImageUrl(item.heroImage?.url),
+        })),
+    };
+
     return (
-        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+        <>
+            <Helmet>
+                <script type="application/ld+json">
+                    {JSON.stringify(breadcrumbSchema)}
+                </script>
+                {allFleet.length > 0 && (
+                    <script type="application/ld+json">
+                        {JSON.stringify(itemListSchema)}
+                    </script>
+                )}
+                <title>Luxury Chauffeur Fleet in London – Explore Premium Vehicles | JK Executive</title>
+                <meta name="description" content="Browse our premium chauffeur fleet in London — Mercedes S/E/V Class, Rolls Royce, Range Rover & EV options. Find your perfect vehicle today." />
+            </Helmet>
+            <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             {/* Hero Banner */}
             <div
                 className="relative pt-36 pb-16 md:pt-44 md:pb-20"
@@ -321,7 +359,8 @@ function Fleet() {
                     </>
                 )}
             </div>
-        </main>
+            </main>
+        </>
     );
 }
 

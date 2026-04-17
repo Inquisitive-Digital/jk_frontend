@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Loader2, ArrowRight } from 'lucide-react';
 import { eventAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+
+const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
 function EventWrapper() {
     const { slug } = useParams();
@@ -67,8 +70,65 @@ function EventWrapper() {
 
     const heroSrc = getImageUrl(event.heroImage?.url);
 
+    const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+            { '@type': 'ListItem', position: 2, name: event.title, item: `${BASE_URL}/events/${event.slug}` },
+        ],
+    };
+
+    const eventSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        name: event.title,
+        description: event.description
+            ? event.description.replace(/<[^>]+>/g, '').slice(0, 300)
+            : '',
+        image: heroSrc || `${BASE_URL}/logo.png`,
+        url: `${BASE_URL}/events/${event.slug}`,
+        ...(event.subtitle && { alternateName: event.subtitle }),
+        organizer: {
+            '@type': 'Organization',
+            name: 'JK Executive Chauffeurs',
+            url: BASE_URL,
+        },
+        performer: {
+            '@type': 'Organization',
+            name: 'JK Executive Chauffeurs',
+            telephone: '+442034759906',
+        },
+        location: {
+            '@type': 'VirtualLocation',
+            url: `${BASE_URL}/booking`,
+        },
+        eventStatus: 'https://schema.org/EventScheduled',
+        eventAttendanceMode: 'https://schema.org/MixedEventAttendanceMode',
+        offers: {
+            '@type': 'Offer',
+            url: `${BASE_URL}/booking`,
+            priceCurrency: 'GBP',
+            availability: 'https://schema.org/InStock',
+            validFrom: new Date().toISOString().split('T')[0],
+        },
+    };
+
+    const seoTitle = event.seoTitle || event.title;
+    const seoDesc = event.seoDescription || (event.description ? event.description.replace(/<[^>]+>/g, '').slice(0, 160) : '');
+
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
+            <Helmet>
+                <title>{seoTitle}</title>
+                <meta name="description" content={seoDesc} />
+                <script type="application/ld+json">
+                    {JSON.stringify(breadcrumbSchema)}
+                </script>
+                <script type="application/ld+json">
+                    {JSON.stringify(eventSchema)}
+                </script>
+            </Helmet>
             {/* Hero Image Section */}
             <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
                 {heroSrc ? (
@@ -199,6 +259,7 @@ function EventWrapper() {
 
                                     <Link
                                         to={`/events/${sportEvent.slug}`}
+                                        onClick={() => Analytics.trackBookingClick('event_sports_card_book_now', { event_title: sportEvent.title })}
                                         className="w-full py-3 rounded-lg font-semibold text-sm text-center transition-all duration-300 flex items-center justify-center gap-2"
                                         style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
                                     >

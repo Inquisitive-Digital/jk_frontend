@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
     ArrowLeft, ShieldCheck, Database, Users, FileCheck,
     Lock, Briefcase, Clock, Mail
@@ -116,6 +117,10 @@ const sections = [
 function GDPRPolicy() {
     return (
         <main style={{ backgroundColor: '#0e0e10', minHeight: '100vh' }}>
+            <Helmet>
+                <title>GDPR Policy JK Executive Chauffeurs Data Protection</title>
+                <meta name="description" content="Read the GDPR Data Protection Policy for JK Executive Chauffeurs. Learn how we collect, use, and protect your personal data in compliance with UK law." />
+            </Helmet>
             {/* Hero */}
             <section className="relative overflow-hidden" style={{ paddingTop: '140px', paddingBottom: '50px' }}>
                 <div className="absolute inset-0 pointer-events-none">

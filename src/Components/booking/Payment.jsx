@@ -195,7 +195,7 @@ const SuccessModal = ({ isOpen, onClose }) => {
           transition={{ delay: 0.3 }}
           className="text-3xl font-bold text-white mb-3"
         >
-          🎉 Booking Confirmed!
+          Booking Confirmed!
         </motion.h2>
 
         <motion.p
@@ -237,7 +237,7 @@ const SuccessModal = ({ isOpen, onClose }) => {
           className="text-sm mt-4"
           style={{ color: 'rgba(255,255,255,0.4)' }}
         >
-          ✈️ Have a safe journey!
+          Have a safe journey!
         </motion.p>
       </motion.div>
     </motion.div>
