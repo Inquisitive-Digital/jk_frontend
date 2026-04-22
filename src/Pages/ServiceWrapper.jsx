@@ -179,23 +179,104 @@ function ServiceWrapper() {
                             </p>
                         </motion.div>
 
-                        {/* Long Description */}
-                        {service.longDescription && (
+                        {/* Structured Sections (from Blog pattern) OR Long Description (Fallback) */}
+                        {service.sections && service.sections.length > 0 ? (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.6 }}
-                                className="space-y-4"
                             >
-                                <div
-                                    className="w-full h-px"
-                                    style={{ background: 'linear-gradient(90deg, var(--color-primary), transparent)' }}
-                                />
-                                <div className="text-white/60 text-base leading-relaxed whitespace-pre-line">
-                                    {service.longDescription}
-                                </div>
+                                {service.sections.map((section, index) => (
+                                    <div key={index} className="mb-8">
+                                        {/* Section Heading (H2) */}
+                                        {section.heading && (
+                                            <h2
+                                                className="text-xl md:text-2xl font-semibold mb-3"
+                                                style={{ color: 'var(--color-primary)' }}
+                                            >
+                                                {section.heading}
+                                            </h2>
+                                        )}
+
+                                        {/* Section Subheading (H3) */}
+                                        {section.subheading && (
+                                            <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
+                                                {section.subheading}
+                                            </h3>
+                                        )}
+
+                                        {/* Section Text (paragraphs) — supports <a> tags for internal linking */}
+                                        {section.text && (
+                                            <div
+                                                className="service-section-text text-base leading-relaxed mb-4"
+                                                style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                dangerouslySetInnerHTML={{ __html: section.text }}
+                                            />
+                                        )}
+
+                                        {/* Section List Items (bullet points) */}
+                                        {section.listItems && section.listItems.length > 0 && (
+                                            <ul
+                                                className="ml-5 mb-4 space-y-2"
+                                                style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                            >
+                                                {section.listItems.map((item, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="list-disc text-base leading-relaxed"
+                                                        dangerouslySetInnerHTML={{ __html: item }}
+                                                    />
+                                                ))}
+                                            </ul>
+                                        )}
+
+                                        {/* Section Inline Image */}
+                                        {section.image?.url && (
+                                            <img
+                                                src={getImageUrl(section.image.url)}
+                                                alt={section.image.alt || section.heading || 'Service image'}
+                                                className="w-full rounded-xl my-4"
+                                            />
+                                        )}
+                                    </div>
+                                ))}
                             </motion.div>
+                        ) : (
+                            /* Fallback to old Long Description pattern */
+                            service.longDescription && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.6 }}
+                                    className="space-y-4"
+                                >
+                                    <div
+                                        className="w-full h-px"
+                                        style={{ background: 'linear-gradient(90deg, var(--color-primary), transparent)' }}
+                                    />
+                                    <div className="text-white/60 text-base leading-relaxed whitespace-pre-line">
+                                        {service.longDescription}
+                                    </div>
+                                </motion.div>
+                            )
                         )}
+
+                        {/* Inline styles for any <a> tags inside text fields */}
+                        <style>{`
+                            .service-section-text a {
+                                color: var(--color-primary);
+                                text-decoration: underline;
+                                text-underline-offset: 2px;
+                                transition: opacity 0.2s;
+                            }
+                            .service-section-text a:hover {
+                                opacity: 0.8;
+                            }
+                            .service-section-text b, .service-section-text strong {
+                                color: white;
+                                font-weight: 600;
+                            }
+                        `}</style>
 
                         {/* Features List */}
                         {service.features && service.features.length > 0 && (
