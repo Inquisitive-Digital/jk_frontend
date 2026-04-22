@@ -138,6 +138,7 @@ const AdminAllPricing = lazy(() => import("./Components/Admin/AdminAllPricing"))
 const AdminAllLocations = lazy(() => import("./Components/Admin/AdminAllLocations"));
 const AdminAddLocation = lazy(() => import("./Components/Admin/AdminAddLocation"));
 const AdminLocationPricing = lazy(() => import("./Components/Admin/AdminLocationPricing"));
+const AdminLocationZoneSetup = lazy(() => import("./Components/Admin/AdminLocationZoneSetup"));
 
 function App() {
   useEffect(() => {
@@ -208,6 +209,7 @@ function App() {
               <Route path="/admin/add-location" element={<AdminAddLocation />} />
               <Route path="/admin/edit-location/:id" element={<AdminAddLocation />} />
               <Route path="/admin/location-pricing/:locationId" element={<AdminLocationPricing />} />
+              <Route path="/admin/location-zone/:id" element={<AdminLocationZoneSetup />} />
 
 
               {/* Catch undefined routes and fallback to home */}

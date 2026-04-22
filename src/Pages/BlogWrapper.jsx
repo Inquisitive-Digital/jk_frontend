@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
@@ -12,10 +12,27 @@ const BASE_URL = 'https://jkexecutivechauffeurs.com';
 function BlogWrapper() {
     const { slug } = useParams();
 
+    // ── SSR Preload: consume window.__BLOG_DATA__ injected by Express ──
+    // useRef so the value is captured once on mount and not re-read on re-renders
+    const preloaded = useRef(
+        typeof window !== 'undefined' &&
+        window.__BLOG_DATA__ &&
+        window.__BLOG_DATA__.slug === slug
+            ? window.__BLOG_DATA__
+            : null
+    );
+    // Clear immediately so client-side navigation never picks up stale data
+    if (typeof window !== 'undefined' && window.__BLOG_DATA__) {
+        window.__BLOG_DATA__ = null;
+    }
+
     const { data, isLoading, isError } = useQuery({
         queryKey: ['blog', slug],
         queryFn: () => blogAPI.getBySlug(slug),
         enabled: !!slug,
+        // If SSR gave us data, use it immediately — no loading spinner needed
+        initialData: preloaded.current ? { blog: preloaded.current } : undefined,
+        staleTime: preloaded.current ? 5 * 60 * 1000 : 0, // 5 min fresh if preloaded
     });
 
     // First, get the total count of blogs with a minimal request
