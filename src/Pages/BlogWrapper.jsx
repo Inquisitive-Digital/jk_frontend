@@ -142,84 +142,79 @@ function BlogWrapper() {
                     {JSON.stringify(blogPostingSchema)}
                 </script>
             </Helmet>
-            {/* Hero Image */}
-            <div className="relative h-[45vh] md:h-[55vh] overflow-hidden ">
-                {heroSrc ? (
-                    <motion.img
-                        initial={{ scale: 1.1 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 1.2 }}
-                        src={heroSrc}
-                        alt={blog.heroImage?.alt || blog.heroImageAlt || blog.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                ) : (
-                    <div
-                        className="w-full h-full"
-                        style={{ background: 'linear-gradient(135deg, rgba(26,26,26,1) 0%, rgba(50,40,20,1) 100%)' }}
-                    />
-                )}
+            {/* Page Header — Refined Title Section */}
+            <header
+                className="pt-40 pb-24 px-4 md:px-8 max-w-6xl mx-auto text-center"
+            >
+                {/* Category Label */}
+                <motion.span
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-xs uppercase tracking-[0.3em] mb-6 block"
+                    style={{ color: 'var(--color-primary)' }}
+                >
+                    {blog.category || 'Luxury Travel'}
+                </motion.span>
 
+                {/* Main Title */}
+                <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.7 }}
+                    className="text-3xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-serif text-white leading-[1.15] tracking-tight mb-8"
+                    style={{
+                        fontFamily: "'Playfair Display', 'Georgia', serif"
+                    }}
+                >
+                    {blog.title}
+                </motion.h1>
 
-
-                {/* Title & Meta on Image */}
-                <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8 xl:px-10 xl:mx-10 2xl:mx-20 2xl:px-20">
-                    <div className="max-w-7xl mx-auto">
-                        {/* {blog.category && (
-                            <motion.span
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="inline-block px-3 py-1 rounded-full text-xs font-base uppercase tracking-wider mb-4"
-                                style={{
-                                    backgroundColor: 'rgba(215,183,94,0.2)',
-                                    color: 'var(--color-primary)',
-                                    border: '1px solid rgba(215,183,94,0.3)',
-                                }}
-                            >
-                                {blog.category}
-                            </motion.span>
-                        )} */}
-                        <motion.h1
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 "
-                        >
-                            {blog.title}
-                        </motion.h1>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="flex items-center gap-4 text-sm text-white/50"
-                        >
-                            <span className="flex items-center gap-1.5">
-                                <Calendar className="w-4 h-4" />
-                                {formatDate(blog.publishDate || blog.createdAt)}
-                            </span>
-                            {blog.author && (
-                                <span className="flex items-center gap-1.5">
-                                    <User className="w-4 h-4" />
-                                    {blog.author}
-                                </span>
-                            )}
-                        </motion.div>
-                    </div>
-                </div>
-            </div>
+                {/* Metadata */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    className="flex items-center justify-center gap-4 text-sm"
+                    style={{ color: 'rgba(255,255,255,0.4)' }}
+                >
+                    <span>{formatDate(blog.publishDate || blog.createdAt)}</span>
+                    <span className="w-1 h-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}></span>
+                    <span>{blog.author || 'JK Executive'}</span>
+                </motion.div>
+            </header>
 
             {/* Blog Content */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 pb-12 md:pb-20 -mt-16 relative z-10">
                 <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
                     {/* Main Content — 2/3 */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
+                        transition={{ delay: 0.3 }}
                         className="lg:col-span-2"
                     >
+                        {/* Hero Image — inline, just above intro */}
+                        {heroSrc && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                                className="w-full mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-2xl h-[250px] md:h-[350px] lg:h-[400px]"
+                                style={{
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 20px rgba(var(--color-primary-rgb), 0.05)'
+                                }}
+                            >
+                                <img
+                                    src={heroSrc}
+                                    alt={blog.heroImage?.alt || blog.heroImageAlt || blog.title}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                                />
+                            </motion.div>
+                        )}
+
                         {/* Introduction Text */}
                         {blog.intro && (
                             <p
