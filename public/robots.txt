@@ -1,5 +1,7 @@
 User-agent: *
 Disallow: /*tag
+Disallow: /admin/
+Disallow: /admin
 Disallow: /*category
 Disallow: /*feed
 sitemap: https://www.jkexecutivechauffeurs.com/sitemap.xml
