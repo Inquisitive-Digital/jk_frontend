@@ -3,12 +3,13 @@ import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { Autocomplete } from "@react-google-maps/api";
+import { useGoogleMaps } from "../../Context/GoogleMapsContext";
 import { ArrowLeft, MapPin, Save, Loader2, Plane, Building, Trophy, Flag, CircleDot, Plus, Trash2, Car, DollarSign, Settings, Zap, Check, ChevronRight } from "lucide-react";
 import { locationAPI, locationPricingAPI, vehicleAPI, getImageUrl } from "../../Utils/api";
 import AdminZoneMap from "./AdminZoneMap";
 
-const LIBRARIES = ["places", "drawing"];
+// Libraries are managed globally via GoogleMapsProvider in App.jsx
 const LOCATION_TYPES = [
     { value: "airport", label: "Airport", icon: Plane },
     { value: "stadium", label: "Stadium", icon: Trophy },
@@ -37,10 +38,7 @@ function AdminLocationZoneSetup() {
     const isEdit = Boolean(id);
     const autocompleteRef = useRef(null);
 
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-        libraries: LIBRARIES,
-    });
+    const { isLoaded } = useGoogleMaps();
 
     const [isFetching, setIsFetching] = useState(isEdit);
     const [isSaving, setIsSaving] = useState(false);
@@ -48,7 +46,8 @@ function AdminLocationZoneSetup() {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [existingPricingIds, setExistingPricingIds] = useState({});
     const [pricingForm, setPricingForm] = useState(DEFAULT_PRICING);
-    const [zone, setZone] = useState(null);
+    const [zone, setZone] = useState(null);          // updated while drawing
+    const [initialZone, setInitialZone] = useState(null); // loaded from server (stable key)
     const [locationSelected, setLocationSelected] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -79,7 +78,10 @@ function AdminLocationZoneSetup() {
                 if (locRes.success) {
                     const l = locRes.data;
                     setFormData({ name: l.name||"", address: l.address||"", placeId: l.placeId||"", iataCode: l.iataCode||"", icaoCode: l.icaoCode||"", coordinates: l.coordinates||{lat:"",lng:""}, zone: l.zone||"Entire UK Cover", locationType: l.locationType||"airport", radiusKm: l.radiusKm||5, isActive: l.isActive!==false });
-                    if (l.zoneShape) setZone(l.zoneShape);
+                    if (l.zoneShape) {
+                        setZone(l.zoneShape);
+                        setInitialZone(l.zoneShape); // stable key — only set once from server
+                    }
                     setLocationSelected(true);
                 }
                 if (pricingRes.success && pricingRes.data) {
@@ -234,9 +236,10 @@ function AdminLocationZoneSetup() {
                     <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><MapPin size={18} className="text-amber-500" /> Draw Coverage Zone</h3>
                     {isLoaded ? (
                         <AdminZoneMap
+                            key={initialZone ? JSON.stringify(initialZone).slice(0, 40) : "empty"}
                             center={formData.coordinates?.lat ? formData.coordinates : null}
                             onZoneChange={setZone}
-                            initialZone={formData.zoneShape || null}
+                            initialZone={initialZone}
                         />
                     ) : (
                         <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center"><Loader2 size={30} className="text-gray-400 animate-spin" /></div>

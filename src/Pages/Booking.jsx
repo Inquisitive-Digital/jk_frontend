@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useJsApiLoader } from "@react-google-maps/api";
+import { useGoogleMaps } from "../Context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { Helmet } from 'react-helmet-async';
@@ -12,7 +12,7 @@ import StickyBookingSummary from "../Components/booking/StickyBookingSummary";
 import { paymentAPI, bookingAPI } from "../Utils/api";
 import Analytics from "../Utils/analytics";
 
-const LIBRARIES = ["places"];
+// Libraries are managed globally via GoogleMapsProvider in App.jsx
 
 // Compute default pickup time: GMT now + 30 min, rounded UP to next 30-min slot
 // Returns a 12-hour formatted string like "02:00 PM"
@@ -51,10 +51,7 @@ const STEPS = [
 ];
 
 function Booking() {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES,
-  });
+  const { isLoaded } = useGoogleMaps();
 
   const location = useLocation();
   const { bookingData, updateBooking, resetBooking, isFromHero, hasValidLocations } = useBooking();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { useJsApiLoader } from '@react-google-maps/api';
+import { useGoogleMaps } from '../../Context/GoogleMapsContext';
 // import heroImage from '../../assets/heroImage.png';
 // Import WebP version after you convert it (heroImage.webp)
 import heroImageWebp from '../../assets/heroImage.webp';
@@ -10,7 +10,7 @@ import Analytics from '../../Utils/analytics';
 import { useBooking } from '../../Context/BookingContext';
 import Locations from '../booking/Locations';
 
-const LIBRARIES = ['places'];
+// Libraries are managed globally via GoogleMapsProvider in App.jsx
 
 // Rotating text options
 const ROTATING_TEXTS = [
@@ -25,10 +25,7 @@ function HeroSection() {
     const navigate = useNavigate();
     const { bookingData, updateBooking, markAsFromHero } = useBooking();
 
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-        libraries: LIBRARIES,
-    });
+    const { isLoaded } = useGoogleMaps();
 
     // Rotate text every 3 seconds
     useEffect(() => {

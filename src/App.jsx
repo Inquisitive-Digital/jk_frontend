@@ -4,6 +4,7 @@ import Analytics from "./Utils/analytics";
 import Lenis from "lenis";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import { BookingProvider } from "./Context/BookingContext";
+import { GoogleMapsProvider } from "./Context/GoogleMapsContext";
 import Layout from "./Layout/Layout";
 import SkeletonLoader from "./Components/SkeletonLoader";
 
@@ -169,6 +170,7 @@ function App() {
   return (
     <HelmetProvider>
       <Router>
+        <GoogleMapsProvider>
         <BookingProvider>
           <ScrollToTop />
           <PageViewTracker />
@@ -218,6 +220,7 @@ function App() {
             </Routes>
           </Suspense>
         </BookingProvider>
+        </GoogleMapsProvider>
       </Router>
     </HelmetProvider>
   );
