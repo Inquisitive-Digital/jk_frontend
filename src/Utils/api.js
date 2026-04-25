@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 const Environment = {
     LOCAL_URL: "http://localhost:5005",
-    STAGING_URL: "https://jk-frontend-nine.vercel.app",
+    STAGING_URL: "https://dev.jkexecutivechauffeurs.com",
     PRODUCTION_URL: "https://www.jkexecutivechauffeurs.com",
 };
 
@@ -11,7 +11,7 @@ const hostname = window.location.hostname;
 
 export let BASE_URL = Environment.LOCAL_URL;
 
-if (hostname.includes("vercel.app")) {
+if (hostname.includes("dev.") || hostname === "dev.jkexecutivechauffeurs.com") {
     BASE_URL = Environment.STAGING_URL;
 } else if (
     hostname.includes("hostingersite.com") ||
