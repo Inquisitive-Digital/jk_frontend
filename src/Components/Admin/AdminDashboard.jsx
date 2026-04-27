@@ -24,6 +24,8 @@ import {
   Plus,
   Target,
   UserPlus,
+  BookOpen,
+  PenSquare,
 } from "lucide-react";
 import { adminAPI } from "../../Utils/api";
 import CreateAdminModal from "./CreateAdminModal";
@@ -90,6 +92,20 @@ const NAV_ITEMS = [
     icon: MapPinPlus,
     label: "Add Location",
     path: "/admin/add-location",
+  },
+
+  // ===== BLOGS =====
+  {
+    id: "all-blogs",
+    icon: BookOpen,
+    label: "All Blogs",
+    path: "/admin/blogs",
+  },
+  {
+    id: "add-blog",
+    icon: PenSquare,
+    label: "Add Blog",
+    path: "/admin/add-blog",
   },
 ];
 
