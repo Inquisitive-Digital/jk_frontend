@@ -388,6 +388,53 @@ export const eventAPI = {
     },
 };
 
+// Calendar Event APIs
+export const calendarEventAPI = {
+    // Get all calendar events grouped by month (public)
+    getAll: async (params = {}) => {
+        const response = await api.get("/api/calendar-events", { params });
+        return response.data;
+    },
+
+    // Get events for a specific month (public)
+    getByMonth: async (month, year) => {
+        const response = await api.get(`/api/calendar-events/month/${month}`, {
+            params: year ? { year } : {},
+        });
+        return response.data;
+    },
+
+    // Get single event by ID (admin)
+    getById: async (id) => {
+        const response = await api.get(`/api/calendar-events/${id}`);
+        return response.data;
+    },
+
+    // Create calendar event (admin)
+    create: async (data) => {
+        const response = await api.post("/api/calendar-events", data);
+        return response.data;
+    },
+
+    // Update calendar event (admin)
+    update: async (id, data) => {
+        const response = await api.put(`/api/calendar-events/${id}`, data);
+        return response.data;
+    },
+
+    // Delete calendar event (admin)
+    delete: async (id) => {
+        const response = await api.delete(`/api/calendar-events/${id}`);
+        return response.data;
+    },
+
+    // Bulk create calendar events (admin — seeding)
+    bulkCreate: async (events) => {
+        const response = await api.post("/api/calendar-events/bulk", { events });
+        return response.data;
+    },
+};
+
 // Blog APIs
 export const blogAPI = {
     // Get all blogs (paginated)

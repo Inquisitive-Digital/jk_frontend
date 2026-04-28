@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Calendar,
+  CalendarDays,
   Car,
   DollarSign,
   Clock,
@@ -90,6 +91,12 @@ const NAV_ITEMS = [
     icon: MapPinPlus,
     label: "Add Location",
     path: "/admin/add-location",
+  },
+  {
+    id: "event-calendar",
+    icon: CalendarDays,
+    label: "Event Calendar",
+    path: "/admin/event-calendar",
   },
 ];
 
