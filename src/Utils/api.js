@@ -333,13 +333,13 @@ export const adminAPI = {
 
 // Service APIs
 export const serviceAPI = {
-    // Get all services (paginated)
+    // Get all services (paginated, public — active only)
     getAllServices: async (page = 1, limit = 10) => {
         const response = await api.get("/api/services", { params: { page, limit } });
         return response.data;
     },
 
-    // Get single service by slug
+    // Get single service by slug (public)
     getServiceBySlug: async (slug) => {
         const response = await api.get(`/api/services/${slug}`);
         return response.data;
@@ -348,6 +348,42 @@ export const serviceAPI = {
     // Get nav menu structure (services grouped by category + airports)
     getNavMenu: async () => {
         const response = await api.get("/api/services/nav-menu");
+        return response.data;
+    },
+
+    // ─── Admin only ──────────────────────────────────────────────────────────
+
+    // Get ALL services for admin panel (includes inactive)
+    getAllAdmin: async (page = 1, limit = 20) => {
+        const response = await api.get("/api/services/admin/all", { params: { page, limit } });
+        return response.data;
+    },
+
+    // Get single service by ID (for admin edit form)
+    getById: async (id) => {
+        const response = await api.get(`/api/services/admin/${id}`);
+        return response.data;
+    },
+
+    // Create a new service (supports image file upload)
+    create: async (formData) => {
+        const response = await api.post("/api/services", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Update existing service by ID (supports image file upload)
+    update: async (id, formData) => {
+        const response = await api.put(`/api/services/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Delete service by ID
+    delete: async (id) => {
+        const response = await api.delete(`/api/services/${id}`);
         return response.data;
     },
 };
