@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -26,6 +26,7 @@ import {
   UserPlus,
   BookOpen,
   PenSquare,
+  Briefcase,
 } from "lucide-react";
 import { adminAPI } from "../../Utils/api";
 import CreateAdminModal from "./CreateAdminModal";
@@ -92,6 +93,20 @@ const NAV_ITEMS = [
     icon: MapPinPlus,
     label: "Add Location",
     path: "/admin/add-location",
+  },
+
+  // ===== SERVICES =====
+  {
+    id: "all-services",
+    icon: Briefcase,
+    label: "All Services",
+    path: "/admin/services",
+  },
+  {
+    id: "add-service",
+    icon: PenSquare,
+    label: "Add Service",
+    path: "/admin/add-service",
   },
 
   // ===== BLOGS =====
@@ -185,6 +200,7 @@ const RecentBookingRow = ({ booking }) => {
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const navRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeNav, setActiveNav] = useState("dashboard");
   const [isLoading, setIsLoading] = useState(true);
@@ -298,7 +314,7 @@ function AdminDashboard() {
           x: isSidebarOpen ? 0 : -288,
         }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white z-40 shadow-2xl overflow-y-auto"
+        className="fixed left-0 top-0 h-screen w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white z-40 shadow-2xl flex flex-col"
       >
         {/* Logo Section */}
         <div className="p-6 border-b border-slate-700/50">
@@ -320,7 +336,18 @@ function AdminDashboard() {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1.5">
+        <nav
+          ref={navRef}
+          tabIndex={-1}
+          onMouseEnter={() => navRef.current?.focus()}
+          onWheel={(e) => {
+            if (!navRef.current) return;
+            e.stopPropagation();
+            navRef.current.scrollTop += e.deltaY;
+          }}
+          className="flex-1 overflow-y-scroll overscroll-contain p-4 space-y-1.5 outline-none"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
+        >
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
@@ -351,7 +378,7 @@ function AdminDashboard() {
         </nav>
 
         {/* Logout Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+        <div className="mt-auto p-4 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm flex-shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 group"

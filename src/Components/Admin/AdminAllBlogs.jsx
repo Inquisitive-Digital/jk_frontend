@@ -27,6 +27,7 @@ import {
   ExternalLink,
   BookOpen,
   UserPlus,
+  Briefcase,
 } from "lucide-react";
 import { adminAPI, blogAPI, getImageUrl } from "../../Utils/api";
 import CreateAdminModal from "./CreateAdminModal";
@@ -42,6 +43,8 @@ const NAV_ITEMS = [
   { id: "all-pricing",    icon: List,             label: "See All Pricing", path: "/admin/all-pricing" },
   { id: "all-locations",  icon: MapPin,           label: "All Locations",   path: "/admin/locations" },
   { id: "add-location",   icon: MapPinPlus,       label: "Add Location",    path: "/admin/add-location" },
+  { id: "all-services",   icon: Briefcase,        label: "All Services",    path: "/admin/services" },
+  { id: "add-service",    icon: PenSquare,        label: "Add Service",     path: "/admin/add-service" },
   { id: "all-blogs",      icon: BookOpen,         label: "All Blogs",       path: "/admin/blogs" },
   { id: "add-blog",       icon: PenSquare,        label: "Add Blog",        path: "/admin/add-blog" },
 ];
