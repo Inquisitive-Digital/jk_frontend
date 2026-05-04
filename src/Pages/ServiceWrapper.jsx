@@ -81,6 +81,22 @@ function ServiceWrapper() {
         },
     };
 
+    // FAQ structured data — only built when FAQs exist
+    const faqSchema = service.faqs && service.faqs.length > 0
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: service.faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: f.answer,
+                },
+            })),
+          }
+        : null;
+
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             <Helmet>
@@ -92,6 +108,11 @@ function ServiceWrapper() {
                 <script type="application/ld+json">
                     {JSON.stringify(serviceSchema)}
                 </script>
+                {faqSchema && (
+                    <script type="application/ld+json">
+                        {JSON.stringify(faqSchema)}
+                    </script>
+                )}
                 {service.script && (
                     <script type="application/ld+json">
                         {service.script}

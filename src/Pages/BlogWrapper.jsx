@@ -148,6 +148,22 @@ function BlogWrapper() {
     const seoTitle = blog.seoTitle || blog.title;
     const seoDesc = blog.seoDescription || blog.excerpt || (blog.intro ? blog.intro.replace(/<[^>]+>/g, '').slice(0, 160) : '');
 
+    // FAQ structured data — only built when FAQs exist
+    const faqSchema = blog.faqs && blog.faqs.length > 0
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: blog.faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: f.answer,
+                },
+            })),
+          }
+        : null;
+
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
             <Helmet>
@@ -159,6 +175,16 @@ function BlogWrapper() {
                 <script type="application/ld+json">
                     {JSON.stringify(blogPostingSchema)}
                 </script>
+                {faqSchema && (
+                    <script type="application/ld+json">
+                        {JSON.stringify(faqSchema)}
+                    </script>
+                )}
+                {blog.script && (
+                    <script type="application/ld+json">
+                        {blog.script}
+                    </script>
+                )}
             </Helmet>
             {/* Hero Image */}
             <div className="relative h-[45vh] md:h-[55vh] overflow-hidden ">
