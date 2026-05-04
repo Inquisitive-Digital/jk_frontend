@@ -1,7 +1,45 @@
+# Standard crawlers
 User-agent: *
-Disallow: /*tag
 Disallow: /admin/
 Disallow: /admin
-Disallow: /*category
-Disallow: /*feed
-sitemap: https://www.jkexecutivechauffeurs.com/sitemap.xml
+Disallow: /login-admin
+
+# ── AI / LLM Crawlers — explicitly allowed ──────────────────────────
+# OpenAI (ChatGPT)
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+# ChatGPT Browse
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Anthropic-ai
+Allow: /
+
+# Google (Gemini / AI Overviews)
+User-agent: Google-Extended
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot-Extended
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+# Microsoft Copilot (uses Bingbot)
+User-agent: Bingbot
+Allow: /
+# ─────────────────────────────────────────────────────────────────────
+
+Sitemap: https://www.jkexecutivechauffeurs.com/sitemap.xml

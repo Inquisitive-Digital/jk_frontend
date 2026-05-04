@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { serviceAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+import InlineFAQSection from '../Components/home/InlineFAQSection';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -379,6 +380,11 @@ function ServiceWrapper() {
                     </motion.div>
                 </div>
             </div>
+
+            {/* Per-Service FAQ Section — only shown when FAQs exist */}
+            {service.faqs && service.faqs.length > 0 && (
+                <InlineFAQSection faqs={service.faqs} />
+            )}
 
             {/* Bottom CTA Section */}
             <div
