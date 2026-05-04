@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { calendarEventAPI, adminAPI } from "../../Utils/api";
+import { NAV_ITEMS } from "../../Utils/adminNav";
 import AdminEventModal from "./AdminEventModal";
 
 const MONTHS = [
@@ -26,22 +27,7 @@ const CATEGORY_COLORS = {
   General: "bg-gray-100 text-gray-700",
 };
 
-const NAV_ITEMS = [
-  { id: "dashboard",       icon: LayoutDashboard, label: "Dashboard",       path: "/admin-dashboard" },
-  { id: "leads",           icon: Target,          label: "All Leads",       path: "/admin/leads" },
-  { id: "bookings",        icon: Calendar,        label: "All Bookings",    path: "/admin/bookings" },
-  { id: "vehicles",        icon: List,            label: "All Cars",        path: "/admin/vehicles" },
-  { id: "add-car",         icon: Plus,            label: "Add Car",         path: "/admin/add-car" },
-  { id: "pricing",         icon: DollarSign,      label: "Set Pricing",     path: "/admin/pricing" },
-  { id: "all-pricing",     icon: List,            label: "See All Pricing", path: "/admin/all-pricing" },
-  { id: "all-locations",   icon: MapPin,          label: "All Locations",   path: "/admin/locations" },
-  { id: "add-location",    icon: MapPinPlus,      label: "Add Location",    path: "/admin/add-location" },
-  { id: "all-services",    icon: Briefcase,       label: "All Services",    path: "/admin/services" },
-  { id: "add-service",     icon: PenSquare,       label: "Add Service",     path: "/admin/add-service" },
-  { id: "all-blogs",       icon: BookOpen,        label: "All Blogs",       path: "/admin/blogs" },
-  { id: "add-blog",        icon: PenSquare,       label: "Add Blog",        path: "/admin/add-blog" },
-  { id: "event-calendar",  icon: CalendarDays,    label: "Event Calendar",  path: "/admin/event-calendar" },
-];
+
 
 function AdminEventCalendar() {
   const navigate = useNavigate();
