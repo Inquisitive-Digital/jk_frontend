@@ -21,9 +21,9 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ─── CONFIG ───────────────────────────────────────────
-const SITE_URL = 'https://jkexecutivechauffeurs.com';
+const SITE_URL = 'https://www.jkexecutivechauffeurs.com';
 const isLocal = process.argv.includes('--local');
-const API_BASE = isLocal ? 'http://localhost:5000' : SITE_URL;
+const API_BASE = isLocal ? 'http://localhost:5005' : SITE_URL;
 const OUTPUT_PATH = path.join(__dirname, '..', 'public', 'sitemap.xml');
 
 const TODAY = new Date().toISOString().split('T')[0];
