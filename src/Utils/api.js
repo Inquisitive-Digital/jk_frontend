@@ -333,13 +333,13 @@ export const adminAPI = {
 
 // Service APIs
 export const serviceAPI = {
-    // Get all services (paginated)
+    // Get all services (paginated, public — active only)
     getAllServices: async (page = 1, limit = 10) => {
         const response = await api.get("/api/services", { params: { page, limit } });
         return response.data;
     },
 
-    // Get single service by slug
+    // Get single service by slug (public)
     getServiceBySlug: async (slug) => {
         const response = await api.get(`/api/services/${slug}`);
         return response.data;
@@ -348,6 +348,42 @@ export const serviceAPI = {
     // Get nav menu structure (services grouped by category + airports)
     getNavMenu: async () => {
         const response = await api.get("/api/services/nav-menu");
+        return response.data;
+    },
+
+    // ─── Admin only ──────────────────────────────────────────────────────────
+
+    // Get ALL services for admin panel (includes inactive)
+    getAllAdmin: async (page = 1, limit = 20) => {
+        const response = await api.get("/api/services/admin/all", { params: { page, limit } });
+        return response.data;
+    },
+
+    // Get single service by ID (for admin edit form)
+    getById: async (id) => {
+        const response = await api.get(`/api/services/admin/${id}`);
+        return response.data;
+    },
+
+    // Create a new service (supports image file upload)
+    create: async (formData) => {
+        const response = await api.post("/api/services", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Update existing service by ID (supports image file upload)
+    update: async (id, formData) => {
+        const response = await api.put(`/api/services/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Delete service by ID
+    delete: async (id) => {
+        const response = await api.delete(`/api/services/${id}`);
         return response.data;
     },
 };
@@ -390,15 +426,59 @@ export const eventAPI = {
 
 // Blog APIs
 export const blogAPI = {
-    // Get all blogs (paginated)
+    // Get all blogs (paginated, public — active only)
     getAll: async (page = 1, limit = 9) => {
         const response = await api.get("/api/blogs", { params: { page, limit } });
         return response.data;
     },
 
-    // Get blog by slug (full body with HTML)
+    // Get blog by slug (full body with sections)
     getBySlug: async (slug) => {
         const response = await api.get(`/api/blogs/${slug}`);
+        return response.data;
+    },
+
+    // ─── Admin only ──────────────────────────────────────────────────────────
+
+    // Get ALL blogs for admin panel (includes inactive)
+    getAllAdmin: async (page = 1, limit = 20) => {
+        const response = await api.get("/api/blogs/admin/all", { params: { page, limit } });
+        return response.data;
+    },
+
+    // Get single blog by ID (for admin edit form)
+    getById: async (id) => {
+        const response = await api.get(`/api/blogs/admin/${id}`);
+        return response.data;
+    },
+
+    // Create a new blog post (supports heroImage file upload)
+    create: async (formData) => {
+        const response = await api.post("/api/blogs", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Update existing blog post by ID (supports heroImage file upload)
+    update: async (id, formData) => {
+        const response = await api.put(`/api/blogs/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Delete blog post by ID
+    delete: async (id) => {
+        const response = await api.delete(`/api/blogs/${id}`);
+        return response.data;
+    },
+
+    // Toggle isActive status
+    toggleActive: async (id, isActive) => {
+        const response = await api.put(`/api/blogs/${id}`, JSON.stringify({ isActive }), {
+            headers: { "Content-Type": "application/json" },
+        });
         return response.data;
     },
 };

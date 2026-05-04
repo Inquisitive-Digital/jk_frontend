@@ -140,6 +140,10 @@ const AdminAllLocations = lazy(() => import("./Components/Admin/AdminAllLocation
 const AdminAddLocation = lazy(() => import("./Components/Admin/AdminAddLocation"));
 const AdminLocationPricing = lazy(() => import("./Components/Admin/AdminLocationPricing"));
 const AdminLocationZoneSetup = lazy(() => import("./Components/Admin/AdminLocationZoneSetup"));
+const AdminAllBlogs = lazy(() => import("./Components/Admin/AdminAllBlogs"));
+const AdminAddBlog = lazy(() => import("./Components/Admin/AdminAddBlog"));
+const AdminAllServices = lazy(() => import("./Components/Admin/AdminAllServices"));
+const AdminAddService = lazy(() => import("./Components/Admin/AdminAddService"));
 
 function App() {
   useEffect(() => {
@@ -205,6 +209,10 @@ function App() {
               <Route path="/admin/add-car" element={<AdminAddCar />} />
               <Route path="/admin/pricing" element={<AdminPricing />} />
               <Route path="/admin/all-pricing" element={<AdminAllPricing />} />
+              <Route path="/admin/blogs" element={<AdminAllBlogs />} />
+              <Route path="/admin/add-blog" element={<AdminAddBlog />} />
+              <Route path="/admin/services" element={<AdminAllServices />} />
+              <Route path="/admin/add-service" element={<AdminAddService />} />
 
               {/* Location Routes */}
               <Route path="/admin/locations" element={<AdminAllLocations />} />

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, User, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { blogAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+import InlineFAQSection from '../Components/home/InlineFAQSection';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -16,8 +17,8 @@ function BlogWrapper() {
     // useRef so the value is captured once on mount and not re-read on re-renders
     const preloaded = useRef(
         typeof window !== 'undefined' &&
-        window.__BLOG_DATA__ &&
-        window.__BLOG_DATA__.slug === slug
+            window.__BLOG_DATA__ &&
+            window.__BLOG_DATA__.slug === slug
             ? window.__BLOG_DATA__
             : null
     );
@@ -259,16 +260,13 @@ function BlogWrapper() {
                                     </h2>
                                 )}
 
-                                {/* Section Subheading (H3) */}
+                                {/* Legacy/Backward Compatibility: Render top-level subheading and text if they exist */}
                                 {section.subheading && (
-                                    <h3
-                                        className="text-lg md:text-xl font-semibold mb-2 text-white"
-                                    >
+                                    <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
                                         {section.subheading}
                                     </h3>
                                 )}
 
-                                {/* Section Text (paragraphs) — supports <a> tags for internal linking */}
                                 {section.text && (
                                     <div
                                         className="blog-section-text text-base leading-relaxed mb-4"
@@ -277,7 +275,6 @@ function BlogWrapper() {
                                     />
                                 )}
 
-                                {/* Section List Items (bullet points) */}
                                 {section.listItems && section.listItems.length > 0 && (
                                     <ul
                                         className="ml-5 mb-4 space-y-2"
@@ -291,6 +288,42 @@ function BlogWrapper() {
                                             />
                                         ))}
                                     </ul>
+                                )}
+
+                                {/* Render new multiple Subsections (blocks) */}
+                                {section.subsections && section.subsections.length > 0 && (
+                                    <div className="space-y-6 mt-4">
+                                        {section.subsections.map((sub, subIdx) => (
+                                            <div key={subIdx} className="subsection-block">
+                                                {sub.subheading && (
+                                                    <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
+                                                        {sub.subheading}
+                                                    </h3>
+                                                )}
+                                                {sub.text && (
+                                                    <div
+                                                        className="blog-section-text text-base leading-relaxed mb-3"
+                                                        style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                        dangerouslySetInnerHTML={{ __html: sub.text }}
+                                                    />
+                                                )}
+                                                {sub.listItems && sub.listItems.length > 0 && (
+                                                    <ul
+                                                        className="ml-5 mb-3 space-y-2"
+                                                        style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                    >
+                                                        {sub.listItems.map((item, i) => (
+                                                            <li
+                                                                key={i}
+                                                                className="list-disc text-base leading-relaxed"
+                                                                dangerouslySetInnerHTML={{ __html: item }}
+                                                            />
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 )}
 
                                 {/* Section Inline Image */}
@@ -429,6 +462,10 @@ function BlogWrapper() {
                     </motion.div>
                 </div>
             </div>
+            {/* Per-Blog FAQ Section — only shown when FAQs exist */}
+            {blog.faqs && blog.faqs.length > 0 && (
+                <InlineFAQSection faqs={blog.faqs} />
+            )}
 
             {/* Prev/Next Blog Navigation */}
             {(prevBlog || nextBlog) && (
@@ -516,6 +553,7 @@ function BlogWrapper() {
                     </div>
                 </div>
             )}
+
 
             {/* Bottom CTA */}
             <div
