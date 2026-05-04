@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,6 +6,7 @@ import {
   ChevronRight, Link2, Search, RefreshCw, LayoutDashboard,
   Calendar, Car, DollarSign, Users, LogOut, Menu, X,
   Target, MapPin, MapPinPlus, List, CheckCircle, AlertCircle,
+  Briefcase, PenSquare, BookOpen,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { calendarEventAPI, adminAPI } from "../../Utils/api";
@@ -26,20 +27,25 @@ const CATEGORY_COLORS = {
 };
 
 const NAV_ITEMS = [
-  { id:"dashboard", icon:LayoutDashboard, label:"Dashboard", path:"/admin-dashboard" },
-  { id:"leads", icon:Target, label:"All Leads", path:"/admin/leads" },
-  { id:"bookings", icon:Calendar, label:"All Bookings", path:"/admin/bookings" },
-  { id:"vehicles", icon:List, label:"All Cars", path:"/admin/vehicles" },
-  { id:"add-car", icon:Plus, label:"Add Car", path:"/admin/add-car" },
-  { id:"pricing", icon:DollarSign, label:"Set Pricing", path:"/admin/pricing" },
-  { id:"all-pricing", icon:List, label:"See All Pricing", path:"/admin/all-pricing" },
-  { id:"all-locations", icon:MapPin, label:"All Locations", path:"/admin/locations" },
-  { id:"add-location", icon:MapPinPlus, label:"Add Location", path:"/admin/add-location" },
-  { id:"event-calendar", icon:CalendarDays, label:"Event Calendar", path:"/admin/event-calendar" },
+  { id: "dashboard",       icon: LayoutDashboard, label: "Dashboard",       path: "/admin-dashboard" },
+  { id: "leads",           icon: Target,          label: "All Leads",       path: "/admin/leads" },
+  { id: "bookings",        icon: Calendar,        label: "All Bookings",    path: "/admin/bookings" },
+  { id: "vehicles",        icon: List,            label: "All Cars",        path: "/admin/vehicles" },
+  { id: "add-car",         icon: Plus,            label: "Add Car",         path: "/admin/add-car" },
+  { id: "pricing",         icon: DollarSign,      label: "Set Pricing",     path: "/admin/pricing" },
+  { id: "all-pricing",     icon: List,            label: "See All Pricing", path: "/admin/all-pricing" },
+  { id: "all-locations",   icon: MapPin,          label: "All Locations",   path: "/admin/locations" },
+  { id: "add-location",    icon: MapPinPlus,      label: "Add Location",    path: "/admin/add-location" },
+  { id: "all-services",    icon: Briefcase,       label: "All Services",    path: "/admin/services" },
+  { id: "add-service",     icon: PenSquare,       label: "Add Service",     path: "/admin/add-service" },
+  { id: "all-blogs",       icon: BookOpen,        label: "All Blogs",       path: "/admin/blogs" },
+  { id: "add-blog",        icon: PenSquare,       label: "Add Blog",        path: "/admin/add-blog" },
+  { id: "event-calendar",  icon: CalendarDays,    label: "Event Calendar",  path: "/admin/event-calendar" },
 ];
 
 function AdminEventCalendar() {
   const navigate = useNavigate();
+  const navRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeNav] = useState("event-calendar");
 
@@ -143,33 +149,65 @@ function AdminEventCalendar() {
       <motion.aside
         initial={false}
         animate={{ x: isSidebarOpen ? 0 : -288 }}
-        transition={{ type:"spring", damping:30, stiffness:300 }}
-        className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white z-40 shadow-2xl overflow-y-auto"
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+        className="fixed left-0 top-0 h-screen w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white z-40 shadow-2xl flex flex-col"
       >
-        <div className="p-6 border-b border-slate-700/50">
+        <div className="p-6 border-b border-slate-700/50 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/JkLogo.png" alt="JK Logo" className="w-11 h-11 object-contain"/>
+              <img src="/JkLogo.png" alt="JK Logo" className="w-11 h-11 object-contain" />
               <div>
-                <h1 className="font-bold text-lg">JK Chauffeur</h1>
-                <p className="text-slate-400 text-xs">Admin Panel</p>
+                <h1 className="font-bold text-lg tracking-tight">JK Chauffeur</h1>
+                <p className="text-slate-400 text-xs font-medium">Admin Panel</p>
               </div>
             </div>
-            <button onClick={()=>setIsSidebarOpen(false)} className="lg:hidden p-2 hover:bg-slate-700/50 rounded-xl"><X size={24}/></button>
+            <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 hover:bg-slate-700/50 rounded-xl transition-colors">
+              <X size={24} />
+            </button>
           </div>
         </div>
-        <nav className="p-4 space-y-1.5">
-          {NAV_ITEMS.map(item => (
-            <button key={item.id} onClick={()=>handleNavClick(item)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${activeNav===item.id?"bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg":"text-slate-300 hover:bg-slate-700/50 hover:text-white hover:translate-x-1"}`}>
-              <item.icon size={20}/>
-              <span className="font-medium text-sm">{item.label}</span>
-            </button>
-          ))}
+        <nav
+          ref={navRef}
+          tabIndex={-1}
+          onMouseEnter={() => navRef.current?.focus()}
+          onWheel={(e) => {
+            if (!navRef.current) return;
+            e.stopPropagation();
+            navRef.current.scrollTop += e.deltaY;
+          }}
+          className="flex-1 overflow-y-scroll overscroll-contain p-4 space-y-1.5 outline-none"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
+        >
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeNav === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  isActive
+                    ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-600/30 scale-[1.02]"
+                    : "text-slate-300 hover:bg-slate-700/50 hover:text-white hover:translate-x-1"
+                }`}
+              >
+                <item.icon size={20} className={isActive ? "" : "group-hover:scale-110 transition-transform"} />
+                <span className="font-medium text-sm">{item.label}</span>
+                {isActive && (
+                  <motion.div layoutId="activeNavIndicator" className="ml-auto" initial={false}>
+                    <ChevronRight size={18} />
+                  </motion.div>
+                )}
+              </button>
+            );
+          })}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all group">
-            <LogOut size={20}/><span className="font-medium text-sm">Logout</span>
+        <div className="mt-auto p-4 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm flex-shrink-0">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 group"
+          >
+            <LogOut size={20} className="group-hover:scale-110 transition-transform" />
+            <span className="font-medium text-sm">Logout</span>
           </button>
         </div>
       </motion.aside>
