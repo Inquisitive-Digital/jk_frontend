@@ -165,7 +165,7 @@ function BlogWrapper() {
         : null;
 
     return (
-        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
+        <main className="overflow-x-hidden" style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
             <Helmet>
                 <title>{seoTitle}</title>
                 <meta name="description" content={seoDesc} />
@@ -187,7 +187,7 @@ function BlogWrapper() {
                 )}
             </Helmet>
             {/* Hero Image */}
-            <div className="relative h-[45vh] md:h-[55vh] overflow-hidden ">
+            <div className="relative h-[52vw] min-h-[240px] md:h-[55vh] overflow-hidden">
                 {heroSrc ? (
                     <motion.img
                         initial={{ scale: 1.1 }}
@@ -208,7 +208,7 @@ function BlogWrapper() {
 
 
                 {/* Title & Meta on Image */}
-                <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8 xl:px-10 xl:mx-10 2xl:mx-20 2xl:px-20">
+                <div className="absolute bottom-4 md:bottom-10 left-0 right-0 px-4 md:px-8">
                     <div className="max-w-7xl mx-auto">
                         {/* {blog.category && (
                             <motion.span
@@ -229,7 +229,7 @@ function BlogWrapper() {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 "
+                            className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-4 leading-tight"
                         >
                             {blog.title}
                         </motion.h1>
@@ -237,7 +237,7 @@ function BlogWrapper() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}
-                            className="flex items-center gap-4 text-sm text-white/50"
+                            className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-white/50"
                         >
                             <span className="flex items-center gap-1.5">
                                 <Calendar className="w-4 h-4" />
@@ -255,8 +255,8 @@ function BlogWrapper() {
             </div>
 
             {/* Blog Content */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
-                <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-14 lg:py-20">
+                <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
                     {/* Main Content — 2/3 */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -297,7 +297,11 @@ function BlogWrapper() {
                                     <div
                                         className="blog-section-text text-base leading-relaxed mb-4"
                                         style={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                                        dangerouslySetInnerHTML={{ __html: section.text }}
+                                        dangerouslySetInnerHTML={{
+                                            __html: section.text.includes('<')
+                                                ? section.text
+                                                : section.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                        }}
                                     />
                                 )}
 
@@ -330,7 +334,11 @@ function BlogWrapper() {
                                                     <div
                                                         className="blog-section-text text-base leading-relaxed mb-3"
                                                         style={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                                                        dangerouslySetInnerHTML={{ __html: sub.text }}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: sub.text.includes('<')
+                                                                ? sub.text
+                                                                : sub.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                                        }}
                                                     />
                                                 )}
                                                 {sub.listItems && sub.listItems.length > 0 && (
@@ -365,6 +373,28 @@ function BlogWrapper() {
 
                         {/* Inline styles for any <a> tags inside text fields */}
                         <style>{`
+                            .blog-section-text {
+                                word-break: break-word;
+                                overflow-wrap: break-word;
+                                max-width: 100%;
+                            }
+                            /* Force all pasted rich-text elements to stay within screen width */
+                            .blog-section-text * {
+                                max-width: 100% !important;
+                                box-sizing: border-box !important;
+                            }
+                            /* Ensure pasted tables or flex containers wrap on mobile */
+                            @media (max-width: 768px) {
+                                .blog-section-text table, 
+                                .blog-section-text tbody, 
+                                .blog-section-text tr, 
+                                .blog-section-text td,
+                                .blog-section-text div {
+                                    display: block !important;
+                                    width: 100% !important;
+                                    min-width: 0 !important;
+                                }
+                            }
                             .blog-section-text a {
                                 color: var(--color-primary);
                                 text-decoration: underline;
@@ -409,8 +439,34 @@ function BlogWrapper() {
                         transition={{ delay: 0.6 }}
                         className="lg:col-span-1"
                     >
+                        {/* Mobile: compact horizontal booking strip */}
                         <div
-                            className="sticky top-32 rounded-2xl p-6 md:p-8 space-y-6"
+                            className="lg:hidden flex flex-col sm:flex-row items-center gap-4 rounded-2xl p-4 sm:p-5"
+                            style={{
+                                backgroundColor: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                            }}
+                        >
+                            <div className="flex-1 min-w-0">
+                                <p className="text-white font-semibold text-sm mb-0.5">Need a Chauffeur?</p>
+                                <p className="text-white/50 text-xs leading-relaxed">Professional drivers, premium vehicles, impeccable service.</p>
+                            </div>
+                            <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                                <Link
+                                    to="/booking"
+                                    onClick={() => Analytics.trackBookingClick('blog_mobile_book_now')}
+                                    className="px-5 py-2.5 rounded-xl font-semibold text-xs uppercase tracking-wider transition-all duration-300 whitespace-nowrap"
+                                    style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
+                                >
+                                    Book Now
+                                </Link>
+                                <a href="tel:+442034759906" onClick={() => Analytics.trackCallClick('blog_mobile_phone')} className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>+44 203 475 9906</a>
+                            </div>
+                        </div>
+
+                        {/* Desktop: full sticky sidebar */}
+                        <div
+                            className="hidden lg:block lg:sticky lg:top-32 rounded-2xl p-6 md:p-8 space-y-6"
                             style={{
                                 backgroundColor: 'rgba(255,255,255,0.04)',
                                 border: '1px solid rgba(255,255,255,0.08)',
@@ -495,7 +551,7 @@ function BlogWrapper() {
 
             {/* Prev/Next Blog Navigation */}
             {(prevBlog || nextBlog) && (
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
                     <div
                         className="rounded-2xl p-6 md:p-8  "
                         style={{
@@ -583,7 +639,7 @@ function BlogWrapper() {
 
             {/* Bottom CTA */}
             <div
-                className="py-16 md:py-20"
+                className="py-10 md:py-16"
                 style={{
                     background: 'linear-gradient(180deg, var(--color-dark) 0%, rgba(215,183,94,0.05) 50%, var(--color-dark) 100%)',
                 }}

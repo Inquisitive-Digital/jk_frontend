@@ -354,8 +354,10 @@ export const serviceAPI = {
     // ─── Admin only ──────────────────────────────────────────────────────────
 
     // Get ALL services for admin panel (includes inactive)
-    getAllAdmin: async (page = 1, limit = 20) => {
-        const response = await api.get("/api/services/admin/all", { params: { page, limit } });
+    getAllAdmin: async (page = 1, limit = 20, search = "") => {
+        const params = { page, limit };
+        if (search.trim()) params.search = search.trim();
+        const response = await api.get("/api/services/admin/all", { params });
         return response.data;
     },
 
@@ -488,8 +490,10 @@ export const blogAPI = {
     // ─── Admin only ──────────────────────────────────────────────────────────
 
     // Get ALL blogs for admin panel (includes inactive)
-    getAllAdmin: async (page = 1, limit = 20) => {
-        const response = await api.get("/api/blogs/admin/all", { params: { page, limit } });
+    getAllAdmin: async (page = 1, limit = 20, search = "") => {
+        const params = { page, limit };
+        if (search.trim()) params.search = search.trim();
+        const response = await api.get("/api/blogs/admin/all", { params });
         return response.data;
     },
 

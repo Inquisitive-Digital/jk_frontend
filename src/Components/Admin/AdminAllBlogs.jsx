@@ -219,6 +219,7 @@ function AdminAllBlogs() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [deletingId, setDeletingId] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
@@ -245,12 +246,21 @@ function AdminAllBlogs() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // ── Debounce search input (400ms) ────────────────────────────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // always reset to page 1 on new search
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   // ── Fetch blogs ─────────────────────────────────────────────────────────
   const fetchBlogs = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await blogAPI.getAllAdmin(page, LIMIT);
+      const data = await blogAPI.getAllAdmin(page, LIMIT, debouncedSearch);
       if (data.success) {
         setBlogs(data.blogs);
         setTotalPages(data.totalPages);
@@ -262,7 +272,7 @@ function AdminAllBlogs() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, navigate]);
+  }, [page, debouncedSearch, navigate]);
 
   useEffect(() => { fetchBlogs(); }, [fetchBlogs]);
 
@@ -307,15 +317,14 @@ function AdminAllBlogs() {
     if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
-  // ── Filtered list (client-side search on current page) ──────────────────
-  const filtered = search.trim()
-    ? blogs.filter(
-        (b) =>
-          b.title?.toLowerCase().includes(search.toLowerCase()) ||
-          b.slug?.toLowerCase().includes(search.toLowerCase()) ||
-          b.category?.toLowerCase().includes(search.toLowerCase())
-      )
-    : blogs;
+  // ── Search input handler ─────────────────────────────────────────────────
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -467,11 +476,20 @@ function AdminAllBlogs() {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by title, slug or category…"
+                placeholder="Search entire database by title, slug, category or author…"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+                onChange={handleSearchChange}
+                className="w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
               />
+              {search && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  title="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
             <button
               onClick={fetchBlogs}
@@ -489,7 +507,7 @@ function AdminAllBlogs() {
                 <Loader2 size={36} className="animate-spin text-blue-600" />
                 <p className="text-gray-500 text-sm">Loading blog posts…</p>
               </div>
-            ) : filtered.length === 0 ? (
+            ) : blogs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
                   <BookOpen size={28} className="text-gray-300" />
@@ -525,7 +543,7 @@ function AdminAllBlogs() {
                   </thead>
                   <tbody>
                     <AnimatePresence>
-                      {filtered.map((blog) => (
+                      {blogs.map((blog) => (
                         <BlogRow
                           key={blog._id}
                           blog={blog}

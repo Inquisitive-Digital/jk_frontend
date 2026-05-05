@@ -217,6 +217,7 @@ function AdminAllServices() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [deletingId, setDeletingId] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
@@ -242,12 +243,21 @@ function AdminAllServices() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ── Fetch services ───────────────────────────────────────────────────────
+  // ── Debounce search input (400ms) ────────────────────────────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // always reset to page 1 on new search
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // ── Fetch services ─────────────────────────────────────────────────────────
   const fetchServices = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await serviceAPI.getAllAdmin(page, LIMIT);
+      const data = await serviceAPI.getAllAdmin(page, LIMIT, debouncedSearch);
       if (data.success) {
         setServices(data.services);
         setTotalPages(data.totalPages);
@@ -259,7 +269,7 @@ function AdminAllServices() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, navigate]);
+  }, [page, debouncedSearch, navigate]);
 
   useEffect(() => { fetchServices(); }, [fetchServices]);
 
@@ -304,16 +314,14 @@ function AdminAllServices() {
     if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
-  // ── Filtered list ────────────────────────────────────────────────────────
-  const filtered = search.trim()
-    ? services.filter(
-        (s) =>
-          s.title?.toLowerCase().includes(search.toLowerCase()) ||
-          s.slug?.toLowerCase().includes(search.toLowerCase()) ||
-          s.category?.toLowerCase().includes(search.toLowerCase()) ||
-          s.subtitle?.toLowerCase().includes(search.toLowerCase())
-      )
-    : services;
+  // ── Search input handler ─────────────────────────────────────────────────
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -461,16 +469,25 @@ function AdminAllServices() {
 
           {/* Search + refresh */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by title, slug, category or subtitle…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
-              />
-            </div>
+              <div className="relative flex-1">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search entire database by title, slug, category or subtitle…"
+                  value={search}
+                  onChange={handleSearchChange}
+                  className="w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+                />
+                {search && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Clear search"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
             <button
               onClick={fetchServices}
               className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium"
@@ -487,7 +504,7 @@ function AdminAllServices() {
                 <Loader2 size={36} className="animate-spin text-blue-600" />
                 <p className="text-gray-500 text-sm">Loading services…</p>
               </div>
-            ) : filtered.length === 0 ? (
+            ) : services.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
                   <Briefcase size={28} className="text-gray-300" />
@@ -522,7 +539,7 @@ function AdminAllServices() {
                   </thead>
                   <tbody>
                     <AnimatePresence>
-                      {filtered.map((service) => (
+                      {services.map((service) => (
                         <ServiceRow
                           key={service._id}
                           service={service}
