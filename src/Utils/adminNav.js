@@ -30,7 +30,7 @@ export const NAV_ITEMS = [
   {
     id: "bookings",
     icon: Calendar,
-    label: "All Bookings",
+    label: "Confirmed Booking",
     path: "/admin/bookings",
   },
 

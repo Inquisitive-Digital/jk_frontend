@@ -687,6 +687,7 @@ function AdminAllBookings() {
             const params = {
                 page,
                 limit: pagination.limit,
+                status: "confirmed",
             };
 
             const response = await bookingAPI.getAllBookings(params);
@@ -747,10 +748,10 @@ function AdminAllBookings() {
                             </button>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">
-                                    All Bookings
+                                    Confirmed Bookings
                                 </h1>
                                 <p className="text-gray-500 text-sm">
-                                    View all confirmed and completed bookings
+                                    View all confirmed bookings
                                 </p>
                             </div>
                         </div>
@@ -762,8 +763,8 @@ function AdminAllBookings() {
                             <div
                                 className={`px-4 py-2 rounded-xl bg-gray-100 flex items-center gap-2 whitespace-nowrap`}
                             >
-                                <span className="text-sm font-medium">Total:</span>
-                                <span className="font-bold">{stats.total}</span>
+                                <span className="text-sm font-medium">Confirmed:</span>
+                                <span className="font-bold">{stats.confirmed || stats.total}</span>
                             </div>
                         </div>
                     )}
