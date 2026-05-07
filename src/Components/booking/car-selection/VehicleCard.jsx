@@ -92,11 +92,11 @@ const VehicleCard = ({ vehicle, isSelected, onSelect, isDisabled }) => {
               <div className="space-y-1 text-[12px] font-mono border-r border-[#222] pr-4">
                 <div className="flex justify-between text-white">
                   <span>BASE FARE</span>
-                  <span>£{(pricing?.totalPrice * 0.8).toFixed(2)}</span>
+                  <span>£{pricing?.basePrice?.toFixed(2) ?? "N/A"}</span>
                 </div>
                 <div className="flex justify-between text-white">
-                  <span>TAX</span>
-                  <span>£{(pricing?.totalPrice * 0.2).toFixed(2)}</span>
+                  <span>TAX ({pricing?.vatRate ?? 20}% VAT)</span>
+                  <span>£{pricing?.tax?.toFixed(2) ?? "N/A"}</span>
                 </div>
               </div>
 
