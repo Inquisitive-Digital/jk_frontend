@@ -223,7 +223,7 @@ function AdminLocationPricing() {
 
     const defaultHourlyForm = {
         hourlyRate: 45,
-        minimumHours: 4,
+        minimumHours: 3,
         additionalHourCharge: 45,
         milesIncluded: 40,
         excessMileageCharge: 2,
@@ -302,7 +302,7 @@ function AdminLocationPricing() {
                         if (vehiclePricing.hourly && vehiclePricing.hourly.isActive) {
                             setHourlyForm({
                                 hourlyRate: vehiclePricing.hourly.hourlyRate || 45,
-                                minimumHours: vehiclePricing.hourly.minimumHours || 4,
+                                minimumHours: vehiclePricing.hourly.minimumHours || 3,
                                 additionalHourCharge: vehiclePricing.hourly.additionalHourCharge || 45,
                                 milesIncluded: vehiclePricing.hourly.milesIncluded || 40,
                                 excessMileageCharge: vehiclePricing.hourly.excessMileageCharge || 2,
