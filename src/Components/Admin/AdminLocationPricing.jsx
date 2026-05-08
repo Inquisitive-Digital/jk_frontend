@@ -227,7 +227,7 @@ function AdminLocationPricing() {
         additionalHourCharge: 45,
         milesIncluded: 40,
         excessMileageCharge: 2,
-        extras: { extraStopPrice: 10, childSeatPrice: 0, congestionCharge: 0 },
+        extras: { extraStopPrice: 10, childSeatPrice: 0, congestionCharge: 0, carParkCharge: 0 },
         displayVATInclusive: true,
         displayParkingInclusive: false,
         priceRoundOff: false,
@@ -409,6 +409,11 @@ function AdminLocationPricing() {
                     excessMileageCharge: hourlyForm.excessMileageCharge,
                     isActive: true,
                 },
+                extras: hourlyForm.extras,
+                displayVATInclusive: hourlyForm.displayVATInclusive,
+                displayParkingInclusive: hourlyForm.displayParkingInclusive,
+                priceRoundOff: hourlyForm.priceRoundOff,
+                status: hourlyForm.status,
             };
             let response;
             if (existingId) {
@@ -834,7 +839,7 @@ function AdminLocationPricing() {
                                             <DollarSign size={18} className="text-amber-500" />
                                             Additional Charges
                                         </h3>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                             <div>
                                                 <label className="text-xs text-gray-500 mb-1 block">Extra Stop (£)</label>
                                                 <input type="number" step="0.01" value={hourlyForm.extras.extraStopPrice}
@@ -851,6 +856,12 @@ function AdminLocationPricing() {
                                                 <label className="text-xs text-gray-500 mb-1 block">Congestion (£)</label>
                                                 <input type="number" step="0.01" value={hourlyForm.extras.congestionCharge}
                                                     onChange={(e) => setHourlyForm((p) => ({ ...p, extras: { ...p.extras, congestionCharge: parseFloat(e.target.value) || 0 } }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Car Park Charges (£)</label>
+                                                <input type="number" step="0.01" value={hourlyForm.extras.carParkCharge || 0}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, extras: { ...p.extras, carParkCharge: parseFloat(e.target.value) || 0 } }))}
                                                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                                             </div>
                                         </div>
