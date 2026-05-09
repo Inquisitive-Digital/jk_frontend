@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { serviceAPI, getImageUrl } from '../../Utils/api';
+import { serviceAPI, getImageUrl, getImageSrcSet } from '../../Utils/api';
 import ServiceCardSkeleton from '../extras/ServiceCardSkeleton';
 import ServicesGhostCard from '../extras/ServicesGhostCard';
 
@@ -172,6 +172,8 @@ function ServicesSection() {
                                         <div className="relative aspect-[16/10] rounded-t-xl overflow-hidden flex-shrink-0">
                                             <img
                                                 src={getImageUrl(service.image?.url)}
+                                                srcSet={getImageSrcSet(service.image?.url)}
+                                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                                 alt={service.title}
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 loading="lazy"

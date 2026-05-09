@@ -214,6 +214,8 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 src={JkLogo}
                 alt="JK Executive Chauffeurs Logo"
                 className="w-24 h-18 md:w-28 md:h-20 object-contain flex-shrink-0"
+                fetchPriority="high"
+                loading="eager"
               />
               <motion.div
                 className="overflow-hidden hidden lg:block"

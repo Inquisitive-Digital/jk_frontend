@@ -10,7 +10,7 @@ import {
   Users,
   Briefcase,
 } from "lucide-react";
-import { fleetAPI, getImageUrl } from "../../Utils/api";
+import { fleetAPI, getImageUrl, getImageSrcSet } from "../../Utils/api";
 import Analytics from "../../Utils/analytics";
 
 function FleetSection() {
@@ -185,6 +185,8 @@ function FleetSection() {
                       <div className="relative aspect-[16/10] rounded-t-xl overflow-hidden flex-shrink-0">
                         <img
                           src={imageUrl}
+                          srcSet={getImageSrcSet(vehicle.heroImage?.url)}
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           alt={vehicle.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           loading="lazy"

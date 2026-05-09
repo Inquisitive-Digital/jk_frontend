@@ -13,6 +13,7 @@
     "build:full": "node scripts/generate-sitemap.js && vite build"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
     "@react-google-maps/api": "^2.20.8",
     "@stripe/react-stripe-js": "^5.4.1",
     "@stripe/stripe-js": "^8.6.3",
@@ -40,6 +41,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "rollup-plugin-visualizer": "^7.0.1",
     "vite": "^7.2.4"
   }
 }

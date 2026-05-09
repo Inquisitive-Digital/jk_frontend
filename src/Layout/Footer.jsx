@@ -130,6 +130,7 @@ function Footer() {
                 src={JkLogo}
                 alt="JK Executive Chauffeurs logo"
                 className="w-20 h-16 object-contain"
+                loading="lazy"
               />
             </Link>
             <h3 className="text-lg font-light text-white tracking-wider mb-3">

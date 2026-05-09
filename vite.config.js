@@ -1,10 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(), 
+    tailwindcss(),
+    visualizer({
+      open: true,
+      filename: 'bundle-analysis.html',
+      gzipSize: true,
+      brotliSize: true,
+    })
+  ],
   build: {
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
@@ -22,6 +32,8 @@ export default defineConfig({
     },
     // Minify with Esbuild (default but explicit for clarity)
     minify: 'esbuild',
+    // Ensure tree shaking is enabled
+    treeshake: true,
   },
 })
 

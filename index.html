@@ -9,8 +9,11 @@
   <!-- Critical performance hints -->
   <link rel="preconnect" href="https://maps.googleapis.com" />
   <link rel="preconnect" href="https://maps.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://embed.tawk.to" />
-  <link rel="preconnect" href="https://va.tawk.to" />
+  
+  <!-- Preload critical assets -->
+  <link rel="preload" href="/src/assets/heroImage.webp" as="image" fetchpriority="high" />
+  <link rel="preload" href="/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
 
   <link href="./src/index.css" rel="stylesheet">
   <!-- <title>Chauffeur Service in London | Travel In Style & Comfort</title> -->

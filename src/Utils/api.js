@@ -30,7 +30,28 @@ export function getImageUrl(path, fallback = "") {
     // Ensure no double-slash between base and path
     const base = BASE_URL.replace(/\/$/, "");
     const rel = path.startsWith("/") ? path : `/${path}`;
+    
+    // Auto-convert to WebP if it's a standard image (optional, depends on if user runs the script)
+    // For now, let's just provide the path.
     return `${base}${rel}`;
+}
+
+/**
+ * Returns a srcset string for responsive images
+ * Assumes the optimize-images.js script has been run
+ */
+export function getImageSrcSet(path) {
+    if (!path || path.startsWith("http")) return null;
+    
+    const base = BASE_URL.replace(/\/$/, "");
+    const rel = path.startsWith("/") ? path : `/${path}`;
+    const nameNoExt = rel.substring(0, rel.lastIndexOf('.'));
+    
+    return [
+        `${base}${nameNoExt}-small.webp 400w`,
+        `${base}${nameNoExt}-medium.webp 800w`,
+        `${base}${nameNoExt}-large.webp 1200w`,
+    ].join(", ");
 }
 
 const api = axios.create({
