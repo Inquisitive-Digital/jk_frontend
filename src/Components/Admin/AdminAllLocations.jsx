@@ -20,6 +20,7 @@ import {
     Flag,
     CircleDot,
     DollarSign,
+    Hexagon,
 } from "lucide-react";
 import { locationAPI } from "../../Utils/api";
 
@@ -102,7 +103,7 @@ const DeleteModal = ({ isOpen, onClose, onConfirm, locationName, isDeleting }) =
 };
 
 // Location Card
-const LocationCard = ({ location, onEdit, onDelete, onSetPricing }) => {
+const LocationCard = ({ location, onEdit, onDelete, onSetPricing, onSetZone }) => {
     const Icon = LOCATION_TYPE_ICONS[location.locationType] || CircleDot;
 
     return (
@@ -130,8 +131,8 @@ const LocationCard = ({ location, onEdit, onDelete, onSetPricing }) => {
                 <div className="flex items-center justify-between">
                     <LocationTypeBadge type={location.locationType} />
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${location.isActive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-500"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-500"
                         }`}>
                         {location.isActive ? "Active" : "Inactive"}
                     </span>
@@ -364,6 +365,7 @@ function AdminAllLocations() {
                                     onEdit={(l) => navigate(`/admin/edit-location/${l._id}`)}
                                     onDelete={(l) => setDeleteModal({ isOpen: true, location: l })}
                                     onSetPricing={(l) => navigate(`/admin/location-pricing/${l._id}`)}
+                                    onSetZone={(l) => navigate(`/admin/location-zone/${l._id}`)}
                                 />
                             ))}
                         </AnimatePresence>

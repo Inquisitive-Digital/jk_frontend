@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { serviceAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+import InlineFAQSection from '../Components/home/InlineFAQSection';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -80,8 +81,24 @@ function ServiceWrapper() {
         },
     };
 
+    // FAQ structured data — only built when FAQs exist
+    const faqSchema = service.faqs && service.faqs.length > 0
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: service.faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: f.answer,
+                },
+            })),
+          }
+        : null;
+
     return (
-        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+        <main className="overflow-x-hidden" style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             <Helmet>
                 <title>{service.meta_title || service.title}</title>
                 <meta name="description" content={service.meta_description || service.description} />
@@ -91,6 +108,11 @@ function ServiceWrapper() {
                 <script type="application/ld+json">
                     {JSON.stringify(serviceSchema)}
                 </script>
+                {faqSchema && (
+                    <script type="application/ld+json">
+                        {JSON.stringify(faqSchema)}
+                    </script>
+                )}
                 {service.script && (
                     <script type="application/ld+json">
                         {service.script}
@@ -98,7 +120,7 @@ function ServiceWrapper() {
                 )}
             </Helmet>
             {/* Hero Image Section */}
-            <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
+            <div className="relative h-[52vw] min-h-[260px] md:h-[55vh] overflow-hidden">
                 <motion.img
                     initial={{ scale: 1.1 }}
                     animate={{ scale: 1 }}
@@ -117,7 +139,7 @@ function ServiceWrapper() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="absolute top-32 md:top-36 left-4 md:left-8"
+                    className="absolute top-20 sm:top-24 md:top-36 left-4 md:left-8"
                 >
                     <Link
                         to="/services"
@@ -142,14 +164,13 @@ function ServiceWrapper() {
                 </motion.div>
 
                 {/* Title Overlay on Image */}
-                <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8">
-                    <div className="max-w-7xl mx-auto  xl:px-5">
-
+                <div className="absolute bottom-5 md:bottom-10 left-0 right-0 px-4 md:px-8">
+                    <div className="max-w-7xl mx-auto">
                         <motion.h1
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white  xl:ml-2"
+                            className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
                         >
                             {service.title}
                         </motion.h1>
@@ -158,8 +179,8 @@ function ServiceWrapper() {
             </div>
 
             {/* Content Section */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
-                <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-14 lg:py-20">
+                <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
                     {/* Main Content — 2/3 */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Short Description */}
@@ -179,23 +200,170 @@ function ServiceWrapper() {
                             </p>
                         </motion.div>
 
-                        {/* Long Description */}
-                        {service.longDescription && (
+                        {/* Structured Sections (from Blog pattern) OR Long Description (Fallback) */}
+                        {service.sections && service.sections.length > 0 ? (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.6 }}
-                                className="space-y-4"
                             >
-                                <div
-                                    className="w-full h-px"
-                                    style={{ background: 'linear-gradient(90deg, var(--color-primary), transparent)' }}
-                                />
-                                <div className="text-white/60 text-base leading-relaxed whitespace-pre-line">
-                                    {service.longDescription}
-                                </div>
+                                {service.sections.map((section, index) => (
+                                    <div key={index} className="mb-8">
+                                        {/* Section Heading (H2) */}
+                                        {section.heading && (
+                                            <h2
+                                                className="text-xl md:text-2xl font-semibold mb-3"
+                                                style={{ color: 'var(--color-primary)' }}
+                                            >
+                                                {section.heading}
+                                            </h2>
+                                        )}
+
+                                        {/* Legacy flat subheading */}
+                                        {section.subheading && (
+                                            <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
+                                                {section.subheading}
+                                            </h3>
+                                        )}
+
+                                        {/* Legacy flat text */}
+                                        {section.text && (
+                                            <div
+                                                className="service-section-text text-base leading-relaxed mb-4"
+                                                style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                dangerouslySetInnerHTML={{
+                                                    __html: section.text.includes('<')
+                                                        ? section.text
+                                                        : section.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                                }}
+                                            />
+                                        )}
+
+                                        {/* Legacy flat list items */}
+                                        {section.listItems && section.listItems.length > 0 && (
+                                            <ul
+                                                className="ml-5 mb-4 space-y-2"
+                                                style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                            >
+                                                {section.listItems.map((item, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="list-disc text-base leading-relaxed"
+                                                        dangerouslySetInnerHTML={{ __html: item }}
+                                                    />
+                                                ))}
+                                            </ul>
+                                        )}
+
+                                        {/* Subsections — H3 blocks with text + bullets */}
+                                        {section.subsections && section.subsections.length > 0 && (
+                                            <div className="space-y-6 mt-4">
+                                                {section.subsections.map((sub, subIdx) => (
+                                                    <div key={subIdx} className="subsection-block">
+                                                        {sub.subheading && (
+                                                            <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
+                                                                {sub.subheading}
+                                                            </h3>
+                                                        )}
+                                                        {sub.text && (
+                                                            <div
+                                                                className="service-section-text text-base leading-relaxed mb-3"
+                                                                style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                                dangerouslySetInnerHTML={{
+                                                                    __html: sub.text.includes('<')
+                                                                        ? sub.text
+                                                                        : sub.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                                                }}
+                                                            />
+                                                        )}
+                                                        {sub.listItems && sub.listItems.length > 0 && (
+                                                            <ul
+                                                                className="ml-5 mb-3 space-y-2"
+                                                                style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                            >
+                                                                {sub.listItems.map((item, i) => (
+                                                                    <li
+                                                                        key={i}
+                                                                        className="list-disc text-base leading-relaxed"
+                                                                        dangerouslySetInnerHTML={{ __html: item }}
+                                                                    />
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Section Inline Image */}
+                                        {section.image?.url && (
+                                            <img
+                                                src={getImageUrl(section.image.url)}
+                                                alt={section.image.alt || section.heading || 'Service image'}
+                                                className="w-full rounded-xl my-4"
+                                            />
+                                        )}
+                                    </div>
+                                ))}
                             </motion.div>
+                        ) : (
+                            /* Fallback to old Long Description pattern */
+                            service.longDescription && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.6 }}
+                                    className="space-y-4"
+                                >
+                                    <div
+                                        className="w-full h-px"
+                                        style={{ background: 'linear-gradient(90deg, var(--color-primary), transparent)' }}
+                                    />
+                                    <div className="text-white/60 text-base leading-relaxed whitespace-pre-line">
+                                        {service.longDescription}
+                                    </div>
+                                </motion.div>
+                            )
                         )}
+
+                        {/* Inline styles for any <a> tags inside text fields */}
+                        <style>{`
+                            .service-section-text {
+                                word-break: break-word;
+                                overflow-wrap: break-word;
+                                max-width: 100%;
+                            }
+                            /* Force all pasted rich-text elements to stay within screen width */
+                            .service-section-text * {
+                                max-width: 100% !important;
+                                box-sizing: border-box !important;
+                            }
+                            /* Ensure pasted tables or flex containers wrap on mobile */
+                            @media (max-width: 768px) {
+                                .service-section-text table, 
+                                .service-section-text tbody, 
+                                .service-section-text tr, 
+                                .service-section-text td,
+                                .service-section-text div {
+                                    display: block !important;
+                                    width: 100% !important;
+                                    min-width: 0 !important;
+                                }
+                            }
+                            .service-section-text a {
+                                color: var(--color-primary);
+                                text-decoration: underline;
+                                text-underline-offset: 2px;
+                                transition: opacity 0.2s;
+                            }
+                            .service-section-text a:hover {
+                                opacity: 0.8;
+                            }
+                            .service-section-text b, .service-section-text strong {
+                                color: white;
+                                font-weight: 600;
+                            }
+                        `}</style>
 
                         {/* Features List */}
                         {service.features && service.features.length > 0 && (
@@ -241,8 +409,34 @@ function ServiceWrapper() {
                         transition={{ delay: 0.6 }}
                         className="lg:col-span-1"
                     >
+                        {/* Mobile: compact horizontal booking strip */}
                         <div
-                            className="sticky top-32 rounded-2xl p-6 md:p-8 space-y-6"
+                            className="lg:hidden flex flex-col sm:flex-row items-center gap-4 rounded-2xl p-4 sm:p-5"
+                            style={{
+                                backgroundColor: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                            }}
+                        >
+                            <div className="flex-1 min-w-0">
+                                <p className="text-white font-semibold text-sm mb-0.5">Ready to Experience?</p>
+                                <p className="text-white/50 text-xs leading-relaxed">Book our {service.title} — world-class chauffeur service.</p>
+                            </div>
+                            <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                                <Link
+                                    to="/booking"
+                                    onClick={() => Analytics.trackBookingClick('service_mobile_book_now', { service_title: service.title })}
+                                    className="px-5 py-2.5 rounded-xl font-semibold text-xs uppercase tracking-wider transition-all duration-300 whitespace-nowrap"
+                                    style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
+                                >
+                                    Book Now
+                                </Link>
+                                <a href="tel:+442034759906" onClick={() => Analytics.trackCallClick('service_mobile_phone')} className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>+44 (0) 203 475 9906</a>
+                            </div>
+                        </div>
+
+                        {/* Desktop: full sticky sidebar */}
+                        <div
+                            className="hidden lg:block lg:sticky lg:top-32 rounded-2xl p-6 md:p-8 space-y-6"
                             style={{
                                 backgroundColor: 'rgba(255,255,255,0.04)',
                                 border: '1px solid rgba(255,255,255,0.08)',
@@ -299,9 +493,14 @@ function ServiceWrapper() {
                 </div>
             </div>
 
+            {/* Per-Service FAQ Section — only shown when FAQs exist */}
+            {service.faqs && service.faqs.length > 0 && (
+                <InlineFAQSection faqs={service.faqs} />
+            )}
+
             {/* Bottom CTA Section */}
             <div
-                className="py-16 md:py-20"
+                className="py-10 md:py-16"
                 style={{
                     background: 'linear-gradient(180deg, var(--color-dark) 0%, rgba(215,183,94,0.05) 50%, var(--color-dark) 100%)',
                 }}

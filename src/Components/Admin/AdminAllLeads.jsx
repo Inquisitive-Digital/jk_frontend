@@ -893,7 +893,7 @@ function AdminAllLeads() {
     };
 
     // Count leads by payment status
-    const paidLeads = bookings.filter((b) => b.paymentStatus === "paid").length;
+
     const unpaidLeads = bookings.filter(
         (b) => b.paymentStatus === "pending"
     ).length;
@@ -936,10 +936,7 @@ function AdminAllLeads() {
                             <span className="text-sm font-medium">Total Leads:</span>
                             <span className="font-bold">{bookings.length}</span>
                         </div>
-                        <div className="px-4 py-2 rounded-xl bg-green-100 text-green-700 flex items-center gap-2 whitespace-nowrap">
-                            <span className="text-sm font-medium">Paid:</span>
-                            <span className="font-bold">{paidLeads}</span>
-                        </div>
+
                         <div className="px-4 py-2 rounded-xl bg-yellow-100 text-yellow-700 flex items-center gap-2 whitespace-nowrap">
                             <span className="text-sm font-medium">Unpaid:</span>
                             <span className="font-bold">{unpaidLeads}</span>
@@ -970,7 +967,7 @@ function AdminAllLeads() {
                                 options={[
                                     { value: "", label: "All Payment Status" },
                                     { value: "pending", label: "Unpaid" },
-                                    { value: "paid", label: "Paid" },
+
                                     { value: "failed", label: "Failed" },
                                 ]}
                             />

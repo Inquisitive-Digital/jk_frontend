@@ -17,6 +17,7 @@ import {
     Zap,
     Settings,
     Plane,
+    Clock,
 } from "lucide-react";
 import { vehicleAPI, locationAPI, locationPricingAPI, getImageUrl } from "../../Utils/api";
 
@@ -199,13 +200,13 @@ function AdminLocationPricing() {
     const [location, setLocation] = useState(null);
     const [vehicles, setVehicles] = useState([]);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
-    const [existingPricingIds, setExistingPricingIds] = useState({}); // vehicleId -> pricingId
+    const [existingPricingIds, setExistingPricingIds] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isFetchingPricing, setIsFetchingPricing] = useState(false);
+    const [activeTab, setActiveTab] = useState("p2p");
 
-    // Pricing Form State
-    const [pricingForm, setPricingForm] = useState({
+    const defaultP2PForm = {
         distanceTiers: [
             { fromDistance: 0, toDistance: 18, price: 109.5, type: "fixed" },
             { fromDistance: 19, toDistance: 40, price: 2.5, type: "per_mile" },
@@ -213,18 +214,32 @@ function AdminLocationPricing() {
         ],
         afterDistanceThreshold: 50,
         afterDistancePricePerMile: 2.5,
-        extras: {
-            extraStopPrice: 15,
-            childSeatPrice: 0,
-            congestionCharge: 0,
-            airportPickupCharge: 0,
-            airportDropoffCharge: 0,
-        },
+        extras: { extraStopPrice: 15, childSeatPrice: 0, congestionCharge: 0, airportPickupCharge: 0, airportDropoffCharge: 0 },
         displayParkingInclusive: true,
         displayVATInclusive: true,
         priceRoundOff: false,
         status: "active",
-    });
+    };
+
+    const defaultHourlyForm = {
+        hourlyRate: 45,
+        minimumHours: 3,
+        additionalHourCharge: 45,
+        milesIncluded: 40,
+        excessMileageCharge: 2,
+        extras: { extraStopPrice: 10, childSeatPrice: 0, congestionCharge: 0, carParkCharge: 0 },
+        displayVATInclusive: true,
+        displayParkingInclusive: false,
+        priceRoundOff: false,
+        status: "active",
+        isActive: false,
+    };
+
+    // P2P Form State
+    const [pricingForm, setPricingForm] = useState(defaultP2PForm);
+
+    // Hourly Form State
+    const [hourlyForm, setHourlyForm] = useState(defaultHourlyForm);
 
     // Fetch location and vehicles
     useEffect(() => {
@@ -264,52 +279,50 @@ function AdminLocationPricing() {
     useEffect(() => {
         const fetchVehiclePricing = async () => {
             if (!selectedVehicle || !locationId) return;
-
             setIsFetchingPricing(true);
-
             try {
                 const pricingRes = await locationPricingAPI.getByLocation(locationId);
                 if (pricingRes.success && pricingRes.data) {
                     const vehiclePricing = pricingRes.data.find(
                         (p) => (p.vehicle?._id || p.vehicle) === selectedVehicle._id
                     );
-
                     if (vehiclePricing) {
+                        // Restore P2P form
                         setPricingForm({
-                            distanceTiers: vehiclePricing.distanceTiers || pricingForm.distanceTiers,
+                            distanceTiers: vehiclePricing.distanceTiers || defaultP2PForm.distanceTiers,
                             afterDistanceThreshold: vehiclePricing.afterDistanceThreshold || 50,
                             afterDistancePricePerMile: vehiclePricing.afterDistancePricePerMile || 2.5,
-                            extras: vehiclePricing.extras || pricingForm.extras,
+                            extras: vehiclePricing.extras || defaultP2PForm.extras,
                             displayParkingInclusive: vehiclePricing.displayParkingInclusive ?? true,
                             displayVATInclusive: vehiclePricing.displayVATInclusive ?? true,
                             priceRoundOff: vehiclePricing.priceRoundOff ?? false,
                             status: vehiclePricing.status || "active",
                         });
+                        // Restore hourly form if configured
+                        if (vehiclePricing.hourly && vehiclePricing.hourly.isActive) {
+                            setHourlyForm({
+                                hourlyRate: vehiclePricing.hourly.hourlyRate || 45,
+                                minimumHours: vehiclePricing.hourly.minimumHours || 3,
+                                additionalHourCharge: vehiclePricing.hourly.additionalHourCharge || 45,
+                                milesIncluded: vehiclePricing.hourly.milesIncluded || 40,
+                                excessMileageCharge: vehiclePricing.hourly.excessMileageCharge || 2,
+                                extras: vehiclePricing.extras || defaultHourlyForm.extras,
+                                displayVATInclusive: vehiclePricing.displayVATInclusive ?? true,
+                                displayParkingInclusive: vehiclePricing.displayParkingInclusive ?? false,
+                                priceRoundOff: vehiclePricing.priceRoundOff ?? false,
+                                status: vehiclePricing.status || "active",
+                                isActive: true,
+                            });
+                        } else {
+                            setHourlyForm(defaultHourlyForm);
+                        }
                         setExistingPricingIds((prev) => ({
                             ...prev,
                             [selectedVehicle._id]: vehiclePricing._id,
                         }));
                     } else {
-                        setPricingForm({
-                            distanceTiers: [
-                                { fromDistance: 0, toDistance: 18, price: 109.5, type: "fixed" },
-                                { fromDistance: 19, toDistance: 40, price: 2.5, type: "per_mile" },
-                                { fromDistance: 41, toDistance: 50, price: 2.5, type: "per_mile" },
-                            ],
-                            afterDistanceThreshold: 50,
-                            afterDistancePricePerMile: 2.5,
-                            extras: {
-                                extraStopPrice: 15,
-                                childSeatPrice: 0,
-                                congestionCharge: 0,
-                                airportPickupCharge: 0,
-                                airportDropoffCharge: 0,
-                            },
-                            displayParkingInclusive: true,
-                            displayVATInclusive: true,
-                            priceRoundOff: false,
-                            status: "active",
-                        });
+                        setPricingForm(defaultP2PForm);
+                        setHourlyForm(defaultHourlyForm);
                     }
                 }
             } catch (err) {
@@ -356,37 +369,73 @@ function AdminLocationPricing() {
         }));
     };
 
-    // Save pricing
+    // Save P2P Pricing
     const savePricing = async () => {
         if (!selectedVehicle || !locationId) return;
-
         setIsSaving(true);
         try {
-            const data = {
-                airport: locationId,
-                vehicle: selectedVehicle._id,
-                ...pricingForm,
-            };
-
             const existingId = existingPricingIds[selectedVehicle._id];
+            const data = { airport: locationId, vehicle: selectedVehicle._id, ...pricingForm };
             let response;
-
             if (existingId) {
                 response = await locationPricingAPI.update(existingId, data);
             } else {
                 response = await locationPricingAPI.create(data);
             }
-
             if (response.success) {
-                toast.success(`Pricing saved for ${selectedVehicle.categoryName}! ✅`);
-                setExistingPricingIds((prev) => ({
-                    ...prev,
-                    [selectedVehicle._id]: response.data._id,
-                }));
+                toast.success(`P2P pricing saved for ${selectedVehicle.categoryName}! ✅`);
+                setExistingPricingIds((prev) => ({ ...prev, [selectedVehicle._id]: response.data._id }));
             }
         } catch (err) {
             console.error("Error saving pricing:", err);
             toast.error(err.response?.data?.message || "Failed to save pricing");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // Save Hourly Pricing (patches the hourly sub-doc on the same AirportPricing record)
+    const saveHourlyPricing = async () => {
+        if (!selectedVehicle || !locationId) return;
+        setIsSaving(true);
+        try {
+            const existingId = existingPricingIds[selectedVehicle._id];
+            const hourlyPayload = {
+                hourly: {
+                    hourlyRate: hourlyForm.hourlyRate,
+                    minimumHours: hourlyForm.minimumHours,
+                    additionalHourCharge: hourlyForm.additionalHourCharge,
+                    milesIncluded: hourlyForm.milesIncluded,
+                    excessMileageCharge: hourlyForm.excessMileageCharge,
+                    isActive: true,
+                },
+                extras: hourlyForm.extras,
+                displayVATInclusive: hourlyForm.displayVATInclusive,
+                displayParkingInclusive: hourlyForm.displayParkingInclusive,
+                priceRoundOff: hourlyForm.priceRoundOff,
+                status: hourlyForm.status,
+            };
+            let response;
+            if (existingId) {
+                // Patch the existing record with hourly data
+                response = await locationPricingAPI.update(existingId, hourlyPayload);
+            } else {
+                // No P2P record yet — create one with defaults + hourly
+                response = await locationPricingAPI.create({
+                    airport: locationId,
+                    vehicle: selectedVehicle._id,
+                    ...defaultP2PForm,
+                    ...hourlyPayload,
+                });
+            }
+            if (response.success) {
+                toast.success(`Hourly pricing saved for ${selectedVehicle.categoryName}! ✅`);
+                setExistingPricingIds((prev) => ({ ...prev, [selectedVehicle._id]: response.data._id }));
+                setHourlyForm((prev) => ({ ...prev, isActive: true }));
+            }
+        } catch (err) {
+            console.error("Error saving hourly pricing:", err);
+            toast.error(err.response?.data?.message || "Failed to save hourly pricing");
         } finally {
             setIsSaving(false);
         }
@@ -407,7 +456,8 @@ function AdminLocationPricing() {
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-20">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
                         <button
                             onClick={() => navigate("/admin/locations")}
                             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -427,6 +477,32 @@ function AdminLocationPricing() {
                                     {location?.name || "Loading..."}
                                 </p>
                             </div>
+                        </div>
+                        </div>
+                        {/* Pricing Type Tabs */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setActiveTab("p2p")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                                    activeTab === "p2p"
+                                        ? "bg-green-600 text-white shadow-lg shadow-green-500/25"
+                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                }`}
+                            >
+                                <MapPin size={16} />
+                                <span className="hidden sm:inline">P2P</span>
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("hourly")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                                    activeTab === "hourly"
+                                        ? "bg-green-600 text-white shadow-lg shadow-green-500/25"
+                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                }`}
+                            >
+                                <Clock size={16} />
+                                <span className="hidden sm:inline">Hourly</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -490,10 +566,10 @@ function AdminLocationPricing() {
                                                 </div>
                                             )}
                                         </div>
-                                        <div>
+                                <div>
                                             <h2 className="text-xl font-bold capitalize">{selectedVehicle.categoryName}</h2>
                                             <p className="text-green-200 text-sm">
-                                                {location?.name} Pricing
+                                                {location?.name} — {activeTab === "p2p" ? "P2P Pricing" : "Hourly Pricing"}
                                                 {existingPricingIds[selectedVehicle._id] && (
                                                     <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">
                                                         <Check size={12} /> Configured
@@ -504,6 +580,9 @@ function AdminLocationPricing() {
                                     </div>
                                 </div>
 
+                                {/* ── P2P Pricing Form ── */}
+                                {activeTab === "p2p" && (
+                                <>
                                 {/* Distance Tiers */}
                                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                                     <div className="flex items-center justify-between mb-4">
@@ -680,19 +759,153 @@ function AdminLocationPricing() {
                                     </div>
                                 </div>
 
-                                {/* Save Button */}
+                                {/* Save P2P Button */}
                                 <button
                                     onClick={savePricing}
                                     disabled={isSaving}
                                     className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-green-500/25 hover:from-green-700 hover:to-emerald-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
-                                    {isSaving ? (
-                                        <Loader2 size={20} className="animate-spin" />
-                                    ) : (
-                                        <Save size={20} />
-                                    )}
-                                    Save Pricing for {selectedVehicle.categoryName}
+                                    {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+                                    Save P2P Pricing for {selectedVehicle.categoryName}
                                 </button>
+                                </>
+                                )} {/* end activeTab === p2p */}
+
+                                {/* ── Hourly Pricing Form ── */}
+                                {activeTab === "hourly" && (
+                                <div className="space-y-5">
+                                    {/* Hourly Rates */}
+                                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                                        <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                            <Clock size={18} className="text-blue-500" />
+                                            Hourly Rates
+                                        </h3>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Hourly Rate (£)</label>
+                                                <input type="number" step="0.01" value={hourlyForm.hourlyRate}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, hourlyRate: parseFloat(e.target.value) || 0 }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Min Hours</label>
+                                                <input type="number" value={hourlyForm.minimumHours} min={1}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, minimumHours: parseInt(e.target.value) || 1 }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Additional Hour (£)</label>
+                                                <input type="number" step="0.01" value={hourlyForm.additionalHourCharge}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, additionalHourCharge: parseFloat(e.target.value) || 0 }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Status</label>
+                                                <select value={hourlyForm.status}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, status: e.target.value }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                                                    <option value="active">Active</option>
+                                                    <option value="inactive">Inactive</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Mileage Settings */}
+                                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                                        <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                            <MapPin size={18} className="text-green-500" />
+                                            Mileage Settings
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Miles Included</label>
+                                                <input type="number" value={hourlyForm.milesIncluded}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, milesIncluded: parseInt(e.target.value) || 0 }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Excess £/Mile</label>
+                                                <input type="number" step="0.01" value={hourlyForm.excessMileageCharge}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, excessMileageCharge: parseFloat(e.target.value) || 0 }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Additional Charges */}
+                                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                                        <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                            <DollarSign size={18} className="text-amber-500" />
+                                            Additional Charges
+                                        </h3>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Extra Stop (£)</label>
+                                                <input type="number" step="0.01" value={hourlyForm.extras.extraStopPrice}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, extras: { ...p.extras, extraStopPrice: parseFloat(e.target.value) || 0 } }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Child Seat (£)</label>
+                                                <input type="number" step="0.01" value={hourlyForm.extras.childSeatPrice}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, extras: { ...p.extras, childSeatPrice: parseFloat(e.target.value) || 0 } }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Congestion (£)</label>
+                                                <input type="number" step="0.01" value={hourlyForm.extras.congestionCharge}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, extras: { ...p.extras, congestionCharge: parseFloat(e.target.value) || 0 } }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 mb-1 block">Car Park Charges (£)</label>
+                                                <input type="number" step="0.01" value={hourlyForm.extras.carParkCharge || 0}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, extras: { ...p.extras, carParkCharge: parseFloat(e.target.value) || 0 } }))}
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Display Options */}
+                                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                                        <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                            <Settings size={18} className="text-purple-500" />
+                                            Display Options
+                                        </h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                                                <input type="checkbox" checked={hourlyForm.displayVATInclusive}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, displayVATInclusive: e.target.checked }))}
+                                                    className="w-4 h-4 text-green-600 rounded" />
+                                                <span className="text-sm text-gray-700">VAT Inclusive</span>
+                                            </label>
+                                            <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                                                <input type="checkbox" checked={hourlyForm.displayParkingInclusive}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, displayParkingInclusive: e.target.checked }))}
+                                                    className="w-4 h-4 text-green-600 rounded" />
+                                                <span className="text-sm text-gray-700">Parking Inclusive</span>
+                                            </label>
+                                            <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                                                <input type="checkbox" checked={hourlyForm.priceRoundOff}
+                                                    onChange={(e) => setHourlyForm((p) => ({ ...p, priceRoundOff: e.target.checked }))}
+                                                    className="w-4 h-4 text-green-600 rounded" />
+                                                <span className="text-sm text-gray-700">Round Off Price</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Save Hourly Button */}
+                                    <button
+                                        onClick={saveHourlyPricing}
+                                        disabled={isSaving}
+                                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+                                        Save Hourly Pricing for {selectedVehicle.categoryName}
+                                    </button>
+                                </div>
+                                )} {/* end activeTab === hourly */}
                             </motion.div>
                                 )}
                             </>

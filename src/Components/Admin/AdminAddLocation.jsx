@@ -3,7 +3,9 @@ import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { Autocomplete } from "@react-google-maps/api";
+import { useGoogleMaps } from "../../Context/GoogleMapsContext";
+import AdminZoneMap from "./AdminZoneMap";
 import {
     ArrowLeft,
     MapPin,
@@ -21,7 +23,7 @@ import {
 } from "lucide-react";
 import { locationAPI } from "../../Utils/api";
 
-const LIBRARIES = ["places"];
+// Libraries are managed globally via GoogleMapsProvider in App.jsx
 
 // CSS for Google Maps Autocomplete styling
 const googleMapsStyles = `
@@ -111,11 +113,8 @@ function AdminAddLocation() {
     const { id } = useParams();
     const isEditMode = Boolean(id);
 
-    // Google Maps API
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-        libraries: LIBRARIES,
-    });
+    // Google Maps API — loaded globally via GoogleMapsProvider in App.jsx
+    const { isLoaded } = useGoogleMaps();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(isEditMode);
@@ -137,6 +136,11 @@ function AdminAddLocation() {
         radiusKm: 5,
         isActive: true,
     });
+
+    // Zone shape drawn on the map (polygon or circle)
+    const [zoneShape, setZoneShape] = useState(null);
+    // Loaded from server — stable key so map doesn't remount while drawing
+    const [initialZone, setInitialZone] = useState(null);
 
     // Inject Google Maps CSS
     useEffect(() => {
@@ -168,6 +172,10 @@ function AdminAddLocation() {
                             radiusKm: loc.radiusKm || 5,
                             isActive: loc.isActive !== false,
                         });
+                        if (loc.zoneShape) {
+                            setZoneShape(loc.zoneShape);
+                            setInitialZone(loc.zoneShape); // stable key — only set once from server
+                        }
                         setLocationSelected(true);
                     }
                 } catch (err) {
@@ -273,13 +281,20 @@ function AdminAddLocation() {
             return;
         }
 
+        // Sync circle radius → radiusKm so Haversine detection on backend works
+        let radiusKm = formData.radiusKm;
+        if (zoneShape?.type === "circle" && zoneShape.radius) {
+            radiusKm = parseFloat((zoneShape.radius / 1000).toFixed(2));
+        }
+
         setIsLoading(true);
         try {
+            const payload = { ...formData, radiusKm, zoneShape };
             let response;
             if (isEditMode) {
-                response = await locationAPI.update(id, formData);
+                response = await locationAPI.update(id, payload);
             } else {
-                response = await locationAPI.create(formData);
+                response = await locationAPI.create(payload);
             }
 
             if (response.success) {
@@ -455,13 +470,44 @@ function AdminAddLocation() {
                             </FormSection>
                         )}
 
-                        {/* Coverage Radius */}
-                        <FormSection title="Coverage Radius" icon={Navigation}>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex-1">
+                        {/* Draw Coverage Zone */}
+                        <FormSection title="Draw Coverage Zone" icon={Navigation}>
+                            <div className="space-y-3">
+                                <p className="text-sm text-gray-500">
+                                    Draw a polygon or circle on the map to define the coverage area.
+                                    Bookings with a pickup inside this zone will use this location's special pricing.
+                                </p>
+                                {isLoaded ? (
+                                    <AdminZoneMap
+                                        key={initialZone ? JSON.stringify(initialZone).slice(0, 40) : "empty"}
+                                        center={
+                                            formData.coordinates?.lat
+                                                ? formData.coordinates
+                                                : null
+                                        }
+                                        onZoneChange={(shape) => {
+                                            setZoneShape(shape);
+                                            if (shape?.type === "circle" && shape.radius) {
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    radiusKm: Math.max(1, Math.round(shape.radius / 1000)),
+                                                }));
+                                            }
+                                        }}
+                                        initialZone={initialZone}
+                                    />
+                                ) : (
+                                    <div className="h-48 bg-gray-100 rounded-xl flex items-center justify-center">
+                                        <Loader2 size={28} className="text-gray-400 animate-spin" />
+                                    </div>
+                                )}
+
+                                {/* Fallback radius slider — shown when no zone is drawn */}
+                                {!zoneShape && (
+                                    <div className="pt-3 border-t border-gray-100">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Radius: <span className="text-blue-600 font-bold">{formData.radiusKm} km</span>
+                                            Fallback Radius:{" "}
+                                            <span className="text-blue-600 font-bold">{formData.radiusKm} km</span>
                                         </label>
                                         <input
                                             type="range"
@@ -478,18 +524,22 @@ function AdminAddLocation() {
                                             <span>25 km</span>
                                             <span>50 km</span>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-blue-50 rounded-xl p-4 flex items-center gap-3">
-                                    <CircleDot size={24} className="text-blue-500 flex-shrink-0" />
-                                    <div className="text-sm text-blue-700">
-                                        <p className="font-medium">Bookings within {formData.radiusKm} km radius</p>
-                                        <p className="text-blue-600 text-xs">
-                                            will use this location's special pricing rules
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            Used only if no zone shape is drawn above.
                                         </p>
                                     </div>
-                                </div>
+                                )}
+
+                                {zoneShape && (
+                                    <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-2">
+                                        <CircleDot size={18} className="text-green-600 flex-shrink-0" />
+                                        <p className="text-sm text-green-700 font-medium">
+                                            {zoneShape.type === "circle"
+                                                ? `Circle zone: ${Math.round(zoneShape.radius)}m radius`
+                                                : `Polygon zone: ${zoneShape.coordinates?.length || 0} points`}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </FormSection>
 
