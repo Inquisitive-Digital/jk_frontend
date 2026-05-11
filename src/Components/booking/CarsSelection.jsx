@@ -2,14 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
-  ArrowLeft,
-  ArrowRight,
   Car,
-  Filter,
   Loader2,
-  Star,
-  Clock,
-  MapPin,
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { vehicleAPI } from "../../Utils/api";
@@ -188,21 +182,6 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
   /* ────── MAIN LAYOUT ────── */
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Journey Info Banner */}
-      {/* <JourneyInfoBanner data={data} journeyInfo={journeyInfo} isHourly={isHourly} /> */}
-
-      {/* Filter Bar */}
-      {/* <FilterBar
-        passengerFilter={passengerFilter}
-        setPassengerFilter={setPassengerFilter}
-        luggageFilter={luggageFilter}
-        setLuggageFilter={setLuggageFilter}
-        passengerOptions={passengerOptions}
-        luggageOptions={luggageOptions}
-        availableCount={availableCount}
-        totalCount={vehicles.length}
-      /> */}
-
       {/* Section Heading */}
       <div className="mb-6">
         <h2
@@ -261,7 +240,7 @@ function CarsSelection({ data, updateData, onNext, onBack }) {
           onContinue={handleContinue}
           backLabel="BACK"
           continueLabel="CONTINUE TO BOOKING"
-          disabled={!selectedVehicle}
+          disabled={!selectedVehicle || selectedVehicle.enableGetAQuote}
         />
       </div>
     </div>

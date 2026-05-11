@@ -180,6 +180,7 @@ const EditVehicleModal = ({ vehicle, isOpen, onClose, onSave }) => {
                 dontCalculateVatForCashJobs: vehicle.dontCalculateVatForCashJobs || false,
                 displayVehicles: vehicle.displayVehicles !== false,
                 displayPrice: vehicle.displayPrice !== false,
+                enableGetAQuote: vehicle.enableGetAQuote || false,
                 minimumNoticePeriod: vehicle.minimumNoticePeriod || 120,
                 displayWarningIfBookingWithinNoticePeriod: vehicle.displayWarningIfBookingWithinNoticePeriod || false,
                 warningMessage: vehicle.warningMessage || "",
@@ -265,6 +266,7 @@ const EditVehicleModal = ({ vehicle, isOpen, onClose, onSave }) => {
             submitData.append("dontCalculateVatForCashJobs", formData.dontCalculateVatForCashJobs);
             submitData.append("displayVehicles", formData.displayVehicles);
             submitData.append("displayPrice", formData.displayPrice);
+            submitData.append("enableGetAQuote", formData.enableGetAQuote);
             submitData.append("minimumNoticePeriod", formData.minimumNoticePeriod);
             submitData.append("displayWarningIfBookingWithinNoticePeriod", formData.displayWarningIfBookingWithinNoticePeriod);
             submitData.append("warningMessage", formData.warningMessage);
@@ -445,6 +447,16 @@ const EditVehicleModal = ({ vehicle, isOpen, onClose, onSave }) => {
                                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                                     />
                                     <span className="text-sm text-gray-700">Display price</span>
+                                </label>
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        name="enableGetAQuote"
+                                        checked={formData.enableGetAQuote}
+                                        onChange={handleChange}
+                                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-gray-700">Enable Get a Quote</span>
                                 </label>
                                 <label className="flex items-center gap-3 cursor-pointer">
                                     <input

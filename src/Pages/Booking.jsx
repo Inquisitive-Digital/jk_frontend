@@ -9,6 +9,8 @@ import CarsSelection from "../Components/booking/CarsSelection";
 import UserDetails from "../Components/booking/UserDetails";
 import Payment from "../Components/booking/Payment";
 import StickyBookingSummary from "../Components/booking/StickyBookingSummary";
+import GetAQuoteForm from "../Components/booking/GetAQuoteForm";
+
 import { paymentAPI, bookingAPI } from "../Utils/api";
 import Analytics from "../Utils/analytics";
 
@@ -361,6 +363,7 @@ function Booking() {
       class: bookingData.selectedVehicle.categoryDetails,
       pax: bookingData.selectedVehicle.numberOfPassengers,
       luggage: bookingData.selectedVehicle.numberOfBigLuggage,
+      enableGetAQuote: bookingData.selectedVehicle.enableGetAQuote || false,
     }
     : null;
 
@@ -545,30 +548,39 @@ function Booking() {
           {currentStep !== 1 && currentStep !== 4 && (
             <div className="hidden lg:block lg:w-[40%]">
               <div className="sticky top-32">
-                <StickyBookingSummary
-                  from={bookingData.pickup}
-                  to={bookingData.dropoff}
-                  date={bookingData.pickupDate}
-                  time={bookingData.pickupTime}
-                  vehicle={stickyVehicle}
-                  passengerName={stickyPassengerName || null}
-                  extras={[]}
-                  currentStep={currentStep}
-                  onGoBack={() => goToStep(currentStep - 1)}
-                  onContinue={
-                    currentStep === 3
-                      ? () => userDetailsRef.current?.submit()
-                      : () => goToStep(currentStep + 1)
-                  }
-                  continueLabel={currentStep === 3 ? "PROCEED TO PAYMENT" : "CONTINUE"}
-                  isLoading={currentStep === 3 ? isLoadingPayment : false}
-                  distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
-                  hours={bookingData.hours}
-                  serviceType={bookingData.serviceType}
-                />
+                {currentStep === 2 && stickyVehicle?.enableGetAQuote ? (
+                  /* Quote-enabled vehicle selected: show quote form instead of summary */
+                  <GetAQuoteForm
+                    vehicle={bookingData.selectedVehicle}
+                    bookingData={bookingData}
+                  />
+                ) : (
+                  <StickyBookingSummary
+                    from={bookingData.pickup}
+                    to={bookingData.dropoff}
+                    date={bookingData.pickupDate}
+                    time={bookingData.pickupTime}
+                    vehicle={stickyVehicle}
+                    passengerName={stickyPassengerName || null}
+                    extras={[]}
+                    currentStep={currentStep}
+                    onGoBack={() => goToStep(currentStep - 1)}
+                    onContinue={
+                      currentStep === 3
+                        ? () => userDetailsRef.current?.submit()
+                        : () => goToStep(currentStep + 1)
+                    }
+                    continueLabel={currentStep === 3 ? "PROCEED TO PAYMENT" : "CONTINUE"}
+                    isLoading={currentStep === 3 ? isLoadingPayment : false}
+                    distance={bookingData.journeyInfo?.distanceMiles ? `${bookingData.journeyInfo.distanceMiles.toFixed(1)} mi` : null}
+                    hours={bookingData.hours}
+                    serviceType={bookingData.serviceType}
+                  />
+                )}
               </div>
             </div>
           )}
+
 
         </div>
       </div>

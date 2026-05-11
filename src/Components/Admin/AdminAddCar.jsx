@@ -126,6 +126,7 @@ function AdminAddCar() {
         dontCalculateVatForCashJobs: false,
         displayVehicles: true,
         displayPrice: true,
+        enableGetAQuote: false,
         minimumNoticePeriod: 120,
         displayWarningIfBookingWithinNoticePeriod: false,
         warningMessage: "Please note: This booking is within the minimum notice period. We will process it as a special case.",
@@ -221,6 +222,7 @@ function AdminAddCar() {
             submitData.append("dontCalculateVatForCashJobs", formData.dontCalculateVatForCashJobs);
             submitData.append("displayVehicles", formData.displayVehicles);
             submitData.append("displayPrice", formData.displayPrice);
+            submitData.append("enableGetAQuote", formData.enableGetAQuote);
             submitData.append("minimumNoticePeriod", formData.minimumNoticePeriod);
             submitData.append("displayWarningIfBookingWithinNoticePeriod", formData.displayWarningIfBookingWithinNoticePeriod);
             submitData.append("warningMessage", formData.warningMessage);
@@ -423,6 +425,13 @@ function AdminAddCar() {
                         checked={formData.displayPrice}
                         onChange={handleChange}
                         description="Show price to customers"
+                    />
+                    <ToggleSwitch
+                        label="Enable Get a Quote"
+                        name="enableGetAQuote"
+                        checked={formData.enableGetAQuote}
+                        onChange={handleChange}
+                        description="Show 'Get a Quote' button instead of price"
                     />
                     <div className="pt-3">
                         <InputField

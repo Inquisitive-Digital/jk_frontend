@@ -208,30 +208,41 @@ function StickyBookingSummary({
         )}
 
         {/* Pricing Section */}
-        <div className="pt-4 border-t border-white/10">
-          <div className="flex justify-between items-end">
-            <div className="space-y-1">
-              <span className="block text-[10px] uppercase tracking-[0.2em] text-white/30">Total Estimate</span>
-              <div className="flex items-center gap-1 text-[10px] text-green-500/80">
-                <Info size={10} />
-                <span>All-inclusive price</span>
+        {vehicle?.enableGetAQuote ? (
+          <div className="pt-4 border-t border-white/10">
+            <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(215,183,94,0.08)', border: '1px solid rgba(215,183,94,0.2)' }}>
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-primary)' }} />
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>Quote Requested</p>
+                <p className="text-[10px] text-white/50 mt-0.5">Our team will be in touch with your personalised quote shortly.</p>
               </div>
             </div>
-            <div className="text-right">
-
-              <span
-                className="text-3xl font-bold tracking-tighter"
-                style={{
-                  color: 'var(--color-primary)',
-                  fontVariantNumeric: 'tabular-nums',
-                  textShadow: '0 0 20px rgba(215, 183, 94, 0.3)',
-                }}
-              >
-                £{vehicle?.price ? vehicle.price.toFixed(2) : "0.00"}
-              </span>
+          </div>
+        ) : (
+          <div className="pt-4 border-t border-white/10">
+            <div className="flex justify-between items-end">
+              <div className="space-y-1">
+                <span className="block text-[10px] uppercase tracking-[0.2em] text-white/30">Total Estimate</span>
+                <div className="flex items-center gap-1 text-[10px] text-green-500/80">
+                  <Info size={10} />
+                  <span>All-inclusive price</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <span
+                  className="text-3xl font-bold tracking-tighter"
+                  style={{
+                    color: 'var(--color-primary)',
+                    fontVariantNumeric: 'tabular-nums',
+                    textShadow: '0 0 20px rgba(215, 183, 94, 0.3)',
+                  }}
+                >
+                  £{vehicle?.price ? vehicle.price.toFixed(2) : "0.00"}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Navigation - StepNavBar Style */}
         <motion.div
