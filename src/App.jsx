@@ -4,6 +4,7 @@ import Analytics from "./Utils/analytics";
 import Lenis from "lenis";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import { BookingProvider } from "./Context/BookingContext";
+import { GoogleMapsProvider } from "./Context/GoogleMapsContext";
 import Layout from "./Layout/Layout";
 import SkeletonLoader from "./Components/SkeletonLoader";
 
@@ -138,6 +139,12 @@ const AdminAllPricing = lazy(() => import("./Components/Admin/AdminAllPricing"))
 const AdminAllLocations = lazy(() => import("./Components/Admin/AdminAllLocations"));
 const AdminAddLocation = lazy(() => import("./Components/Admin/AdminAddLocation"));
 const AdminLocationPricing = lazy(() => import("./Components/Admin/AdminLocationPricing"));
+const AdminLocationZoneSetup = lazy(() => import("./Components/Admin/AdminLocationZoneSetup"));
+const AdminAllBlogs = lazy(() => import("./Components/Admin/AdminAllBlogs"));
+const AdminAddBlog = lazy(() => import("./Components/Admin/AdminAddBlog"));
+const AdminAllServices = lazy(() => import("./Components/Admin/AdminAllServices"));
+const AdminAddService = lazy(() => import("./Components/Admin/AdminAddService"));
+const AdminEventCalendar = lazy(() => import("./Components/Admin/AdminEventCalendar"));
 
 function App() {
   useEffect(() => {
@@ -168,54 +175,62 @@ function App() {
   return (
     <HelmetProvider>
       <Router>
-        <BookingProvider>
-          <ScrollToTop />
-          <PageViewTracker />
-          <TawkIntegration />
-          <CanonicalUpdater />
-          <Suspense fallback={<SkeletonLoader />}>
-            <Routes>
-              {/* Public Routes with Layout */}
-              <Route path="/" element={<Layout isHeroPage={true}><Home /></Layout>} />
-              <Route path="/booking" element={<Layout isHeroPage={false} showContactForm={false} showWhatsApp={false} showScrollToTop={false}><Booking /></Layout>} />
-              <Route path="/services" element={<Layout isHeroPage={false}><Services /></Layout>} />
-              <Route path="/services/:slug" element={<Layout isHeroPage={false}><ServiceWrapper /></Layout>} />
-              <Route path="/fleet" element={<Layout isHeroPage={false}><Fleet /></Layout>} />
-              <Route path="/fleet/:slug" element={<Layout isHeroPage={false}><FleetDetail /></Layout>} />
-              <Route path="/events/event-calendar" element={<Layout isHeroPage={false}><EventCalendar /></Layout>} />
-              <Route path="/events/:slug" element={<Layout isHeroPage={false}><EventWrapper /></Layout>} />
-              <Route path="/blog" element={<Layout isHeroPage={false}><Blog /></Layout>} />
-              <Route path="/blog/:slug" element={<Layout isHeroPage={false}><BlogWrapper /></Layout>} />
-              <Route path="/about" element={<Layout isHeroPage={false}><AboutUs /></Layout>} />
-              <Route path="/contact" element={<Layout isHeroPage={false} showContactForm={false}><ContactUs /></Layout>} />
-              <Route path="/terms-and-conditions" element={<Layout isHeroPage={false}><TermsAndConditions /></Layout>} />
-              <Route path="/privacy-policy" element={<Layout isHeroPage={false}><PrivacyPolicy /></Layout>} />
-              <Route path="/gdpr-policy" element={<Layout isHeroPage={false}><GDPRPolicy /></Layout>} />
-              <Route path="/event-calender2" element={<Layout isHeroPage={false}><EventCalendar /></Layout>} />
+        <GoogleMapsProvider>
+          <BookingProvider>
+            <ScrollToTop />
+            <PageViewTracker />
+            <TawkIntegration />
+            <CanonicalUpdater />
+            <Suspense fallback={<SkeletonLoader />}>
+              <Routes>
+                {/* Public Routes with Layout */}
+                <Route path="/" element={<Layout isHeroPage={true}><Home /></Layout>} />
+                <Route path="/booking" element={<Layout isHeroPage={false} showContactForm={false} showWhatsApp={false} showScrollToTop={false}><Booking /></Layout>} />
+                <Route path="/services" element={<Layout isHeroPage={false}><Services /></Layout>} />
+                <Route path="/services/:slug" element={<Layout isHeroPage={false}><ServiceWrapper /></Layout>} />
+                <Route path="/fleet" element={<Layout isHeroPage={false}><Fleet /></Layout>} />
+                <Route path="/fleet/:slug" element={<Layout isHeroPage={false}><FleetDetail /></Layout>} />
+                <Route path="/events/event-calendar" element={<Layout isHeroPage={false}><EventCalendar /></Layout>} />
+                <Route path="/events/:slug" element={<Layout isHeroPage={false}><EventWrapper /></Layout>} />
+                <Route path="/blog" element={<Layout isHeroPage={false}><Blog /></Layout>} />
+                <Route path="/blog/:slug" element={<Layout isHeroPage={false}><BlogWrapper /></Layout>} />
+                <Route path="/about" element={<Layout isHeroPage={false}><AboutUs /></Layout>} />
+                <Route path="/contact" element={<Layout isHeroPage={false} showContactForm={false}><ContactUs /></Layout>} />
+                <Route path="/terms-and-conditions" element={<Layout isHeroPage={false}><TermsAndConditions /></Layout>} />
+                <Route path="/privacy-policy" element={<Layout isHeroPage={false}><PrivacyPolicy /></Layout>} />
+                <Route path="/gdpr-policy" element={<Layout isHeroPage={false}><GDPRPolicy /></Layout>} />
+                <Route path="/event-calender2" element={<Layout isHeroPage={false}><EventCalendar /></Layout>} />
 
-              {/* Admin Routes (no layout wrapper) */}
-              <Route path="/login-admin" element={<AdminLogin />} />
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/leads" element={<AdminAllLeads />} />
-              <Route path="/admin/bookings" element={<AdminAllBookings />} />
-              <Route path="/admin/vehicles" element={<AdminAllCars />} />
-              <Route path="/admin/add-car" element={<AdminAddCar />} />
-              <Route path="/admin/pricing" element={<AdminPricing />} />
-              <Route path="/admin/all-pricing" element={<AdminAllPricing />} />
+                {/* Admin Routes (no layout wrapper) */}
+                <Route path="/login-admin" element={<AdminLogin />} />
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/leads" element={<AdminAllLeads />} />
+                <Route path="/admin/bookings" element={<AdminAllBookings />} />
+                <Route path="/admin/vehicles" element={<AdminAllCars />} />
+                <Route path="/admin/add-car" element={<AdminAddCar />} />
+                <Route path="/admin/pricing" element={<AdminPricing />} />
+                <Route path="/admin/all-pricing" element={<AdminAllPricing />} />
+                <Route path="/admin/blogs" element={<AdminAllBlogs />} />
+                <Route path="/admin/add-blog" element={<AdminAddBlog />} />
+                <Route path="/admin/services" element={<AdminAllServices />} />
+                <Route path="/admin/add-service" element={<AdminAddService />} />
 
-              {/* Location Routes */}
-              <Route path="/admin/locations" element={<AdminAllLocations />} />
-              <Route path="/admin/add-location" element={<AdminAddLocation />} />
-              <Route path="/admin/edit-location/:id" element={<AdminAddLocation />} />
-              <Route path="/admin/location-pricing/:locationId" element={<AdminLocationPricing />} />
+                {/* Location Routes */}
+                <Route path="/admin/locations" element={<AdminAllLocations />} />
+                <Route path="/admin/add-location" element={<AdminAddLocation />} />
+                <Route path="/admin/edit-location/:id" element={<AdminAddLocation />} />
+                <Route path="/admin/location-pricing/:locationId" element={<AdminLocationPricing />} />
+                <Route path="/admin/location-zone/:id" element={<AdminLocationZoneSetup />} />
+                <Route path="/admin/event-calendar" element={<AdminEventCalendar />} />
 
 
-              {/* Catch undefined routes and fallback to home */}
-              <Route path="*" element={<Layout isHeroPage={false}><Home /></Layout>} />
+                {/* Catch undefined routes and fallback to home */}
+                <Route path="*" element={<Layout isHeroPage={false}><Home /></Layout>} />
 
-            </Routes>
-          </Suspense>
-        </BookingProvider>
+              </Routes>
+            </Suspense>
+          </BookingProvider>
+        </GoogleMapsProvider>
       </Router>
     </HelmetProvider>
   );

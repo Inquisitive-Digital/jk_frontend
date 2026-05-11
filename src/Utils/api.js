@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 const Environment = {
     LOCAL_URL: "http://localhost:5005",
-    STAGING_URL: "https://jk-frontend-nine.vercel.app",
+    STAGING_URL: "https://dev.jkexecutivechauffeurs.com",
     PRODUCTION_URL: "https://www.jkexecutivechauffeurs.com",
 };
 
@@ -11,7 +11,7 @@ const hostname = window.location.hostname;
 
 export let BASE_URL = Environment.LOCAL_URL;
 
-if (hostname.includes("vercel.app")) {
+if (hostname.includes("dev.") || hostname === "dev.jkexecutivechauffeurs.com") {
     BASE_URL = Environment.STAGING_URL;
 } else if (
     hostname.includes("hostingersite.com") ||
@@ -333,13 +333,13 @@ export const adminAPI = {
 
 // Service APIs
 export const serviceAPI = {
-    // Get all services (paginated)
+    // Get all services (paginated, public — active only)
     getAllServices: async (page = 1, limit = 10) => {
         const response = await api.get("/api/services", { params: { page, limit } });
         return response.data;
     },
 
-    // Get single service by slug
+    // Get single service by slug (public)
     getServiceBySlug: async (slug) => {
         const response = await api.get(`/api/services/${slug}`);
         return response.data;
@@ -348,6 +348,44 @@ export const serviceAPI = {
     // Get nav menu structure (services grouped by category + airports)
     getNavMenu: async () => {
         const response = await api.get("/api/services/nav-menu");
+        return response.data;
+    },
+
+    // ─── Admin only ──────────────────────────────────────────────────────────
+
+    // Get ALL services for admin panel (includes inactive)
+    getAllAdmin: async (page = 1, limit = 20, search = "") => {
+        const params = { page, limit };
+        if (search.trim()) params.search = search.trim();
+        const response = await api.get("/api/services/admin/all", { params });
+        return response.data;
+    },
+
+    // Get single service by ID (for admin edit form)
+    getById: async (id) => {
+        const response = await api.get(`/api/services/admin/${id}`);
+        return response.data;
+    },
+
+    // Create a new service (supports image file upload)
+    create: async (formData) => {
+        const response = await api.post("/api/services", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Update existing service by ID (supports image file upload)
+    update: async (id, formData) => {
+        const response = await api.put(`/api/services/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Delete service by ID
+    delete: async (id) => {
+        const response = await api.delete(`/api/services/${id}`);
         return response.data;
     },
 };
@@ -388,17 +426,110 @@ export const eventAPI = {
     },
 };
 
+// Calendar Event APIs
+export const calendarEventAPI = {
+    // Get all calendar events grouped by month (public)
+    getAll: async (params = {}) => {
+        const response = await api.get("/api/calendar-events", { params });
+        return response.data;
+    },
+
+    // Get events for a specific month (public)
+    getByMonth: async (month, year) => {
+        const response = await api.get(`/api/calendar-events/month/${month}`, {
+            params: year ? { year } : {},
+        });
+        return response.data;
+    },
+
+    // Get single event by ID (admin)
+    getById: async (id) => {
+        const response = await api.get(`/api/calendar-events/${id}`);
+        return response.data;
+    },
+
+    // Create calendar event (admin)
+    create: async (data) => {
+        const response = await api.post("/api/calendar-events", data);
+        return response.data;
+    },
+
+    // Update calendar event (admin)
+    update: async (id, data) => {
+        const response = await api.put(`/api/calendar-events/${id}`, data);
+        return response.data;
+    },
+
+    // Delete calendar event (admin)
+    delete: async (id) => {
+        const response = await api.delete(`/api/calendar-events/${id}`);
+        return response.data;
+    },
+
+    // Bulk create calendar events (admin — seeding)
+    bulkCreate: async (events) => {
+        const response = await api.post("/api/calendar-events/bulk", { events });
+        return response.data;
+    },
+};
+
 // Blog APIs
 export const blogAPI = {
-    // Get all blogs (paginated)
+    // Get all blogs (paginated, public — active only)
     getAll: async (page = 1, limit = 9) => {
         const response = await api.get("/api/blogs", { params: { page, limit } });
         return response.data;
     },
 
-    // Get blog by slug (full body with HTML)
+    // Get blog by slug (full body with sections)
     getBySlug: async (slug) => {
         const response = await api.get(`/api/blogs/${slug}`);
+        return response.data;
+    },
+
+    // ─── Admin only ──────────────────────────────────────────────────────────
+
+    // Get ALL blogs for admin panel (includes inactive)
+    getAllAdmin: async (page = 1, limit = 20, search = "") => {
+        const params = { page, limit };
+        if (search.trim()) params.search = search.trim();
+        const response = await api.get("/api/blogs/admin/all", { params });
+        return response.data;
+    },
+
+    // Get single blog by ID (for admin edit form)
+    getById: async (id) => {
+        const response = await api.get(`/api/blogs/admin/${id}`);
+        return response.data;
+    },
+
+    // Create a new blog post (supports heroImage file upload)
+    create: async (formData) => {
+        const response = await api.post("/api/blogs", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Update existing blog post by ID (supports heroImage file upload)
+    update: async (id, formData) => {
+        const response = await api.put(`/api/blogs/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+
+    // Delete blog post by ID
+    delete: async (id) => {
+        const response = await api.delete(`/api/blogs/${id}`);
+        return response.data;
+    },
+
+    // Toggle isActive status
+    toggleActive: async (id, isActive) => {
+        const response = await api.put(`/api/blogs/${id}`, JSON.stringify({ isActive }), {
+            headers: { "Content-Type": "application/json" },
+        });
         return response.data;
     },
 };

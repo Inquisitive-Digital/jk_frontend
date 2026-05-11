@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Calendar,
+  CalendarDays,
   Car,
   DollarSign,
   Clock,
@@ -24,74 +25,15 @@ import {
   Plus,
   Target,
   UserPlus,
+  BookOpen,
+  PenSquare,
+  Briefcase,
 } from "lucide-react";
 import { adminAPI } from "../../Utils/api";
+import { NAV_ITEMS } from "../../Utils/adminNav";
 import CreateAdminModal from "./CreateAdminModal";
 
-// Sidebar Navigation Items - Organized by Section
-const NAV_ITEMS = [
-  // ===== OVERVIEW =====
-  {
-    id: "dashboard",
-    icon: LayoutDashboard,
-    label: "Dashboard",
-    path: "/admin-dashboard",
-  },
-  {
-    id: "leads",
-    icon: Target,
-    label: "All Leads",
-    path: "/admin/leads",
-  },
-  {
-    id: "bookings",
-    icon: Calendar,
-    label: "All Bookings",
-    path: "/admin/bookings",
-  },
 
-  // ===== VEHICLES =====
-  {
-    id: "vehicles",
-    icon: List,
-    label: "All Cars",
-    path: "/admin/vehicles",
-  },
-  {
-    id: "add-car",
-    icon: Plus,
-    label: "Add Car",
-    path: "/admin/add-car",
-  },
-
-  // ===== STANDARD PRICING (Per Vehicle) =====
-  {
-    id: "pricing",
-    icon: DollarSign,
-    label: "Set Pricing",
-    path: "/admin/pricing",
-  },
-  {
-    id: "all-pricing",
-    icon: List,
-    label: "See All Pricing",
-    path: "/admin/all-pricing",
-  },
-
-  // ===== SPECIAL LOCATIONS (Airports, Stadiums, etc.) =====
-  {
-    id: "all-locations",
-    icon: MapPin,
-    label: "All Locations",
-    path: "/admin/locations",
-  },
-  {
-    id: "add-location",
-    icon: MapPinPlus,
-    label: "Add Location",
-    path: "/admin/add-location",
-  },
-];
 
 // Stat Card Component
 const StatCard = ({ icon: Icon, label, value, color, trend, bgGradient }) => (
@@ -169,6 +111,7 @@ const RecentBookingRow = ({ booking }) => {
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const navRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeNav, setActiveNav] = useState("dashboard");
   const [isLoading, setIsLoading] = useState(true);
@@ -282,7 +225,7 @@ function AdminDashboard() {
           x: isSidebarOpen ? 0 : -288,
         }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white z-40 shadow-2xl overflow-y-auto"
+        className="fixed left-0 top-0 h-screen w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white z-40 shadow-2xl flex flex-col"
       >
         {/* Logo Section */}
         <div className="p-6 border-b border-slate-700/50">
@@ -304,7 +247,18 @@ function AdminDashboard() {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1.5">
+        <nav
+          ref={navRef}
+          tabIndex={-1}
+          onMouseEnter={() => navRef.current?.focus()}
+          onWheel={(e) => {
+            if (!navRef.current) return;
+            e.stopPropagation();
+            navRef.current.scrollTop += e.deltaY;
+          }}
+          className="flex-1 overflow-y-scroll overscroll-contain p-4 space-y-1.5 outline-none"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
+        >
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
@@ -335,7 +289,7 @@ function AdminDashboard() {
         </nav>
 
         {/* Logout Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+        <div className="mt-auto p-4 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm flex-shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 group"
@@ -408,13 +362,13 @@ function AdminDashboard() {
             </div>
           ) : null}
 
-          {/* Stats Grid */}
+          {/* Main Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <StatCard
-              icon={Calendar}
-              label="Total Bookings"
-              value={stats?.bookings?.total || 0}
-              bgGradient="bg-gradient-to-br from-blue-500 to-blue-600"
+              icon={Users}
+              label="Confirmed Booking"
+              value={stats?.bookings?.confirmed || 0}
+              bgGradient="bg-gradient-to-br from-pink-500 to-rose-600"
             />
             <StatCard
               icon={Clock}
@@ -423,50 +377,27 @@ function AdminDashboard() {
               bgGradient="bg-gradient-to-br from-yellow-500 to-orange-500"
             />
             <StatCard
-              icon={CheckCircle}
-              label="Completed"
-              value={stats?.bookings?.completed || 0}
-              bgGradient="bg-gradient-to-br from-green-500 to-emerald-600"
-            />
-            <StatCard
               icon={XCircle}
               label="Cancelled"
               value={stats?.bookings?.cancelled || 0}
               bgGradient="bg-gradient-to-br from-red-500 to-rose-600"
             />
+            <StatCard
+              icon={Car}
+              label="Active Vehicles"
+              value={stats?.totalVehicles || 0}
+              bgGradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+            />
           </div>
 
-          {/* Second Row Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            {/* Total Earnings: Full width on mobile (col-span-2), normal on large screens */}
-            <div className="col-span-2 lg:col-span-1">
-              <StatCard
-                icon={DollarSign}
-                label="Total Earnings"
-                value={`£${stats?.totalEarnings?.toFixed(2) || "0.00"}`}
-                bgGradient="bg-gradient-to-br from-purple-500 to-indigo-600"
-              />
-            </div>
-
-            {/* Active Vehicles: Full width on mobile (col-span-2), normal on large screens */}
-            <div className="col-span-2 lg:col-span-1">
-              <StatCard
-                icon={Car}
-                label="Active Vehicles"
-                value={stats?.totalVehicles || 0}
-                bgGradient="bg-gradient-to-br from-cyan-500 to-blue-600"
-              />
-            </div>
-
-            {/* Confirmed Bookings: Full width on mobile (col-span-2), normal on large screens */}
-            <div className="col-span-2 lg:col-span-1">
-              <StatCard
-                icon={Users}
-                label="Confirmed Bookings"
-                value={stats?.bookings?.confirmed || 0}
-                bgGradient="bg-gradient-to-br from-pink-500 to-rose-600"
-              />
-            </div>
+          {/* Earnings Row */}
+          <div className="mb-6 sm:mb-8">
+            <StatCard
+              icon={DollarSign}
+              label="Total Earnings"
+              value={`£${stats?.totalEarnings?.toFixed(2) || "0.00"}`}
+              bgGradient="bg-gradient-to-br from-purple-500 to-indigo-600"
+            />
           </div>
 
           {/* Recent Bookings */}

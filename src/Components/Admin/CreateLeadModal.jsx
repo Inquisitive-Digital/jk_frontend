@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { Autocomplete } from "@react-google-maps/api";
+import { useGoogleMaps } from "../../Context/GoogleMapsContext";
 import {
     X, MapPin, Calendar, Clock, User, Mail, Phone, Users,
     Briefcase, Car, FileText, Loader2, ChevronRight, ChevronDown,
@@ -10,8 +11,7 @@ import {
 } from "lucide-react";
 import { bookingAPI, vehicleAPI } from "../../Utils/api";
 
-// ── Must be a STATIC constant outside component → prevents LoadScript reload warning
-const GOOGLE_LIBRARIES = ["places"];
+// Libraries are managed globally via GoogleMapsProvider in App.jsx
 
 // ── Country codes ──────────────────────────────────────────────────────────────
 const countryCodes = [
@@ -525,11 +525,7 @@ const CreateLeadModal = ({ isOpen, onClose, onCreate }) => {
         };
     }, [isOpen]);
 
-    // Google Maps
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-        libraries: GOOGLE_LIBRARIES,
-    });
+    const { isLoaded } = useGoogleMaps();
 
     const pickupAutocompleteRef = useRef(null);
     const dropoffAutocompleteRef = useRef(null);

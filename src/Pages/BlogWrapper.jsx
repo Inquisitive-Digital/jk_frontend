@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
@@ -6,16 +6,34 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, User, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { blogAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+import InlineFAQSection from '../Components/home/InlineFAQSection';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
 function BlogWrapper() {
     const { slug } = useParams();
 
+    // ── SSR Preload: consume window.__BLOG_DATA__ injected by Express ──
+    // useRef so the value is captured once on mount and not re-read on re-renders
+    const preloaded = useRef(
+        typeof window !== 'undefined' &&
+            window.__BLOG_DATA__ &&
+            window.__BLOG_DATA__.slug === slug
+            ? window.__BLOG_DATA__
+            : null
+    );
+    // Clear immediately so client-side navigation never picks up stale data
+    if (typeof window !== 'undefined' && window.__BLOG_DATA__) {
+        window.__BLOG_DATA__ = null;
+    }
+
     const { data, isLoading, isError } = useQuery({
         queryKey: ['blog', slug],
         queryFn: () => blogAPI.getBySlug(slug),
         enabled: !!slug,
+        // If SSR gave us data, use it immediately — no loading spinner needed
+        initialData: preloaded.current ? { blog: preloaded.current } : undefined,
+        staleTime: preloaded.current ? 5 * 60 * 1000 : 0, // 5 min fresh if preloaded
     });
 
     // First, get the total count of blogs with a minimal request
@@ -130,8 +148,24 @@ function BlogWrapper() {
     const seoTitle = blog.seoTitle || blog.title;
     const seoDesc = blog.seoDescription || blog.excerpt || (blog.intro ? blog.intro.replace(/<[^>]+>/g, '').slice(0, 160) : '');
 
+    // FAQ structured data — only built when FAQs exist
+    const faqSchema = blog.faqs && blog.faqs.length > 0
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: blog.faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: f.answer,
+                },
+            })),
+        }
+        : null;
+
     return (
-        <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
+        <main className="overflow-x-hidden" style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
             <Helmet>
                 <title>{seoTitle}</title>
                 <meta name="description" content={seoDesc} />
@@ -141,6 +175,16 @@ function BlogWrapper() {
                 <script type="application/ld+json">
                     {JSON.stringify(blogPostingSchema)}
                 </script>
+                {faqSchema && (
+                    <script type="application/ld+json">
+                        {JSON.stringify(faqSchema)}
+                    </script>
+                )}
+                {blog.script && (
+                    <script type="application/ld+json">
+                        {blog.script}
+                    </script>
+                )}
             </Helmet>
             {/* Page Header — Refined Title Section */}
             <header
@@ -183,9 +227,76 @@ function BlogWrapper() {
                     <span>{blog.author || 'JK Executive'}</span>
                 </motion.div>
             </header>
+            {/* Hero Image */}
+            <div className="relative h-[52vw] min-h-[240px] md:h-[55vh] overflow-hidden">
+                {heroSrc ? (
+                    <motion.img
+                        initial={{ scale: 1.1 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 1.2 }}
+                        src={heroSrc}
+                        alt={blog.heroImage?.alt || blog.heroImageAlt || blog.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                ) : (
+                    <div
+                        className="w-full h-full"
+                        style={{ background: 'linear-gradient(135deg, rgba(26,26,26,1) 0%, rgba(50,40,20,1) 100%)' }}
+                    />
+                )}
+
+
+
+                {/* Title & Meta on Image */}
+                <div className="absolute bottom-4 md:bottom-10 left-0 right-0 px-4 md:px-8">
+                    <div className="max-w-7xl mx-auto">
+                        {/* {blog.category && (
+                            <motion.span
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="inline-block px-3 py-1 rounded-full text-xs font-base uppercase tracking-wider mb-4"
+                                style={{
+                                    backgroundColor: 'rgba(215,183,94,0.2)',
+                                    color: 'var(--color-primary)',
+                                    border: '1px solid rgba(215,183,94,0.3)',
+                                }}
+                            >
+                                {blog.category}
+                            </motion.span>
+                        )} */}
+                        <motion.h1
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-4 leading-tight"
+                        >
+                            {blog.title}
+                        </motion.h1>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-white/50"
+                        >
+                            <span className="flex items-center gap-1.5">
+                                <Calendar className="w-4 h-4" />
+                                {formatDate(blog.publishDate || blog.createdAt)}
+                            </span>
+                            {blog.author && (
+                                <span className="flex items-center gap-1.5">
+                                    <User className="w-4 h-4" />
+                                    {blog.author}
+                                </span>
+                            )}
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
 
             {/* Blog Content */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 pb-12 md:pb-20 -mt-16 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
                 <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
                     {/* Main Content — 2/3 */}
                     <motion.div
@@ -237,25 +348,25 @@ function BlogWrapper() {
                                     </h2>
                                 )}
 
-                                {/* Section Subheading (H3) */}
+                                {/* Legacy/Backward Compatibility: Render top-level subheading and text if they exist */}
                                 {section.subheading && (
-                                    <h3
-                                        className="text-lg md:text-xl font-semibold mb-2 text-white"
-                                    >
+                                    <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
                                         {section.subheading}
                                     </h3>
                                 )}
 
-                                {/* Section Text (paragraphs) — supports <a> tags for internal linking */}
                                 {section.text && (
                                     <div
                                         className="blog-section-text text-base leading-relaxed mb-4"
                                         style={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                                        dangerouslySetInnerHTML={{ __html: section.text }}
+                                        dangerouslySetInnerHTML={{
+                                            __html: section.text.includes('<')
+                                                ? section.text
+                                                : section.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                        }}
                                     />
                                 )}
 
-                                {/* Section List Items (bullet points) */}
                                 {section.listItems && section.listItems.length > 0 && (
                                     <ul
                                         className="ml-5 mb-4 space-y-2"
@@ -271,6 +382,46 @@ function BlogWrapper() {
                                     </ul>
                                 )}
 
+                                {/* Render new multiple Subsections (blocks) */}
+                                {section.subsections && section.subsections.length > 0 && (
+                                    <div className="space-y-6 mt-4">
+                                        {section.subsections.map((sub, subIdx) => (
+                                            <div key={subIdx} className="subsection-block">
+                                                {sub.subheading && (
+                                                    <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
+                                                        {sub.subheading}
+                                                    </h3>
+                                                )}
+                                                {sub.text && (
+                                                    <div
+                                                        className="blog-section-text text-base leading-relaxed mb-3"
+                                                        style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: sub.text.includes('<')
+                                                                ? sub.text
+                                                                : sub.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                                        }}
+                                                    />
+                                                )}
+                                                {sub.listItems && sub.listItems.length > 0 && (
+                                                    <ul
+                                                        className="ml-5 mb-3 space-y-2"
+                                                        style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                    >
+                                                        {sub.listItems.map((item, i) => (
+                                                            <li
+                                                                key={i}
+                                                                className="list-disc text-base leading-relaxed"
+                                                                dangerouslySetInnerHTML={{ __html: item }}
+                                                            />
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
                                 {/* Section Inline Image */}
                                 {section.image?.url && (
                                     <img
@@ -284,6 +435,28 @@ function BlogWrapper() {
 
                         {/* Inline styles for any <a> tags inside text fields */}
                         <style>{`
+                            .blog-section-text {
+                                word-break: break-word;
+                                overflow-wrap: break-word;
+                                max-width: 100%;
+                            }
+                            /* Force all pasted rich-text elements to stay within screen width */
+                            .blog-section-text * {
+                                max-width: 100% !important;
+                                box-sizing: border-box !important;
+                            }
+                            /* Ensure pasted tables or flex containers wrap on mobile */
+                            @media (max-width: 768px) {
+                                .blog-section-text table, 
+                                .blog-section-text tbody, 
+                                .blog-section-text tr, 
+                                .blog-section-text td,
+                                .blog-section-text div {
+                                    display: block !important;
+                                    width: 100% !important;
+                                    min-width: 0 !important;
+                                }
+                            }
                             .blog-section-text a {
                                 color: var(--color-primary);
                                 text-decoration: underline;
@@ -328,8 +501,34 @@ function BlogWrapper() {
                         transition={{ delay: 0.6 }}
                         className="lg:col-span-1"
                     >
+                        {/* Mobile: compact horizontal booking strip */}
                         <div
-                            className="sticky top-32 rounded-2xl p-6 md:p-8 space-y-6"
+                            className="lg:hidden flex flex-col sm:flex-row items-center gap-4 rounded-2xl p-4 sm:p-5"
+                            style={{
+                                backgroundColor: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                            }}
+                        >
+                            <div className="flex-1 min-w-0">
+                                <p className="text-white font-semibold text-sm mb-0.5">Need a Chauffeur?</p>
+                                <p className="text-white/50 text-xs leading-relaxed">Professional drivers, premium vehicles, impeccable service.</p>
+                            </div>
+                            <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                                <Link
+                                    to="/booking"
+                                    onClick={() => Analytics.trackBookingClick('blog_mobile_book_now')}
+                                    className="px-5 py-2.5 rounded-xl font-semibold text-xs uppercase tracking-wider transition-all duration-300 whitespace-nowrap"
+                                    style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
+                                >
+                                    Book Now
+                                </Link>
+                                <a href="tel:+442034759906" onClick={() => Analytics.trackCallClick('blog_mobile_phone')} className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>+44 203 475 9906</a>
+                            </div>
+                        </div>
+
+                        {/* Desktop: full sticky sidebar */}
+                        <div
+                            className="hidden lg:block lg:sticky lg:top-32 rounded-2xl p-6 md:p-8 space-y-6"
                             style={{
                                 backgroundColor: 'rgba(255,255,255,0.04)',
                                 border: '1px solid rgba(255,255,255,0.08)',
@@ -407,10 +606,14 @@ function BlogWrapper() {
                     </motion.div>
                 </div>
             </div>
+            {/* Per-Blog FAQ Section — only shown when FAQs exist */}
+            {blog.faqs && blog.faqs.length > 0 && (
+                <InlineFAQSection faqs={blog.faqs} />
+            )}
 
             {/* Prev/Next Blog Navigation */}
             {(prevBlog || nextBlog) && (
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
                     <div
                         className="rounded-2xl p-6 md:p-8  "
                         style={{
@@ -495,9 +698,10 @@ function BlogWrapper() {
                 </div>
             )}
 
+
             {/* Bottom CTA */}
             <div
-                className="py-16 md:py-20"
+                className="py-10 md:py-16"
                 style={{
                     background: 'linear-gradient(180deg, var(--color-dark) 0%, rgba(215,183,94,0.05) 50%, var(--color-dark) 100%)',
                 }}
