@@ -7,6 +7,8 @@ import { ArrowLeft, Calendar, User, Loader2, ChevronLeft, ChevronRight } from 'l
 import { blogAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
 import InlineFAQSection from '../Components/home/InlineFAQSection';
+import FleetSection from '../Components/home/FleetSection';
+import TestimonialsSection from '../Components/home/TestimonialsSection';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -638,6 +640,9 @@ function BlogWrapper() {
                 </div>
             )}
 
+            {/* Fleet & Testimonials */}
+            <FleetSection />
+            <TestimonialsSection />
 
             {/* Bottom CTA */}
             <div
