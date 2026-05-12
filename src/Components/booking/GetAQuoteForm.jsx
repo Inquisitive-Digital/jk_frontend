@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Mail,
@@ -96,6 +97,7 @@ function CountryDropdown({ value, onChange }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════ */
 export default function GetAQuoteForm({ vehicle, bookingData }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -139,10 +141,25 @@ export default function GetAQuoteForm({ vehicle, bookingData }) {
         phone: `${form.countryCode}${form.phone}`,
         message: form.message,
         carName: vehicle?.categoryName || "Vehicle",
+        bookingData: {
+          pickup: bookingData.pickup,
+          dropoff: bookingData.dropoff,
+          pickupDate: bookingData.pickupDate,
+          pickupTime: bookingData.pickupTime,
+          serviceType: bookingData.serviceType,
+          hours: bookingData.hours,
+        }
       });
+      
       setSubmitted(true);
       toast.success("Quote request sent! We'll be in touch shortly.");
-    } catch {
+      
+      // Navigate to home after a brief delay so they see the success state
+      setTimeout(() => {
+        navigate("/?quoteSuccess=true");
+      }, 1500);
+    } catch (error) {
+      console.error("Error sending quote:", error);
       toast.error("Failed to send quote. Please try again.");
     } finally {
       setSubmitting(false);
@@ -207,7 +224,7 @@ export default function GetAQuoteForm({ vehicle, bookingData }) {
             </div>
             <p className="text-base font-bold text-white">Quote Request Sent!</p>
             <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
-              Our team will contact you within 2 hours with a personalised quote for your{" "}
+              Our team will contact you with a personalised quote for your{" "}
               <span style={{ color: "var(--color-primary)" }}>{vehicle?.categoryName}</span>.
             </p>
           </motion.div>
@@ -336,7 +353,7 @@ export default function GetAQuoteForm({ vehicle, bookingData }) {
             </button>
 
             <p className="text-center text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
-              We respond within 2 hours with a personalised quote
+              We will get back to you with a personalised quote
             </p>
           </form>
         )}
