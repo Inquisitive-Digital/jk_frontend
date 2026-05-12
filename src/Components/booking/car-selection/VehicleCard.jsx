@@ -60,8 +60,7 @@ const VehicleCard = ({ vehicle, isSelected, onSelect, isDisabled }) => {
               e.stopPropagation();
               onSelect(vehicle);
             }}
-            className="px-4 py-2 rounded-xl text-xs font-bold transition-all border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-black"
-            style={{ color: 'var(--color-primary)' }}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-black cursor-pointer"
           >
             GET A QUOTE
           </button>

@@ -52,7 +52,7 @@ function CountryDropdown({ value, onChange }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-3 py-3.5 border border-r-0 rounded-l-xl transition-colors min-w-[88px]"
+        className="flex items-center gap-1.5 px-3 py-3.5 border border-r-0 rounded-l-xl transition-colors min-w-[88px] cursor-pointer"
         style={{ backgroundColor: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)", color: "#fff" }}
       >
         <span className="text-base">{selected.flag}</span>
@@ -74,7 +74,7 @@ function CountryDropdown({ value, onChange }) {
                 <button
                   type="button"
                   onClick={() => { onChange(c.code); setOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors cursor-pointer"
                   style={{
                     backgroundColor: c.code === value ? "rgba(215,183,94,0.1)" : "transparent",
                     color: c.code === value ? "var(--color-primary)" : "rgba(255,255,255,0.75)",
