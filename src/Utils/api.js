@@ -547,6 +547,12 @@ export const contactAPI = {
         const response = await api.post("/api/contact/quote", data);
         return response.data;
     },
+
+    // Submit individual car quote request
+    submitCarQuote: async (data) => {
+        const response = await api.post("/api/contact/car-quote", data);
+        return response.data;
+    },
 };
 
 // FAQ APIs
