@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import HeroSection from '../Components/home/HeroSection';
 import ServicesSection from '../Components/home/ServicesSection';
 import FleetSection from '../Components/home/FleetSection';
@@ -86,6 +87,13 @@ function Home() {
     const [searchParams, setSearchParams] = useSearchParams();
     const showSuccess = searchParams.get('quoteSuccess') === 'true';
 
+    const stats = [
+        { number: '10+', label: 'Years of Excellence' },
+        { number: '5000+', label: 'Journeys Completed' },
+        { number: '50+', label: 'Premium Vehicles' },
+        { number: '24/7', label: 'Available' },
+    ];
+
     const closeSuccessModal = () => {
         searchParams.delete('quoteSuccess');
         setSearchParams(searchParams);
@@ -103,10 +111,43 @@ function Home() {
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)' }}>
                 <HeroSection />
+
+                {/* Stats Bar */}
+                <section className="max-w-7xl mx-auto px-4 md:px-8 mb-0">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="rounded-2xl p-8 md:p-10"
+                        style={{
+                            background: '',
+                            border: '',
+                        }}
+                    >
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                            {stats.map((stat, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="text-center"
+                                >
+                                    <p className="text-3xl md:text-4xl font-bold mb-1" style={{ color: 'var(--color-primary)' }}>
+                                        {stat.number}
+                                    </p>
+                                    <p className="text-white/40 text-xs uppercase tracking-wider">{stat.label}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
+                </section>
+
+                <FleetSection />
                 <ServicesSection />
                 <WhySetsUsApart />
                 <TestimonialsSection />
-                <FleetSection />
                 <BlogSection />
                 <FAQSection />
             </main>
