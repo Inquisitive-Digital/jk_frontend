@@ -5,10 +5,11 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft, Users, Briefcase, CheckCircle2, ChevronLeft, ChevronRight,
-    Loader2, Shield, Star, ArrowRight,
+    Loader2, Shield, Star, ArrowRight, Check
 } from 'lucide-react';
 import { fleetAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+import InlineFAQSection from '../Components/home/InlineFAQSection';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -112,6 +113,22 @@ function FleetDetail() {
                 <script type="application/ld+json">
                     {JSON.stringify(vehicleSchema)}
                 </script>
+                {fleet.faqs && fleet.faqs.length > 0 && (
+                    <script type="application/ld+json">
+                        {JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'FAQPage',
+                            mainEntity: fleet.faqs.map((f) => ({
+                                '@type': 'Question',
+                                name: f.question,
+                                acceptedAnswer: {
+                                    '@type': 'Answer',
+                                    text: f.answer,
+                                },
+                            })),
+                        })}
+                    </script>
+                )}
             </Helmet>
             {/* Hero Section */}
             <div
@@ -279,21 +296,150 @@ function FleetDetail() {
                                 </p>
                             </div>
 
-                            {/* Long Description */}
-                            {fleet.longDescription && (
-                                <div className="space-y-4">
-                                    <h2
-                                        className="text-xl md:text-2xl font-semibold text-white"
-                                    >
-                                        About This Vehicle
-                                    </h2>
-                                    {fleet.longDescription.split('\n').filter(Boolean).map((para, i) => (
-                                        <p key={i} className="text-white/60 text-sm leading-relaxed">
-                                            {para}
-                                        </p>
+                            {/* Long Description & Structured Sections */}
+                            {(fleet.sections && fleet.sections.length > 0) ? (
+                                <div className="space-y-8">
+                                    {fleet.sections.map((section, index) => (
+                                        <div key={index} className="fleet-section">
+                                            {/* Section Heading (H2) */}
+                                            {section.heading && (
+                                                <h2
+                                                    className="text-xl md:text-2xl font-semibold mb-4"
+                                                    style={{ color: 'var(--color-primary)' }}
+                                                >
+                                                    {section.heading}
+                                                </h2>
+                                            )}
+
+                                            {/* Legacy flat subheading */}
+                                            {section.subheading && (
+                                                <h3 className="text-lg md:text-xl font-semibold mb-3 text-white">
+                                                    {section.subheading}
+                                                </h3>
+                                            )}
+
+                                            {/* Legacy flat text */}
+                                            {section.text && (
+                                                <div
+                                                    className="fleet-section-text text-sm md:text-base leading-relaxed mb-4"
+                                                    style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: section.text.includes('<')
+                                                            ? section.text
+                                                            : section.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                                    }}
+                                                />
+                                            )}
+
+                                            {/* Legacy flat list items */}
+                                            {section.listItems && section.listItems.length > 0 && (
+                                                <ul
+                                                    className="ml-5 mb-5 space-y-2"
+                                                    style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                >
+                                                    {section.listItems.map((item, i) => (
+                                                        <li
+                                                            key={i}
+                                                            className="list-disc text-sm md:text-base leading-relaxed"
+                                                            dangerouslySetInnerHTML={{ __html: item }}
+                                                        />
+                                                    ))}
+                                                </ul>
+                                            )}
+
+                                            {/* Subsections — H3 blocks with text + bullets */}
+                                            {section.subsections && section.subsections.length > 0 && (
+                                                <div className="space-y-6 mt-4">
+                                                    {section.subsections.map((sub, subIdx) => (
+                                                        <div key={subIdx} className="subsection-block">
+                                                            {sub.subheading && (
+                                                                <h3 className="text-lg md:text-xl font-semibold mb-2 text-white">
+                                                                    {sub.subheading}
+                                                                </h3>
+                                                            )}
+                                                            {sub.text && (
+                                                                <div
+                                                                    className="fleet-section-text text-sm md:text-base leading-relaxed mb-3"
+                                                                    style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                                    dangerouslySetInnerHTML={{
+                                                                        __html: sub.text.includes('<')
+                                                                            ? sub.text
+                                                                            : sub.text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            {sub.listItems && sub.listItems.length > 0 && (
+                                                                <ul
+                                                                    className="ml-5 mb-3 space-y-2"
+                                                                    style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                                                                >
+                                                                    {sub.listItems.map((item, i) => (
+                                                                        <li
+                                                                            key={i}
+                                                                            className="list-disc text-sm md:text-base leading-relaxed"
+                                                                            dangerouslySetInnerHTML={{ __html: item }}
+                                                                        />
+                                                                    ))}
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Section Inline Image */}
+                                            {section.image?.url && (
+                                                <img
+                                                    src={getImageUrl(section.image.url)}
+                                                    alt={section.image.alt || section.heading || 'Fleet image'}
+                                                    className="w-full rounded-xl my-6"
+                                                />
+                                            )}
+                                        </div>
                                     ))}
                                 </div>
+                            ) : (
+                                fleet.longDescription && (
+                                    <div className="space-y-4">
+                                        <h2
+                                            className="text-xl md:text-2xl font-semibold text-white"
+                                        >
+                                            About This Vehicle
+                                        </h2>
+                                        {fleet.longDescription.split('\n').filter(Boolean).map((para, i) => (
+                                            <p key={i} className="text-white/60 text-sm leading-relaxed">
+                                                {para}
+                                            </p>
+                                        ))}
+                                    </div>
+                                )
                             )}
+
+                            {/* Inline styles for any <a> tags inside text fields */}
+                            <style>{`
+                                .fleet-section-text {
+                                    word-break: break-word;
+                                    overflow-wrap: break-word;
+                                    max-width: 100%;
+                                }
+                                .fleet-section-text * {
+                                    max-width: 100% !important;
+                                    box-sizing: border-box !important;
+                                }
+                                .fleet-section-text a {
+                                    color: var(--color-primary);
+                                    text-decoration: underline;
+                                    text-underline-offset: 2px;
+                                    transition: opacity 0.2s;
+                                }
+                                .fleet-section-text a:hover {
+                                    opacity: 0.8;
+                                }
+                                .fleet-section-text b, .fleet-section-text strong {
+                                    color: white;
+                                    font-weight: 600;
+                                }
+                            `}</style>
 
                             {/* Specifications */}
                             {fleet.specifications && fleet.specifications.length > 0 && (
@@ -441,6 +587,13 @@ function FleetDetail() {
                     </div>
                 </div>
             </div>
+
+            {/* Per-Fleet FAQ Section — only shown when FAQs exist */}
+            {fleet.faqs && fleet.faqs.length > 0 && (
+                <div className="max-w-7xl mx-auto px-4 md:px-8 pb-10">
+                    <InlineFAQSection faqs={fleet.faqs} />
+                </div>
+            )}
         </main>
     );
 }
