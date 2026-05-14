@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import HeroSection from '../Components/home/HeroSection';
-import ServicesSection from '../Components/home/ServicesSection';
-import FleetSection from '../Components/home/FleetSection';
-import WhySetsUsApart from '../Components/home/WhySetsUsApart';
-import TestimonialsSection from '../Components/home/TestimonialsSection';
-import FAQSection from '../Components/home/FAQSection';
-import BlogSection from '../Components/home/BlogSection';
-import QuoteSuccessModal from '../Components/booking/QuoteSuccessModal';
+
+// Lazy load below-the-fold components to reduce Total Blocking Time
+const ServicesSection = lazy(() => import('../Components/home/ServicesSection'));
+const FleetSection = lazy(() => import('../Components/home/FleetSection'));
+const WhySetsUsApart = lazy(() => import('../Components/home/WhySetsUsApart'));
+const TestimonialsSection = lazy(() => import('../Components/home/TestimonialsSection'));
+const FAQSection = lazy(() => import('../Components/home/FAQSection'));
+const BlogSection = lazy(() => import('../Components/home/BlogSection'));
+const QuoteSuccessModal = lazy(() => import('../Components/booking/QuoteSuccessModal'));
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -144,15 +146,19 @@ function Home() {
                     </motion.div>
                 </section>
 
-                <FleetSection />
-                <ServicesSection />
-                <WhySetsUsApart />
-                <TestimonialsSection />
-                <BlogSection />
-                <FAQSection />
+                <Suspense fallback={<div className="min-h-[1000px] bg-transparent"></div>}>
+                    <FleetSection />
+                    <ServicesSection />
+                    <WhySetsUsApart />
+                    <TestimonialsSection />
+                    <BlogSection />
+                    <FAQSection />
+                </Suspense>
             </main>
 
-            <QuoteSuccessModal isOpen={showSuccess} onClose={closeSuccessModal} />
+            <Suspense fallback={null}>
+                <QuoteSuccessModal isOpen={showSuccess} onClose={closeSuccessModal} />
+            </Suspense>
         </>
     );
 }

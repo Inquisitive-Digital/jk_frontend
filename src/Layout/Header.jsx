@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Menu, X, ChevronDown, ChevronRight, LogIn } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import JkLogo from "../assets/JkLogo.png"
 import { serviceAPI, fleetAPI, eventAPI } from '../Utils/api';
 import Analytics from '../Utils/analytics';
@@ -74,7 +75,7 @@ function Header({ isTransparent = false, theme = 'dark' }) {
       try {
         const [servicesData, fleetData, eventsNavData] = await Promise.all([
           serviceAPI.getNavMenu(),
-          fleetAPI.getAll(1, 100), // Get all fleets
+          fleetAPI.getAll(1, 15), // Get all fleets (limited to 15 for faster load)
           eventAPI.getNavEvents()  // Get events for nav dropdown (showInNav: true)
         ]);
 
@@ -214,6 +215,8 @@ function Header({ isTransparent = false, theme = 'dark' }) {
                 src={JkLogo}
                 alt="JK Executive Chauffeurs Logo"
                 className="w-24 h-18 md:w-28 md:h-20 object-contain flex-shrink-0"
+                width="112"
+                height="80"
               />
               <motion.div
                 className="overflow-hidden hidden lg:block"

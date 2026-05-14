@@ -127,10 +127,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       return;
     }
 
-    await this.loadTrackingScripts();
-
     this.gtmId = import.meta.env.VITE_GTM_ID || "GTM-WMZR9JNW";
     this.pixelId = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => this.loadTrackingScripts(), { timeout: 3000 });
+    } else {
+      setTimeout(() => this.loadTrackingScripts(), 2000);
+    }
+
     this.isInitialized = true;
 
     console.log(

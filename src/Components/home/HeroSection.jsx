@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { useGoogleMaps } from '../../Context/GoogleMapsContext';
 // import heroImage from '../../assets/heroImage.png';
 // Import WebP version after you convert it (heroImage.webp)
-import heroImageWebp from '../../assets/heroImage.webp';
+const heroImageWebp = '/heroImage.webp';
 import Analytics from '../../Utils/analytics';
 import { useBooking } from '../../Context/BookingContext';
 import Locations from '../booking/Locations';
@@ -75,7 +75,7 @@ function HeroSection() {
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
+                            transition={{ duration: 0.8 }}
                             className="font-medium tracking-[0.2em] uppercase text-xs md:text-sm mb-2"
                             style={{ color: 'var(--color-primary)' }}
                         >
@@ -86,7 +86,7 @@ function HeroSection() {
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.4 }}
+                            transition={{ duration: 0.8 }}
                             className="mb-8"
                         >
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight">
@@ -126,7 +126,7 @@ function HeroSection() {
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.6 }}
+                            transition={{ duration: 0.8 }}
                             className="text-base md:text-lg text-white/80 max-w-xl mb-4 leading-relaxed"
                         >
                             Experience unrivalled reliability and multi-award-winning service.
@@ -137,7 +137,7 @@ function HeroSection() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.8 }}
+                            transition={{ duration: 0.8 }}
                             className="flex flex-col sm:flex-row items-start gap-4"
                         >
                             <Link
@@ -179,13 +179,15 @@ function HeroSection() {
                         transition={{ duration: 0.8, delay: 1 }}
                         className="hidden lg:block relative z-[50]"
                     >
-                        {isLoaded && (
+                        {isLoaded ? (
                             <Locations
                                 data={bookingData}
                                 updateData={updateBooking}
                                 onNext={handleHeroSubmit}
                                 isOnHome={true}
                             />
+                        ) : (
+                            <div className="w-full h-[400px] bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 animate-pulse hidden lg:block"></div>
                         )}
                     </motion.div>
                 </div>
@@ -197,13 +199,15 @@ function HeroSection() {
                     transition={{ duration: 0.8, delay: 1.2 }}
                     className="lg:hidden mt-8 pb-8 relative z-[50]"
                 >
-                    {isLoaded && (
+                    {isLoaded ? (
                         <Locations
                             data={bookingData}
                             updateData={updateBooking}
                             onNext={handleHeroSubmit}
                             isOnHome={true}
                         />
+                    ) : (
+                        <div className="w-full h-[350px] bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 animate-pulse lg:hidden"></div>
                     )}
                 </motion.div>
             </div>

@@ -42,25 +42,50 @@ function PageViewTracker() {
 function TawkIntegration() {
   const location = useLocation();
 
-  // Load the Tawk script once on mount (only if not on a hidden route initially)
+  // Load the Tawk script once on interaction
   useEffect(() => {
     const propertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
     const widgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
 
     if (!propertyId || !widgetId) return;
 
-    // Inject the script only once
-    if (!document.querySelector(`script[src*="tawk.to"]`)) {
-      window.Tawk_API = window.Tawk_API || {};
-      window.Tawk_LoadStart = new Date();
-      const s1 = document.createElement("script");
-      const s0 = document.getElementsByTagName("script")[0];
-      s1.async = true;
-      s1.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
-      s1.charset = 'UTF-8';
-      s1.setAttribute('crossorigin', '*');
-      s0.parentNode.insertBefore(s1, s0);
-    }
+    const loadTawk = () => {
+      if (!document.querySelector(`script[src*="tawk.to"]`)) {
+        window.Tawk_API = window.Tawk_API || {};
+        window.Tawk_LoadStart = new Date();
+        const s1 = document.createElement("script");
+        const s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        if (s0 && s0.parentNode) {
+            s0.parentNode.insertBefore(s1, s0);
+        } else {
+            document.head.appendChild(s1);
+        }
+      }
+      cleanup();
+    };
+
+    const cleanup = () => {
+      window.removeEventListener('scroll', loadTawk);
+      window.removeEventListener('mousemove', loadTawk);
+      window.removeEventListener('touchstart', loadTawk);
+      window.removeEventListener('keydown', loadTawk);
+    };
+
+    window.addEventListener('scroll', loadTawk, { once: true });
+    window.addEventListener('mousemove', loadTawk, { once: true });
+    window.addEventListener('touchstart', loadTawk, { once: true });
+    window.addEventListener('keydown', loadTawk, { once: true });
+
+    const fallback = setTimeout(loadTawk, 5000);
+
+    return () => {
+      cleanup();
+      clearTimeout(fallback);
+    };
   }, []); // run once on mount
 
   // Show / hide the widget based on the current route
@@ -156,18 +181,31 @@ function App() {
       window.history.scrollRestoration = 'manual';
     }
 
-    const lenis = new Lenis();
-    lenisInstance = lenis; // Store globally for ScrollToTop access
+    // Defer Lenis initialization to unblock the main thread
+    let lenis;
+    let rafId;
 
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+    const initLenis = () => {
+      lenis = new Lenis();
+      lenisInstance = lenis; // Store globally for ScrollToTop access
+
+      function raf(time) {
+        lenis.raf(time);
+        rafId = requestAnimationFrame(raf);
+      }
+      rafId = requestAnimationFrame(raf);
+    };
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(initLenis, { timeout: 3000 });
+    } else {
+      setTimeout(initLenis, 1000);
     }
-    requestAnimationFrame(raf);
 
     // Cleanup on unmount
     return () => {
-      lenis.destroy();
+      if (rafId) cancelAnimationFrame(rafId);
+      if (lenis) lenis.destroy();
       lenisInstance = null;
     };
   }, []);
