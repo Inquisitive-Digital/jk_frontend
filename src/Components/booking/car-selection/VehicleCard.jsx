@@ -53,65 +53,83 @@ const VehicleCard = ({ vehicle, isSelected, onSelect, isDisabled }) => {
         </div>
 
         {/* Price Section - Always on right */}
-        <div className="text-right shrink-0">
-          <p className="text-[8px] text-white uppercase tracking-wider font-medium">Total</p>
-          <div className="text-lg md:text-xl font-bold leading-none" style={{ color: 'var(--color-primary)' }}>
-            £{pricing?.totalPrice?.toFixed(2)}
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isSelected) onSelect(vehicle);
-            setShowBreakdown(!showBreakdown);
-          }}
-          className="p-2 rounded-full border cursor-pointer border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)] group transition-colors"
-        >
-          <motion.div animate={{ rotate: showBreakdown ? 180 : 0 }}>
-            <ChevronDown
-              size={16}
-              className="text-[var(--color-primary)] group-hover:text-black transition-colors"
-            />
-          </motion.div>
-        </button>
-      </div>
-
-      {/* COMPACT EXPANDABLE SECTION */}
-      <AnimatePresence>
-        {showBreakdown && (
-          <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
-            className="bg-[#0a0a0a] border-t border-[#222] overflow-hidden"
+        {vehicle.enableGetAQuote ? (
+          /* Get A Quote mode — standalone full-width button, no chevron */
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(vehicle);
+            }}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-black cursor-pointer"
           >
-            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Ultra-compact price breakdown */}
-              <div className="space-y-1 text-[12px] font-mono border-r border-[#222] pr-4">
-                <div className="flex justify-between text-white">
-                  <span>BASE FARE</span>
-                  <span>£{pricing?.basePrice?.toFixed(2) ?? "N/A"}</span>
-                </div>
-                <div className="flex justify-between text-white">
-                  <span>TAX ({pricing?.vatRate ?? 20}% VAT)</span>
-                  <span>£{pricing?.tax?.toFixed(2) ?? "N/A"}</span>
-                </div>
-              </div>
-
-              {/* Tiny Chips for Features */}
-              <div className="flex flex-wrap gap-1.5">
-                {vehicle.companyFeatures?.slice(0, 3).map((feat, i) => (
-                  <span key={i} className="text-[9px] px-2 py-0.5 rounded uppercase font-bold border" style={{ backgroundColor: 'rgba(215,183,94,0.1)', color: 'var(--color-primary)', borderColor: 'rgba(215,183,94,0.2)' }}>
-                    {feat}
-                  </span>
-                ))}
+            GET A QUOTE
+          </button>
+        ) : (
+          <>
+            {/* Price */}
+            <div className="text-right shrink-0">
+              <p className="text-[8px] text-white uppercase tracking-wider font-medium">Total</p>
+              <div className="text-lg md:text-xl font-bold leading-none" style={{ color: 'var(--color-primary)' }}>
+                £{pricing?.totalPrice?.toFixed(2)}
               </div>
             </div>
-          </motion.div>
+
+            {/* Expand Chevron */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isSelected) onSelect(vehicle);
+                setShowBreakdown(!showBreakdown);
+              }}
+              className="p-2 rounded-full border cursor-pointer border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)] group transition-colors"
+            >
+              <motion.div animate={{ rotate: showBreakdown ? 180 : 0 }}>
+                <ChevronDown
+                  size={16}
+                  className="text-[var(--color-primary)] group-hover:text-black transition-colors"
+                />
+              </motion.div>
+            </button>
+          </>
         )}
-      </AnimatePresence>
+      </div>
+
+      {/* COMPACT EXPANDABLE SECTION — only for priced vehicles */}
+      {!vehicle.enableGetAQuote && (
+        <AnimatePresence>
+          {showBreakdown && (
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: "auto" }}
+              exit={{ height: 0 }}
+              className="bg-[#0a0a0a] border-t border-[#222] overflow-hidden"
+            >
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Price breakdown */}
+                <div className="space-y-1 text-[12px] font-mono border-r border-[#222] pr-4">
+                  <div className="flex justify-between text-white">
+                    <span>BASE FARE</span>
+                    <span>£{pricing?.basePrice?.toFixed(2) ?? "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between text-white">
+                    <span>TAX ({pricing?.vatRate ?? 20}% VAT)</span>
+                    <span>£{pricing?.tax?.toFixed(2) ?? "N/A"}</span>
+                  </div>
+                </div>
+
+                {/* Feature Chips */}
+                <div className="flex flex-wrap gap-1.5">
+                  {vehicle.companyFeatures?.slice(0, 3).map((feat, i) => (
+                    <span key={i} className="text-[9px] px-2 py-0.5 rounded uppercase font-bold border" style={{ backgroundColor: 'rgba(215,183,94,0.1)', color: 'var(--color-primary)', borderColor: 'rgba(215,183,94,0.2)' }}>
+                      {feat}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </motion.div>
   );
 };
