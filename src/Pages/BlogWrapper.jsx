@@ -150,6 +150,32 @@ function BlogWrapper() {
     const seoTitle = blog.seoTitle || blog.title;
     const seoDesc = blog.seoDescription || blog.excerpt || (blog.intro ? blog.intro.replace(/<[^>]+>/g, '').slice(0, 160) : '');
 
+    const articleSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `${BASE_URL}/blog/${blog.slug}`,
+        },
+        headline: seoTitle,
+        description: seoDesc,
+        image: heroSrc || `${BASE_URL}/logo.png`,
+        author: {
+            '@type': 'Person',
+            name: blog.author || 'JK Executive Chauffeurs',
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'JK Executive Chauffeurs',
+            logo: {
+                '@type': 'ImageObject',
+                url: `${BASE_URL}/logo.png`,
+            },
+        },
+        datePublished: blog.publishDate || blog.createdAt,
+        dateModified: blog.updatedAt || blog.createdAt,
+    };
+
     // FAQ structured data — only built when FAQs exist
     const faqSchema = blog.faqs && blog.faqs.length > 0
         ? {
@@ -176,6 +202,9 @@ function BlogWrapper() {
                 </script>
                 <script type="application/ld+json">
                     {JSON.stringify(blogPostingSchema)}
+                </script>
+                <script type="application/ld+json">
+                    {JSON.stringify(articleSchema)}
                 </script>
                 {faqSchema && (
                     <script type="application/ld+json">
