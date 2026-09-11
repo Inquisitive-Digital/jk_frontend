@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 const Environment = {
     LOCAL_URL: "http://localhost:5005",
-    STAGING_URL: "https://dev.jkexecutivechauffeurs.com",
+    STAGING_URL: "https://www.dev.jkexecutivechauffeurs.com",
     PRODUCTION_URL: "https://www.jkexecutivechauffeurs.com",
 };
 
@@ -21,7 +21,7 @@ if (hostname.includes("dev.") || hostname === "dev.jkexecutivechauffeurs.com") {
     BASE_URL = Environment.PRODUCTION_URL;
 }
 
-export const BASE_URL_IMAGE = BASE_URL; 
+export const BASE_URL_IMAGE = BASE_URL;
 
 export function getImageUrl(path, fallback = "") {
     if (!path) return fallback;
@@ -403,6 +403,62 @@ export const fleetAPI = {
         const response = await api.get(`/api/fleet/${slug}`);
         return response.data;
     },
+
+    // ===== ADMIN ROUTES =====
+
+    // Get all fleets (Admin)
+    getAllAdmin: async (page = 1, limit = 20, search = "") => {
+        const response = await api.get("/api/fleet/admin/all", {
+            params: { page, limit, search },
+        });
+        return response.data;
+    },
+
+    // Get fleet by ID (Admin)
+    getById: async (id) => {
+        const response = await api.get(`/api/fleet/admin/${id}`);
+        return response.data;
+    },
+
+    // Create new fleet
+    create: async (formData) => {
+        const token = localStorage.getItem("adminToken");
+        const response = await api.post("/api/fleet", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+            },
+        });
+        return response.data;
+    },
+
+    // Update fleet
+    update: async (id, formData) => {
+        const token = localStorage.getItem("adminToken");
+        const response = await api.put(`/api/fleet/${id}`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+            },
+        });
+        return response.data;
+    },
+
+    // Delete fleet
+    delete: async (id) => {
+        const response = await api.delete(`/api/fleet/${id}`);
+        return response.data;
+    },
+
+    // Toggle Active Status
+    toggleActive: async (id, isActive) => {
+        const fd = new FormData();
+        fd.append("isActive", String(isActive));
+        const response = await api.put(`/api/fleet/${id}`, fd, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
 };
 
 // Event APIs
@@ -551,6 +607,22 @@ export const contactAPI = {
     // Submit individual car quote request
     submitCarQuote: async (data) => {
         const response = await api.post("/api/contact/car-quote", data);
+        return response.data;
+    },
+
+    // ─── Admin only ──────────────────────────────────────────────────────────
+
+    // Get all contact leads (Admin)
+    getAllAdmin: async (page = 1, limit = 20, search = "") => {
+        const response = await api.get("/api/contact/leads", {
+            params: { page, limit, search },
+        });
+        return response.data;
+    },
+
+    // Delete contact lead (Admin)
+    deleteLead: async (id) => {
+        const response = await api.delete(`/api/contact/leads/${id}`);
         return response.data;
     },
 };

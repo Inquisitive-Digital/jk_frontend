@@ -28,6 +28,7 @@ import {
   BookOpen,
   PenSquare,
   Briefcase,
+  MessageSquare,
 } from "lucide-react";
 import { adminAPI } from "../../Utils/api";
 import { NAV_ITEMS } from "../../Utils/adminNav";
@@ -328,6 +329,14 @@ function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* All Leads Button */}
+              <button
+                onClick={() => navigate("/admin/leads")}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-500/30"
+              >
+                <Target size={18} />
+                <span className="hidden sm:inline font-medium text-sm">All Leads</span>
+              </button>
               {/* Create Admin Button */}
               <button
                 onClick={() => setIsCreateAdminModalOpen(true)}

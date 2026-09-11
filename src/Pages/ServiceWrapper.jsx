@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { serviceAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
 import InlineFAQSection from '../Components/home/InlineFAQSection';
@@ -20,6 +20,39 @@ function ServiceWrapper() {
     });
 
     const service = data?.service;
+
+    // Fetch all active services for sidebar category widgets
+    const { data: allServicesData } = useQuery({
+        queryKey: ['allServicesSidebar'],
+        queryFn: () => serviceAPI.getAllServices(1, 100),
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const allServices = allServicesData?.services || [];
+    const categoryOrder = ["Business Travel", "Leisure Travel", "Airport Travel", "Chauffeur Service", "Wedding Service", "Areas"];
+
+    // Group active services by category
+    const categoryMap = {};
+    allServices.forEach((s) => {
+        if (!s.category) return;
+        if (!categoryMap[s.category]) {
+            categoryMap[s.category] = [];
+        }
+        categoryMap[s.category].push(s);
+    });
+
+    // Preserve preferred category order, append any extra categories found
+    const availableCategories = [
+        ...categoryOrder.filter((cat) => categoryMap[cat] && categoryMap[cat].length > 0),
+        ...Object.keys(categoryMap).filter((cat) => !categoryOrder.includes(cat) && categoryMap[cat].length > 0),
+    ];
+
+    // Extract first service & total count for each category
+    const categoryFirstServices = availableCategories.map((cat) => ({
+        category: cat,
+        firstService: categoryMap[cat][0],
+        count: categoryMap[cat].length,
+    }));
 
     // Loading State
     if (isLoading) {
@@ -365,41 +398,6 @@ function ServiceWrapper() {
                             }
                         `}</style>
 
-                        {/* Features List */}
-                        {service.features && service.features.length > 0 && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.7 }}
-                            >
-                                <h3
-                                    className="text-lg font-semibold mb-5"
-                                    style={{ color: 'var(--color-primary)' }}
-                                >
-                                    Key Features
-                                </h3>
-                                <div className="grid sm:grid-cols-2 gap-3">
-                                    {service.features.map((feature, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.7 + i * 0.05 }}
-                                            className="flex items-start gap-3 p-3 rounded-lg"
-                                            style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
-                                        >
-                                            <div
-                                                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                                                style={{ backgroundColor: 'rgba(215,183,94,0.15)' }}
-                                            >
-                                                <Check className="w-3 h-3" style={{ color: 'var(--color-primary)' }} />
-                                            </div>
-                                            <span className="text-white/70 text-sm">{feature}</span>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
                     </div>
 
                     {/* Sidebar — 1/3 */}
@@ -434,60 +432,318 @@ function ServiceWrapper() {
                             </div>
                         </div>
 
+                        {/* Mobile Category Widgets */}
+                        {categoryFirstServices.length > 0 && (
+                            <div className="lg:hidden mt-6 space-y-6">
+                                {/* First Service of Each Category (Image 1 reference style) */}
+                                <div
+                                    className="rounded-2xl p-5 space-y-4"
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2.5">
+                                        <span
+                                            className="w-1.5 h-5 rounded-full inline-block"
+                                            style={{ backgroundColor: 'var(--color-primary)' }}
+                                        />
+                                        <h3 className="text-lg font-bold text-white tracking-tight">
+                                            Latest Services
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {categoryFirstServices.map(({ category, firstService }) => {
+                                            const isCurrent = firstService.slug === service.slug;
+                                            return (
+                                                <div key={category} className="group">
+                                                    <Link
+                                                        to={`/services/${firstService.slug}`}
+                                                        className="flex items-center gap-3.5"
+                                                    >
+                                                        <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-white/5 border border-white/10">
+                                                            <img
+                                                                src={getImageUrl(firstService.image?.url)}
+                                                                alt={firstService.title}
+                                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4
+                                                                className={`font-bold text-sm leading-snug line-clamp-2 transition-colors mb-1 ${
+                                                                    isCurrent ? 'text-[var(--color-primary)]' : 'text-white group-hover:text-[var(--color-primary)]'
+                                                                }`}
+                                                            >
+                                                                {firstService.title}
+                                                            </h4>
+                                                            <p className="text-xs text-white/50 mb-2 font-medium">
+                                                                {category}
+                                                            </p>
+                                                            <div
+                                                                className="w-8 h-[3px] rounded-full"
+                                                                style={{ backgroundColor: 'var(--color-primary)' }}
+                                                            />
+                                                        </div>
+                                                    </Link>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Service Categories (Image 2 reference style) */}
+                                <div
+                                    className="rounded-2xl p-5 space-y-4"
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2.5">
+                                        <span
+                                            className="w-1.5 h-5 rounded-full inline-block"
+                                            style={{ backgroundColor: 'var(--color-primary)' }}
+                                        />
+                                        <h3 className="text-lg font-bold text-white tracking-tight">
+                                            Categories
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {categoryFirstServices.map(({ category, firstService, count }) => {
+                                            const isCurrentCategory = service.category === category;
+                                            return (
+                                                <Link
+                                                    key={category}
+                                                    to={`/services/${firstService.slug}`}
+                                                    className="flex items-center justify-between p-3 rounded-xl transition-all duration-300 group"
+                                                    style={{
+                                                        backgroundColor: isCurrentCategory ? 'rgba(215,183,94,0.12)' : 'rgba(255,255,255,0.03)',
+                                                        border: isCurrentCategory ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.08)',
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div
+                                                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                                                            style={{
+                                                                backgroundColor: isCurrentCategory ? 'var(--color-primary)' : 'rgba(255,255,255,0.08)',
+                                                                color: isCurrentCategory ? 'var(--color-dark)' : 'var(--color-primary)',
+                                                            }}
+                                                        >
+                                                            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                                                        </div>
+                                                        <span className={`font-semibold text-xs transition-colors ${isCurrentCategory ? 'text-white' : 'text-white/90 group-hover:text-white'}`}>
+                                                            {category}
+                                                        </span>
+                                                    </div>
+                                                    <span
+                                                        className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+                                                        style={{
+                                                            backgroundColor: 'rgba(255,255,255,0.08)',
+                                                            color: 'rgba(255,255,255,0.7)',
+                                                        }}
+                                                    >
+                                                        {count}
+                                                    </span>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Desktop: full sticky sidebar */}
-                        <div
-                            className="hidden lg:block lg:sticky lg:top-32 rounded-2xl p-6 md:p-8 space-y-6"
-                            style={{
-                                backgroundColor: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                            }}
-                        >
-                            <h3 className="text-lg font-semibold text-white">
-                                Ready to Experience?
-                            </h3>
-                            <p className="text-white/50 text-sm leading-relaxed">
-                                Book our {service.title} and enjoy world-class chauffeur service tailored to your needs.
-                            </p>
-
-                            {/* Decorative line */}
+                        <div className="hidden lg:block lg:sticky lg:top-32 space-y-6">
+                            {/* Booking CTA Card */}
                             <div
-                                className="w-12 h-0.5 rounded-full"
-                                style={{ backgroundColor: 'var(--color-primary)' }}
-                            />
-
-                            {/* Book Now CTA */}
-                            <Link
-                                to="/booking"
-                                onClick={() => Analytics.trackBookingClick('service_page_book_now', { service_title: service.title })}
-                                className="block w-full text-center px-6 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
+                                className="rounded-2xl p-6 md:p-8 space-y-6"
                                 style={{
-                                    backgroundColor: 'var(--color-primary)',
-                                    color: 'var(--color-dark)',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)';
-                                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(215,183,94,0.4)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'var(--color-primary)';
-                                    e.currentTarget.style.boxShadow = 'none';
+                                    backgroundColor: 'rgba(255,255,255,0.04)',
+                                    border: '1px solid rgba(255,255,255,0.08)',
                                 }}
                             >
-                                Book Now
-                            </Link>
+                                <h3 className="text-lg font-semibold text-white">
+                                    Ready to Experience?
+                                </h3>
+                                <p className="text-white/50 text-sm leading-relaxed">
+                                    Book our {service.title} and enjoy world-class chauffeur service tailored to your needs.
+                                </p>
 
-                            {/* Contact info */}
-                            <div className="text-center">
-                                <p className="text-white/40 text-xs mb-1">Or call us directly</p>
-                                <a
-                                    href="tel:+442034759906"
-                                    onClick={() => Analytics.trackCallClick('service_page_phone')}
-                                    className="text-sm font-medium transition-colors"
-                                    style={{ color: 'var(--color-primary)' }}
+                                {/* Decorative line */}
+                                <div
+                                    className="w-12 h-0.5 rounded-full"
+                                    style={{ backgroundColor: 'var(--color-primary)' }}
+                                />
+
+                                {/* Book Now CTA */}
+                                <Link
+                                    to="/booking"
+                                    onClick={() => Analytics.trackBookingClick('service_page_book_now', { service_title: service.title })}
+                                    className="block w-full text-center px-6 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300"
+                                    style={{
+                                        backgroundColor: 'var(--color-primary)',
+                                        color: 'var(--color-dark)',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)';
+                                        e.currentTarget.style.boxShadow = '0 4px 20px rgba(215,183,94,0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
                                 >
-                                    +44 (0) 203 475 9906
-                                </a>
+                                    Book Now
+                                </Link>
+
+                                {/* Contact info */}
+                                <div className="text-center">
+                                    <p className="text-white/40 text-xs mb-1">Or call us directly</p>
+                                    <a
+                                        href="tel:+442034759906"
+                                        onClick={() => Analytics.trackCallClick('service_page_phone')}
+                                        className="text-sm font-medium transition-colors"
+                                        style={{ color: 'var(--color-primary)' }}
+                                    >
+                                        +44 (0) 203 475 9906
+                                    </a>
+                                </div>
                             </div>
+
+                            {/* First Service of Each Category Widget (Image 1 reference style) */}
+                            {categoryFirstServices.length > 0 && (
+                                <div
+                                    className="rounded-2xl p-6 space-y-5"
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2.5">
+                                        <span
+                                            className="w-1.5 h-6 rounded-full inline-block"
+                                            style={{ backgroundColor: 'var(--color-primary)' }}
+                                        />
+                                        <h3 className="text-xl font-bold text-white tracking-tight">
+                                            Latest Services
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {categoryFirstServices.map(({ category, firstService }) => {
+                                            const isCurrent = firstService.slug === service.slug;
+                                            return (
+                                                <div key={category} className="group">
+                                                    <Link
+                                                        to={`/services/${firstService.slug}`}
+                                                        className="flex items-center gap-3.5"
+                                                    >
+                                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-white/5 border border-white/10">
+                                                            <img
+                                                                src={getImageUrl(firstService.image?.url)}
+                                                                alt={firstService.title}
+                                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4
+                                                                className={`font-bold text-sm leading-snug line-clamp-2 transition-colors mb-1 ${
+                                                                    isCurrent ? 'text-[var(--color-primary)]' : 'text-white group-hover:text-[var(--color-primary)]'
+                                                                }`}
+                                                            >
+                                                                {firstService.title}
+                                                            </h4>
+                                                            <p className="text-xs text-white/50 mb-2 font-medium">
+                                                                {category}
+                                                            </p>
+                                                            <div
+                                                                className="w-8 h-[3px] rounded-full"
+                                                                style={{ backgroundColor: 'var(--color-primary)' }}
+                                                            />
+                                                        </div>
+                                                    </Link>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Service Categories Widget (Image 2 reference style) */}
+                            {categoryFirstServices.length > 0 && (
+                                <div
+                                    className="rounded-2xl p-6 space-y-5"
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2.5">
+                                        <span
+                                            className="w-1.5 h-6 rounded-full inline-block"
+                                            style={{ backgroundColor: 'var(--color-primary)' }}
+                                        />
+                                        <h3 className="text-xl font-bold text-white tracking-tight">
+                                            Categories
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-2.5">
+                                        {categoryFirstServices.map(({ category, firstService, count }) => {
+                                            const isCurrentCategory = service.category === category;
+                                            return (
+                                                <Link
+                                                    key={category}
+                                                    to={`/services/${firstService.slug}`}
+                                                    className="flex items-center justify-between p-3.5 rounded-xl transition-all duration-300 group"
+                                                    style={{
+                                                        backgroundColor: isCurrentCategory ? 'rgba(215,183,94,0.12)' : 'rgba(255,255,255,0.03)',
+                                                        border: isCurrentCategory ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.08)',
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        if (!isCurrentCategory) {
+                                                            e.currentTarget.style.borderColor = 'rgba(215,183,94,0.5)';
+                                                            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)';
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        if (!isCurrentCategory) {
+                                                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                                                            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div
+                                                            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                                                            style={{
+                                                                backgroundColor: isCurrentCategory ? 'var(--color-primary)' : 'rgba(255,255,255,0.08)',
+                                                                color: isCurrentCategory ? 'var(--color-dark)' : 'var(--color-primary)',
+                                                            }}
+                                                        >
+                                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                                                        </div>
+                                                        <span className={`font-semibold text-sm transition-colors ${isCurrentCategory ? 'text-white' : 'text-white/90 group-hover:text-white'}`}>
+                                                            {category}
+                                                        </span>
+                                                    </div>
+                                                    <span
+                                                        className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                                                        style={{
+                                                            backgroundColor: 'rgba(255,255,255,0.08)',
+                                                            color: 'rgba(255,255,255,0.7)',
+                                                        }}
+                                                    >
+                                                        {count}
+                                                    </span>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 </div>

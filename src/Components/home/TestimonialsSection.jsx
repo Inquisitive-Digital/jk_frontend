@@ -3,47 +3,47 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import Analytics from '../../Utils/analytics';
 
-// Testimonials data
+// Testimonials data — Real Google Reviews (fetched Sep 2026, Place ID: ChIJrQeu8XNydkgRZ_viBgGRIn0)
 const TESTIMONIALS = [
     {
         id: 1,
-        name: 'James Richardson',
-        role: 'Business Executive',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+        name: 'Jason Kite',
+        role: 'Airport Transfer · Heathrow',
+        image: 'https://lh3.googleusercontent.com/a/ACg8ocJoU9OkOZvDgKjWYGzl6P5FVeZhZyXdOVLqy5837n7KY86uwg=s128-c0x00000000-cc-rp-mo-ba4',
         rating: 5,
-        text: 'Exceptional service from start to finish. The chauffeur was punctual, professional, and the vehicle was immaculate. Highly recommend for business travel.',
+        text: 'Tremendous communication from the moment I started the booking. Very helpful, polite and quick to respond. Our driver, Abdul, was very friendly and the car, S560, in great condition. We were met at Heathrow after flying from US and taken to the east coast where we arrived refreshed. Highly recommend and will certainly use again.',
+        source: 'Google',
+        date: '3 months ago',
     },
     {
         id: 2,
-        name: 'Sarah Mitchell',
-        role: 'Wedding Client',
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face',
+        name: 'ikranesha15',
+        role: 'Business Travel Client',
+        image: 'https://lh3.googleusercontent.com/a/ACg8ocJge3EigAIo7YlRubECHN70J47TZEedchVvs4btRkd2CyEw-A=s128-c0x00000000-cc-rp-mo-ba3',
         rating: 5,
-        text: 'Made our wedding day absolutely perfect. The Mercedes was stunning and our chauffeur went above and beyond. Thank you JK Executive!',
+        text: 'I was on a business trip in China and I was easily able to book a chauffeur for children the same day. I was provided with the chauffeur details and they had an enhanced DBS. My kids also enjoyed the experience and I will definitely recommend and use in future.',
+        source: 'Google',
+        date: '2 months ago',
     },
     {
         id: 3,
-        name: 'Michael Chen',
-        role: 'Corporate Client',
-        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        name: 'Ashley Matlock',
+        role: 'Family & Airport Client',
+        image: 'https://lh3.googleusercontent.com/a-/ALV-UjU4vvu7XJIi6uatR_C4qeO02j2UgGpEfhcOWBkMFkIxxP-s0sI=s128-c0x00000000-cc-rp-mo',
         rating: 5,
-        text: 'We use JK Executive for all our corporate transfers. Reliable, professional and always on time. Our clients are always impressed.',
+        text: 'Baerru was absolutely fabulous to have as our driver for the last few days in London. My grandmother and I were traveling with my 6 month old son. He was so accommodating, flexible with what we wanted to do each day. I highly recommend him and look forward to using him in the future when we visit London again.',
+        source: 'Google',
+        date: '10 months ago',
     },
     {
         id: 4,
-        name: 'Emma Thompson',
-        role: 'Airport Transfer',
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+        name: 'Silvia Oliveras',
+        role: 'Airport Transfer Client',
+        image: 'https://lh3.googleusercontent.com/a-/ALV-UjUqay6QhLB0SjIRQ-72L2AIdQRe6S4kGVrBXBIbryrWXkPQHZKK=s128-c0x00000000-cc-rp-mo-ba4',
         rating: 5,
-        text: 'The meet and greet service was fantastic. After a long flight, it was wonderful to be greeted and driven home in comfort.',
-    },
-    {
-        id: 5,
-        name: 'David Williams',
-        role: 'Regular Client',
-        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
-        rating: 5,
-        text: 'Been using JK Executive for over a year now. Consistently excellent service. Would not trust anyone else for my travel needs.',
+        text: 'Everything went well and the level of service met our needs and high expectations. The car was the expected model, very clean. The driver was very polite, wearing a suit and did all the hard work both ends. After a couple of bad experiences, we were very happy and relieved to have hired JK Executive Chauffeurs. Would definitely recommend and will use them again.',
+        source: 'Google',
+        date: '2 years ago',
     },
 ];
 
@@ -78,7 +78,26 @@ const TestimonialCard = ({ testimonial }) => (
                 src={testimonial.image}
                 alt={testimonial.name}
                 className="w-12 h-12 rounded-full object-cover"
+                onError={(e) => {
+                    // Hide broken image and show initials fallback
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling;
+                    if (fallback) fallback.style.display = 'flex';
+                }}
             />
+            {/* Initials fallback — hidden by default, shown if image fails */}
+            <div
+                className="w-12 h-12 rounded-full items-center justify-center flex-shrink-0 text-sm font-bold text-black"
+                style={{ display: 'none', backgroundColor: 'var(--color-primary)' }}
+                aria-hidden="true"
+            >
+                {testimonial.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase()}
+            </div>
             <div>
                 <h4 className="text-white font-semibold text-sm">
                     {testimonial.name}
@@ -166,6 +185,49 @@ function TestimonialsSection() {
                             </span>
                         </motion.h2>
                     </div>
+
+                    {/* Google Reviews Badge */}
+                    <motion.a
+                        href="https://www.google.com/maps/search/?api=1&query=JK+Executive+Chauffeurs"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.15 }}
+                        className="hidden md:flex items-center gap-3 px-4 py-2.5 rounded-xl border cursor-pointer transition-all duration-300"
+                        style={{
+                            borderColor: 'rgba(212,175,55,0.25)',
+                            backgroundColor: 'rgba(255,255,255,0.04)',
+                            textDecoration: 'none',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.08)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.25)'; }}
+                    >
+                        {/* Google "G" Logo */}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+
+                        <div className="flex flex-col leading-tight">
+                            {/* Stars row */}
+                            <div className="flex items-center gap-1">
+                                <span className="text-sm font-bold text-white">4.9</span>
+                                <div className="flex items-center gap-0.5">
+                                    {[...Array(5)].map((_, i) => (
+                                        <svg key={i} width="13" height="13" viewBox="0 0 24 24" fill={i < 5 ? '#D4AF37' : 'none'} xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* Review count */}
+                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>45 Google reviews</span>
+                        </div>
+                    </motion.a>
 
                     {/* Navigation Arrows - Desktop Only */}
                     <div className="hidden md:flex items-center gap-3">

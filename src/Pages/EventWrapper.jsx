@@ -234,7 +234,7 @@ function EventWrapper() {
                                 {/* Card Image */}
                                 <div className="relative h-48 overflow-hidden">
                                     <img
-                                        src={getImageUrl(sportEvent.heroImage?.url, 'https://via.placeholder.com/800x600?text=Event')}
+                                        src={getImageUrl(sportEvent.heroImage?.url, 'https://placehold.co/800x600?text=Event')}
                                         alt={sportEvent.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />

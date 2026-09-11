@@ -160,7 +160,7 @@ function Footer() {
             </div>
           </div>
 
-          {/* Quick Links + Services — 2-col on mobile, each 1 col on lg */}
+          {/* Quick Links + Services + Fleet — 2-col on mobile, each 1 col on lg */}
           <div className="grid grid-cols-2 lg:contents gap-8">
             {/* Quick Links */}
             <div className="text-center lg:text-left">
