@@ -43,6 +43,7 @@ const CATEGORY_COLOURS = {
   "Airport Travel":   "bg-purple-50 text-purple-600",
   "Chauffeur Service":"bg-amber-50 text-amber-600",
   "Wedding Service":  "bg-pink-50 text-pink-600",
+  "Areas":            "bg-teal-50 text-teal-600",
 };
 
 // ─── Service row ──────────────────────────────────────────────────────────────

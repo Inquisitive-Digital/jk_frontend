@@ -864,6 +864,7 @@ function AdminAddService() {
                     <option value="Airport Travel">Airport Travel</option>
                     <option value="Chauffeur Service">Chauffeur Service</option>
                     <option value="Wedding Service">Wedding Service</option>
+                    <option value="Areas">Areas</option>
                   </select>
                 </div>
               </div>
