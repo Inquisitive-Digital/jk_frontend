@@ -9,8 +9,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Critical performance hints -->
-  <link rel="preconnect" href="https://maps.googleapis.com" />
-  <link rel="preconnect" href="https://maps.gstatic.com" crossorigin />
+  <!-- Backend API - preconnect saves ~300ms on first data fetch (LCP improvement) -->
+  <link rel="preconnect" href="https://mpc2-prod-26-is5qnl632q-uc.a.run.app" />
+
+  <!-- Maps: dns-prefetch only (not preconnect) - Maps JS only loads on /booking -->
+  <link rel="dns-prefetch" href="https://maps.googleapis.com" />
+  <link rel="dns-prefetch" href="https://maps.gstatic.com" />
+
+  <!-- Tawk live chat -->
   <link rel="preconnect" href="https://embed.tawk.to" />
   <link rel="preconnect" href="https://va.tawk.to" />
 

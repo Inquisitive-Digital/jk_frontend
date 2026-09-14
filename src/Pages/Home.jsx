@@ -246,7 +246,7 @@ function Home() {
                     {JSON.stringify(faqPageSchema)}
                 </script>
 
-                <title>Executive Car Hire London | Chauffeur Service & Airport Transfers</title>
+                <title>Chauffeur Services in London | JK Executive Chauffeurs</title>
                 <meta name="description" content="Premium executive car hire & chauffeur service in London. Professional chauffeurs, luxury fleet, on-time airport transfers & corporate travel. Book now." />
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)' }}>
