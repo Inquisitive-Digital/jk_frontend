@@ -1,3 +1,14 @@
+PassengerAppRoot /home/u850098406/domains/jkexecutivechauffeurs.com/hbuilds/current/nodejs
+PassengerAppType node
+PassengerNodejs /opt/alt/alt-nodejs22/root/bin/node
+PassengerStartupFile server.js
+PassengerBaseURI /
+PassengerRestartDir /home/u850098406/domains/jkexecutivechauffeurs.com/hbuilds/current/nodejs/tmp
+SetEnv NODE_OPTIONS "--require /home/u850098406/domains/jkexecutivechauffeurs.com/hbuilds/config/preload-timestamp.js"
+SetEnv LSNODE_CONSOLE_LOG console.log
+RewriteRule ^\.builds - [F,L]
+
+
 # =============================================================================
 # .htaccess - 301 Redirects for JK Executive Chauffeurs
 # =============================================================================
@@ -8,6 +19,19 @@
 # Enable Rewrite Engine
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
+   
+    RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://www.jkexecutivechauffeurs.com/$1 [R=301,L]
+
+RewriteCond %{HTTP_HOST} !^www\.jkexecutivechauffeurs\.com$ [NC]
+RewriteRule ^(.*)$ https://www.jkexecutivechauffeurs.com/$1 [R=301,L]
+
+ # ── Remove trailing slash from slug routes ─────────────────────────────────
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} ^/(blog|services|events|fleet)/[^/]+/$
+    RewriteRule ^(.+)/$ https://www.jkexecutivechauffeurs.com/$1 [R=301,L]
 
     # =============================================================================
     # SERVICES REDIRECTS
@@ -52,6 +76,36 @@
     # Evening Car Hire Service in London
     RewriteRule ^evening-car-hire-service-in-london/?$ https://www.jkexecutivechauffeurs.com/services/evening-car-hire-service-in-london [R=301,L]
 
+    # Executive Chauffeur Service
+    RewriteRule ^executive-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/services/london-chauffeur-service [R=301,L]
+
+    # Luxury Chauffeur Service in London
+    RewriteRule ^luxury-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/services/london-chauffeur-service [R=301,L]
+
+    # Luxury Chauffeur Service London
+    RewriteRule ^luxury-chauffeur-service-london/?$ https://www.jkexecutivechauffeurs.com/services/london-chauffeur-service [R=301,L]
+
+    # Corporate Chauffeur London
+    RewriteRule ^corporate-chauffeur-london/?$ https://www.jkexecutivechauffeurs.com/services/corporate-chauffeur-service [R=301,L]
+
+    # Corporate Services
+    RewriteRule ^corporate-services/?$ https://www.jkexecutivechauffeurs.com/services/corporate-chauffeur-service [R=301,L]
+
+    # Heathrow Airport Transfer
+    RewriteRule ^heathrow-airport-transfer/?$ https://www.jkexecutivechauffeurs.com/services/heathrow-airport-chauffeur-service [R=301,L]
+
+    # Heathrow Chauffeur from London
+    RewriteRule ^heathrow-chauffeur-from-london/?$ https://www.jkexecutivechauffeurs.com/services/heathrow-airport-chauffeur-service [R=301,L]
+
+    # London Heathrow Airport Private Chauffeur Transfers
+    RewriteRule ^london-heathrow-airport-private-chauffeur-transfers/?$ https://www.jkexecutivechauffeurs.com/services/heathrow-airport-chauffeur-service [R=301,L]
+
+    # Luxury Airport Transfer Service in London
+    RewriteRule ^luxury-airport-transfer-service-in-london/?$ https://www.jkexecutivechauffeurs.com/services/airport-chauffeur-service [R=301,L]
+
+    # Private Aviation Service
+    RewriteRule ^private-aviation-service/?$ https://www.jkexecutivechauffeurs.com/services/private-aviation-chauffeur [R=301,L]
+
     # =============================================================================
     # LUXURY CHAUFFEUR SERVICE REDIRECT
     # =============================================================================
@@ -68,11 +122,8 @@
     # HOME PAGE REDIRECTS
     # =============================================================================
 
-    # Chauffeur Hire London
-    RewriteRule ^chauffeur-hire-london/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
-
-    # Executive Car Hire London
-    RewriteRule ^executive-car-hire-london/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
+    # Executive Car Hire London (case-insensitive)
+    RewriteRule ^executive-car-hire-[Ll]ondon/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
 
     # Terms & Conditions
     RewriteRule ^terms-conditions/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
@@ -122,6 +173,9 @@
     # Event Services
     RewriteRule ^event-services/?$ https://www.jkexecutivechauffeurs.com/events/event-chauffeur-service-in-london [R=301,L]
 
+    # Events (root)
+    RewriteRule ^events/?$ https://www.jkexecutivechauffeurs.com/events/event-chauffeur-service-in-london [R=301,L]
+
     # =============================================================================
     # ABOUT & CONTACT REDIRECTS
     # =============================================================================
@@ -169,9 +223,8 @@
     # July Festival Newmarket
     RewriteRule ^july-festival-newmarket/?$ https://www.jkexecutivechauffeurs.com/blog/july-festival-newmarket/ [R=301,L]
 
-    # Professional Chauffeurs Manchester
-    RewriteRule ^professional-chauffeurs-manchester-hire-a-chauffeur-in-manchester-today/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
-
+    # Professional Chauffeurs Manchester - UPDATED to blog post
+    RewriteRule ^professional-chauffeurs-manchester-hire-a-chauffeur-in-manchester-today/?$ https://www.jkexecutivechauffeurs.com/blog/hire-a-chauffeur-in-manchester-today [R=301,L]
     # Farnborough Airshow Chauffeur
     RewriteRule ^farnborough-airshow-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/farnborough-airshow-chauffeur/ [R=301,L]
 
@@ -451,9 +504,6 @@
     # Top 10 Events in London
     RewriteRule ^the-top-10-events-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/the-top-10-events-in-london/ [R=301,L]
 
-    # Best Chauffeur Service in London
-    RewriteRule ^best-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/best-chauffeur-service-in-london/ [R=301,L]
-
     # Discover Unmatched Elegance
     RewriteRule ^discover-unmatched-elegance-with-chauffeur-services-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/discover-unmatched-elegance-with-chauffeur-services-in-london/ [R=301,L]
 
@@ -499,8 +549,8 @@
     # Kew Garden Chauffeur
     RewriteRule ^kew-garden-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/kew-garden-chauffeur/ [R=301,L]
 
-    # Chauffeur Hire London Ultimate
-    RewriteRule ^chauffeur-hire-london-the-ultimate-way-to-travel-in-style-and-comfort/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-hire-london-the-ultimate-way-to-travel-in-style-and-comfort/ [R=301,L]
+    # Chauffeur Hire London Ultimate - UPDATED to blog post
+   RewriteRule ^chauffeur-hire-london/?$ https://www.jkexecutivechauffeurs.com/blog/24-7-chauffeur-hire-in-london [R=301,L]
 
     # Chauffeur Glastonbury Festival
     RewriteRule ^chauffeur-glastonbury-festival/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-glastonbury-festival/ [R=301,L]
@@ -583,6 +633,104 @@
     # Best Executive Chauffeur
     RewriteRule ^best-executive-chauffeur/?$ https://www.jkexecutivechauffeurs.com/blog/best-executive-chauffeur/ [R=301,L]
 
+    # =============================================================================
+    # NEW REDIRECTS FROM TSV (added)
+    # =============================================================================
+
+    # Book FA Cup Finals Chauffeur Service
+    RewriteRule ^book-a-chauffeur-service-for-the-fa-cup-finals-for-enhanced-travel/?$ https://www.jkexecutivechauffeurs.com/blog/book-a-chauffeur-service-for-the-fa-cup-finals-for-enhanced-travel [R=301,L]
+
+    # Christmas Tour in London
+    RewriteRule ^christmas-tour-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/christmas-tour-in-london [R=301,L]
+
+    # Executive Car Hire Experience
+    RewriteRule ^executive-car-hire-experience/?$ https://www.jkexecutivechauffeurs.com/blog/executive-car-hire-experience/ [R=301,L]
+
+    # Executive Car Hire
+    RewriteRule ^executive-car-hire/?$ https://www.jkexecutivechauffeurs.com/blog/executive-car-hire/ [R=301,L]
+
+    # Hire Executive Chauffeur Service
+    RewriteRule ^hire-executive-chauffeur-service/?$ https://www.jkexecutivechauffeurs.com/blog/hire-executive-chauffeur-service [R=301,L]
+
+    # Luxury Chauffeur Service Elevate Your Travel Experience
+    RewriteRule ^luxury-chauffeur-service-elevate-your-travel-experience/?$ https://www.jkexecutivechauffeurs.com/blog/luxury-chauffeur-service-elevate-your-travel-experience [R=301,L]
+
+    # Tips for Hiring a Chauffeur in London
+    RewriteRule ^tips-for-hiring-a-chauffeur-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/tips-for-hiring-a-chauffeur-in-london/ [R=301,L]
+
+    # Twickenham Stadium Chauffeur Service
+    RewriteRule ^twickenham-stadium-chauffeur-service-car-hire-for-twickenham/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
+
+    # Chauffeurs Service FA Cup
+    RewriteRule ^chauffeurs-service-fa-cup/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
+
+    # Chauffeur Service Cambridge (non-www handled by www-redirect above, but adding for safety)
+    RewriteRule ^chauffeur-service-cambridge/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
+    RewriteRule ^wimbledon-chauffeur-service?$ https://www.jkexecutivechauffeurs.com/blog/wimbledon-chauffeur-service [R=301,L]
+
+    
+    RewriteRule ^chauffeur-hire-edinburgh-today/?$ https://www.jkexecutivechauffeurs.com/blog/chauffeur-hire-edinburgh-today [R=301,L]
+    # Farnborough Airshow Chauffeur Service Experience
+    RewriteRule ^farnborough-airshow-chauffeur-service-experience-luxury-and-convenience/?$ https://www.jkexecutivechauffeurs.com/blog [R=301,L]
+    
+    RewriteRule ^events/event-chauffeur-service-in-london?$ https://www.jkexecutivechauffeurs.com/blog/events-chauffeur-service [R=301,L]
+    RewriteRule ^best-chauffeur-service-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/best-chauffeur-service-in-london [R=301,L]
+    RewriteRule ^luxury-car-hire-london/?$ https://www.jkexecutivechauffeurs.com/blog/luxury-car-hire-london [R=301,L]
+    RewriteRule ^blog/mercedes-vito-hire-with-driver-for-events-transfers-in-london/?$ https://www.jkexecutivechauffeurs.com/blog/mercedes-vito-chauffeur-car-hire [R=301,L]
+    RewriteRule ^gdpr/?$ https://www.jkexecutivechauffeurs.com/ [R=301,L]
+    RewriteRule ^blog/heathrow-airport/?$ https://www.jkexecutivechauffeurs.com/blog/heathrow-airport-chauffeur/ [R=301,L]
+
+    # =============================================================================
+    # SPA FALLBACK - React Router support
+    # CRITICAL: Without this, refreshing any React route gives a 404 on Apache
+    # Must be LAST inside the mod_rewrite block (after all 301 redirects)
+    # =============================================================================
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ /index.html [L]
+
+</IfModule>
+
+# =============================================================================
+# GZIP COMPRESSION - Reduces JS/CSS transfer size by ~70%
+# Speeds up page load time for Googlebot and real users
+# =============================================================================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE font/woff2
+    AddOutputFilterByType DEFLATE font/woff
+</IfModule>
+
+# =============================================================================
+# BROWSER CACHING - Static assets cached locally, reduces repeat crawl time
+# Vite adds content hashes to filenames so 1-year cache is safe
+# =============================================================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # HTML - short cache (content changes)
+    ExpiresByType text/html                 "access plus 1 hour"
+
+    # JS & CSS - long cache (Vite adds hash to filename on each build)
+    ExpiresByType application/javascript    "access plus 1 year"
+    ExpiresByType text/css                  "access plus 1 year"
+
+    # Images
+    ExpiresByType image/webp                "access plus 1 year"
+    ExpiresByType image/png                 "access plus 1 year"
+    ExpiresByType image/jpeg                "access plus 1 year"
+    ExpiresByType image/svg+xml             "access plus 1 year"
+    ExpiresByType image/x-icon              "access plus 1 year"
+
+    # Fonts
+    ExpiresByType font/woff2                "access plus 1 year"
+    ExpiresByType font/woff                 "access plus 1 year"
 </IfModule>
 
 # =============================================================================
