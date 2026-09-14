@@ -133,6 +133,7 @@ const AdminLogin = lazy(() => import("./Components/Admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./Components/Admin/AdminDashboard"));
 const AdminAllBookings = lazy(() => import("./Components/Admin/AdminAllBookings"));
 const AdminAllLeads = lazy(() => import("./Components/Admin/AdminAllLeads"));
+const AdminContactLeads = lazy(() => import("./Components/Admin/AdminContactLeads"));
 const AdminAllCars = lazy(() => import("./Components/Admin/AdminAllCars"));
 const AdminAddCar = lazy(() => import("./Components/Admin/AdminAddCar"));
 const AdminPricing = lazy(() => import("./Components/Admin/AdminPricing"));
@@ -145,6 +146,8 @@ const AdminAllBlogs = lazy(() => import("./Components/Admin/AdminAllBlogs"));
 const AdminAddBlog = lazy(() => import("./Components/Admin/AdminAddBlog"));
 const AdminAllServices = lazy(() => import("./Components/Admin/AdminAllServices"));
 const AdminAddService = lazy(() => import("./Components/Admin/AdminAddService"));
+const AdminAllFleets = lazy(() => import("./Components/Admin/AdminAllFleets"));
+const AdminAddFleet = lazy(() => import("./Components/Admin/AdminAddFleet"));
 const AdminEventCalendar = lazy(() => import("./Components/Admin/AdminEventCalendar"));
 
 function App() {
@@ -206,6 +209,7 @@ function App() {
                 <Route path="/login-admin" element={<AdminLogin />} />
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/leads" element={<AdminAllLeads />} />
+                <Route path="/admin/contact-leads" element={<AdminContactLeads />} />
                 <Route path="/admin/bookings" element={<AdminAllBookings />} />
                 <Route path="/admin/vehicles" element={<AdminAllCars />} />
                 <Route path="/admin/add-car" element={<AdminAddCar />} />
@@ -213,6 +217,8 @@ function App() {
                 <Route path="/admin/all-pricing" element={<AdminAllPricing />} />
                 <Route path="/admin/blogs" element={<AdminAllBlogs />} />
                 <Route path="/admin/add-blog" element={<AdminAddBlog />} />
+                <Route path="/admin/fleets" element={<AdminAllFleets />} />
+                <Route path="/admin/add-fleet" element={<AdminAddFleet />} />
                 <Route path="/admin/services" element={<AdminAllServices />} />
                 <Route path="/admin/add-service" element={<AdminAddService />} />
 

@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft, Users, Briefcase, CheckCircle2, ChevronLeft, ChevronRight,
-    Loader2, Shield, Star, ArrowRight, Check
+    Loader2, Shield, Star, ArrowRight, Check, Zap, Wifi
 } from 'lucide-react';
 import { fleetAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
@@ -76,42 +76,13 @@ function FleetDetail() {
         ],
     };
 
-    const vehicleSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        name: fleet.title,
-        description: fleet.description,
-        url: `${BASE_URL}/fleet/${fleet.slug}`,
-        image: getImageUrl(fleet.heroImage?.url),
-        brand: {
-            '@type': 'Brand',
-            name: 'JK Executive Chauffeurs',
-        },
-        ...(fleet.basePrice && {
-            offers: {
-                '@type': 'Offer',
-                price: fleet.basePrice,
-                priceCurrency: 'GBP',
-                availability: 'https://schema.org/InStock',
-                url: `${BASE_URL}/booking`,
-            },
-        }),
-        additionalProperty: [
-            ...(fleet.passengers ? [{ '@type': 'PropertyValue', name: 'Passengers', value: fleet.passengers }] : []),
-            ...(fleet.luggage ? [{ '@type': 'PropertyValue', name: 'Luggage', value: fleet.luggage }] : []),
-        ],
-    };
-
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             <Helmet>
-                <title>{fleet.meta_title || fleet.seoTitle || fleet.title}</title>
-                <meta name="description" content={fleet.meta_description || fleet.seoDescription || fleet.description} />
+                <title>{fleet.seoTitle || fleet.title}</title>
+                <meta name="description" content={fleet.seoDescription || fleet.description} />
                 <script type="application/ld+json">
                     {JSON.stringify(breadcrumbSchema)}
-                </script>
-                <script type="application/ld+json">
-                    {JSON.stringify(vehicleSchema)}
                 </script>
                 {fleet.faqs && fleet.faqs.length > 0 && (
                     <script type="application/ld+json">
@@ -216,7 +187,7 @@ function FleetDetail() {
                                 <AnimatePresence mode="wait">
                                     <motion.img
                                         key={activeImage}
-                                        src={getImageUrl(allImages[activeImage]?.url, 'https://via.placeholder.com/800x500?text=Vehicle')}
+                                        src={getImageUrl(allImages[activeImage]?.url, 'https://placehold.co/800x500?text=Vehicle')}
                                         alt={fleet.title}
                                         className="w-full h-full object-cover"
                                         initial={{ opacity: 0 }}
@@ -224,7 +195,7 @@ function FleetDetail() {
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                         onError={(e) => {
-                                            e.target.src = 'https://via.placeholder.com/800x500?text=Vehicle';
+                                            e.target.src = 'https://placehold.co/800x500?text=Vehicle';
                                         }}
                                     />
                                 </AnimatePresence>
@@ -286,6 +257,100 @@ function FleetDetail() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="space-y-6"
                         >
+                            {/* Horizontal Vehicle Capacity */}
+                            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 py-2 border-b border-white/5 mb-4">
+                                <div className="flex items-center gap-2 text-white/80">
+                                    <Users className="w-4 h-4 text-gray-400" />
+                                    <span className="text-sm font-medium">{fleet.passengers || '4'} Passengers</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-white/80">
+                                    <Briefcase className="w-4 h-4 text-gray-400" />
+                                    <span className="text-sm font-medium">{fleet.luggage || '2'} Suitcases</span>
+                                </div>
+                                {fleet.features && fleet.features.map((feature, index) => (
+                                    <div key={index} className="flex items-center gap-2 text-white/80">
+                                        <Zap className="w-4 h-4 text-gray-400" />
+                                        <span className="text-sm font-medium">{feature}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Static Highlights & Pricing Section (Native Dark Mode) */}
+                            (
+                            <div className="rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 mb-6 mt-4 border border-white/5" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                {/* Left: Highlights */}
+                                <div className="flex-1">
+                                    <h3 className="text-xl font-semibold text-white mb-6">Service Highlights</h3>
+                                    <ul className="space-y-4">
+                                        {[
+                                            "First class chauffeur",
+                                            "Free 60 mins airport parking",
+                                            "Free 60 mins waiting time for airport pickups, 15 mins for all others",
+                                            "Includes meet & greet",
+                                            "Free cancellation"
+                                        ].map((text, i) => (
+                                            <li key={i} className="flex items-start gap-4">
+                                                <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/10">
+                                                    <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
+                                                </div>
+                                                <span className="text-white/80 text-sm md:text-base leading-relaxed">{text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Right: Pricing Box */}
+                                <div className="w-full md:w-[380px] bg-[#141414] rounded-xl p-7 border border-white/10 flex flex-col relative overflow-hidden">
+                                    {/* Optional decorative glow */}
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-primary)] opacity-5 blur-[50px] rounded-full"></div>
+
+                                    <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
+                                        Pricing Options
+                                    </h3>
+
+                                    {fleet.pricingOptions && fleet.pricingOptions.length > 0 ? (
+                                        <>
+                                            <div className="space-y-4 flex-1 relative z-10">
+                                                {fleet.pricingOptions.map((opt, i) => (
+                                                    <div key={i} className="flex justify-between items-center border-b border-white/10 pb-3 last:border-0 last:pb-0">
+                                                        <span className="text-white/60 text-sm">{opt.label}</span>
+                                                        <span className="text-white font-bold text-base">{opt.price}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <p className="text-white/40 text-xs italic mt-5 mb-5 relative z-10">Prices subject to VAT</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="space-y-4 flex-1 relative z-10">
+                                                {[
+                                                    { label: 'Hourly rate (minimum 3 hours)', price: '£75' },
+                                                    { label: 'Day rate (8 hours)', price: '£600' },
+                                                    { label: 'Heathrow to Central London', price: '£180' }
+                                                ].map((opt, i) => (
+                                                    <div key={i} className="flex justify-between items-center border-b border-white/10 pb-3 last:border-0 last:pb-0">
+                                                        <span className="text-white/60 text-sm">{opt.label}</span>
+                                                        <span className="text-white font-bold text-base">{opt.price}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <p className="text-white/40 text-xs italic mt-5 mb-5 relative z-10">Prices subject to VAT</p>
+                                        </>
+                                    )}
+
+                                    <button
+                                        onClick={() => {
+                                            Analytics.trackBookingClick('fleet_detail_book_now', { vehicle_name: fleet.title });
+                                            navigate('/booking');
+                                        }}
+                                        className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 relative z-10 hover:opacity-90"
+                                        style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
+                                    >
+                                        GET A PRICE &amp; BOOK
+                                    </button>
+                                </div>
+                            </div>
+                            )
+
                             {/* Short Description */}
                             <div
                                 className="p-6 rounded-xl"
@@ -441,147 +506,59 @@ function FleetDetail() {
                                 }
                             `}</style>
 
-                            {/* Specifications */}
-                            {fleet.specifications && fleet.specifications.length > 0 && (
-                                <div className="space-y-4">
-                                    <h2 className="text-xl md:text-2xl font-semibold text-white">
-                                        Vehicle Specifications
-                                    </h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {fleet.specifications.map((spec, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: i * 0.03 }}
-                                                className="flex items-start gap-3 p-3 rounded-lg"
-                                                style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
-                                            >
-                                                <CheckCircle2
-                                                    className="w-4 h-4 flex-shrink-0 mt-0.5"
-                                                    style={{ color: 'var(--color-primary)' }}
-                                                />
-                                                <span className="text-white/70 text-sm">{spec}</span>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+
+
                         </motion.div>
                     </div>
 
                     {/* Right Column: Sidebar */}
                     <div className="space-y-6">
-                        {/* Quick Info Card */}
+                        {/* Need a Chauffeur Card */}
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.3 }}
-                            className="rounded-xl p-6 space-y-5 sticky top-28"
-                            style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
+                            className="rounded-xl p-8 sticky top-28 border border-white/5"
+                            style={{ backgroundColor: '#1a1a1a' }}
                         >
-                            {/* Capacity */}
-                            <div className="space-y-3">
-                                <h3
-                                    className="text-sm font-semibold uppercase tracking-wider"
-                                    style={{ color: 'var(--color-primary)' }}
-                                >
-                                    Vehicle Capacity
-                                </h3>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div
-                                        className="flex flex-col items-center py-4 rounded-lg"
-                                        style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
-                                    >
-                                        <Users className="w-5 h-5 mb-2" style={{ color: 'var(--color-primary)' }} />
-                                        <span className="text-white text-xl font-bold">{fleet.passengers || '—'}</span>
-                                        <span className="text-white/40 text-xs mt-1">Passengers</span>
-                                    </div>
-                                    <div
-                                        className="flex flex-col items-center py-4 rounded-lg"
-                                        style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
-                                    >
-                                        <Briefcase className="w-5 h-5 mb-2" style={{ color: 'var(--color-primary)' }} />
-                                        <span className="text-white text-xl font-bold">{fleet.luggage || '—'}</span>
-                                        <span className="text-white/40 text-xs mt-1">Luggage</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <h3 className="text-xl font-bold text-white mb-4">
+                                Need a Chauffeur?
+                            </h3>
+                            <p className="text-white/70 text-sm leading-relaxed mb-6">
+                                Book our luxury chauffeur service for your next journey. Professional drivers, premium vehicles, impeccable service.
+                            </p>
 
-                            {/* Divider */}
-                            <div className="border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+                            <div className="w-12 h-[2px] mb-6" style={{ backgroundColor: 'var(--color-primary)' }}></div>
 
-                            {/* Features */}
-                            {fleet.features && fleet.features.length > 0 && (
-                                <div className="space-y-3">
-                                    <h3
-                                        className="text-sm font-semibold uppercase tracking-wider"
-                                        style={{ color: 'var(--color-primary)' }}
-                                    >
-                                        Included Features
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {fleet.features.map((feature, i) => (
-                                            <div key={i} className="flex items-center gap-2">
-                                                <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--color-primary)' }} />
-                                                <span className="text-white/60 text-sm">{feature}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Divider */}
-                            <div className="border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }} />
-
-                            {/* Price */}
-                            {fleet.basePrice && (
-                                <div className="text-center py-2">
-                                    <span className="text-white/40 text-xs uppercase tracking-wider block mb-1">
-                                        Starting from
-                                    </span>
-                                    <span
-                                        className="text-3xl font-bold"
-                                        style={{ color: 'var(--color-primary)' }}
-                                    >
-                                        £{Math.round(fleet.basePrice)}
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Book Now CTA */}
                             <button
                                 onClick={() => {
                                     Analytics.trackBookingClick('fleet_detail_book_now', { vehicle_name: fleet.title });
                                     navigate('/booking');
                                 }}
-                                className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300"
-                                style={{
-                                    backgroundColor: 'var(--color-primary)',
-                                    color: 'var(--color-dark)',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(215,183,94,0.3)';
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.boxShadow = 'none';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                }}
+                                className="w-full py-3.5 rounded-lg text-sm font-bold tracking-wider transition-all duration-300 mb-8 uppercase hover:opacity-90 shadow-[0_0_15px_rgba(215,183,94,0.15)]"
+                                style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-dark)' }}
                             >
-                                Book Now
+                                BOOK NOW
                             </button>
 
-                            {/* Browse Fleet Link */}
-                            <div className="text-center">
-                                <Link
-                                    to="/fleet"
-                                    className="inline-flex items-center gap-2 text-xs font-medium transition-colors hover:opacity-80"
-                                    style={{ color: 'var(--color-primary)' }}
-                                >
-                                    <ArrowLeft className="w-3 h-3" />
-                                    Browse All Vehicles
+                            <div className="space-y-4">
+                                <h4 className="text-white font-bold mb-4">Quick Links</h4>
+                                <Link to="/fleet" className="block text-white/70 hover:text-white text-sm flex items-center gap-2 transition-colors">
+                                    <span style={{ color: 'var(--color-primary)' }}>→</span> Our Fleet
                                 </Link>
+                                <Link to="/services" className="block text-white/70 hover:text-white text-sm flex items-center gap-2 transition-colors">
+                                    <span style={{ color: 'var(--color-primary)' }}>→</span> Airport Transfers
+                                </Link>
+                                <Link to="/services" className="block text-white/70 hover:text-white text-sm flex items-center gap-2 transition-colors">
+                                    <span style={{ color: 'var(--color-primary)' }}>→</span> Event Chauffeur
+                                </Link>
+                            </div>
+
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                                <p className="text-white/40 text-xs mb-2">Or call us directly</p>
+                                <a href="tel:+442034759906" className="text-lg font-bold transition-opacity hover:opacity-80" style={{ color: 'var(--color-primary)' }}>
+                                    +44 203 475 9906
+                                </a>
                             </div>
                         </motion.div>
                     </div>

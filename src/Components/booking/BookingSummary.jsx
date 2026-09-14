@@ -201,7 +201,7 @@ function BookingSummary({ data, onEdit, onProceed, isLoading = false }) {
                                     alt={selectedVehicle?.categoryName}
                                     className="w-full h-full object-contain"
                                     onError={(e) => {
-                                        e.target.src = "https://via.placeholder.com/100x60?text=Car";
+                                        e.target.src = "https://placehold.co/100x60?text=Car";
                                     }}
                                 />
                             </div>

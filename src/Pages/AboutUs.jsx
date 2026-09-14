@@ -303,12 +303,12 @@ function AboutUs() {
                                     alt={fleetVehicles[0]?.title || 'JK Executive Chauffeurs luxury fleet'}
                                     className="w-full h-auto object-cover"
                                     onError={(e) => {
-                                        e.target.src = "https://via.placeholder.com/800x600?text=JK+Executive+Fleet";
+                                        e.target.src = "https://placehold.co/800x600?text=JK+Executive+Fleet";
                                     }}
                                 />
                             ) : (
                                 <img
-                                    src="https://via.placeholder.com/800x600?text=JK+Executive+Fleet"
+                                    src="https://placehold.co/800x600?text=JK+Executive+Fleet"
                                     alt="JK Executive Chauffeurs luxury fleet"
                                     className="w-full h-auto object-cover"
                                 />

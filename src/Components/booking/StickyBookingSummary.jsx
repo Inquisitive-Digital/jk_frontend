@@ -37,25 +37,25 @@ function StickyBookingSummary({
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     try {
-        if (typeof dateStr === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
-            const [y, m, d] = dateStr.trim().split("-").map(Number);
-            const dateObj = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
-            return dateObj.toLocaleDateString("en-GB", {
-                timeZone: "UTC",
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-            });
-        }
-        const dateObj = new Date(dateStr);
-        if (isNaN(dateObj.getTime())) return String(dateStr);
+      if (typeof dateStr === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+        const [y, m, d] = dateStr.trim().split("-").map(Number);
+        const dateObj = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
         return dateObj.toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
+          timeZone: "UTC",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
         });
+      }
+      const dateObj = new Date(dateStr);
+      if (isNaN(dateObj.getTime())) return String(dateStr);
+      return dateObj.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
     } catch (error) {
-        return String(dateStr);
+      return String(dateStr);
     }
   };
 
@@ -82,30 +82,30 @@ function StickyBookingSummary({
           {/* Timeline Track */}
           <div className="relative flex flex-col items-center w-3 shrink-0 pt-1">
             {/* Top Dot - Active */}
-            <div 
-              className="w-3 h-3 rounded-full z-10 shadow-lg" 
-              style={{ 
-                backgroundColor: 'var(--color-primary)', 
+            <div
+              className="w-3 h-3 rounded-full z-10 shadow-lg"
+              style={{
+                backgroundColor: 'var(--color-primary)',
                 border: '2px solid rgba(255,255,255,0.15)',
                 boxShadow: '0 0 12px rgba(215, 183, 94, 0.5)'
-              }} 
+              }}
             />
-            
+
             {/* Connecting Line */}
-            <div 
-              className="absolute top-3.5 bottom-3 w-[2px] rounded-full" 
-              style={{ 
-                background: `linear-gradient(to bottom, var(--color-primary) 0%, rgba(215, 183, 94, 0.4) 50%, rgba(255,255,255,0.08) 100%)` 
-              }} 
+            <div
+              className="absolute top-3.5 bottom-3 w-[2px] rounded-full"
+              style={{
+                background: `linear-gradient(to bottom, var(--color-primary) 0%, rgba(215, 183, 94, 0.4) 50%, rgba(255,255,255,0.08) 100%)`
+              }}
             />
-            
+
             {/* Bottom Dot - Inactive */}
-            <div 
-              className="mt-auto w-3 h-3 rounded-full z-10" 
-              style={{ 
-                backgroundColor: '#1a1a1a', 
-                border: '2px solid rgba(255,255,255,0.12)' 
-              }} 
+            <div
+              className="mt-auto w-3 h-3 rounded-full z-10"
+              style={{
+                backgroundColor: '#1a1a1a',
+                border: '2px solid rgba(255,255,255,0.12)'
+              }}
             />
           </div>
 
@@ -114,9 +114,9 @@ function StickyBookingSummary({
             {/* Pick-up */}
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <div 
-                  className="w-1.5 h-1.5 rounded-full" 
-                  style={{ backgroundColor: 'var(--color-primary)' }} 
+                <div
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
                 />
                 <span className="text-[9px] uppercase tracking-[0.2em] text-white/35 font-semibold">Pick-up</span>
               </div>
@@ -124,13 +124,13 @@ function StickyBookingSummary({
                 {from || <span className="text-white/30">Not specified</span>}
               </p>
             </div>
-            
+
             {/* Drop-off - Only show for non-hourly bookings */}
             {!isHourly && (
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <div 
-                    className="w-1.5 h-1.5 rounded-full bg-white/20" 
+                  <div
+                    className="w-1.5 h-1.5 rounded-full bg-white/20"
                   />
                   <span className="text-[9px] uppercase tracking-[0.2em] text-white/35 font-semibold">Drop-off</span>
                 </div>
@@ -303,17 +303,17 @@ function StickyBookingSummary({
               style={
                 disabled || isLoading
                   ? {
-                      backgroundColor: "rgba(255,255,255,0.04)",
-                      color: "rgba(255,255,255,0.3)",
-                      cursor: disabled ? "not-allowed" : "default",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    color: "rgba(255,255,255,0.3)",
+                    cursor: disabled ? "not-allowed" : "default",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }
                   : {
-                      backgroundColor: "var(--color-primary)",
-                      color: "var(--color-dark)",
-                      boxShadow: "0 8px 24px rgba(215,183,94,0.28)",
-                      cursor: "pointer",
-                    }
+                    backgroundColor: "var(--color-primary)",
+                    color: "var(--color-dark)",
+                    boxShadow: "0 8px 24px rgba(215,183,94,0.28)",
+                    cursor: "pointer",
+                  }
               }
               onMouseEnter={(e) => {
                 if (!disabled && !isLoading) {

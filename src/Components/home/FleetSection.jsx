@@ -190,7 +190,7 @@ function FleetSection() {
                           loading="lazy"
                           onError={(e) => {
                             e.target.src =
-                              "https://via.placeholder.com/400x250?text=Vehicle";
+                              "https://placehold.co/400x250?text=Vehicle";
                           }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
@@ -217,7 +217,7 @@ function FleetSection() {
                         </h3>
 
                         {/* Capacity badges */}
-                        <div className="flex items-center gap-4 text-white/50 text-sm mb-2 flex-grow">
+                        <div className="flex items-center gap-4 text-white/50 text-sm mb-4">
                           {vehicle.passengers > 0 && (
                             <div className="flex items-center gap-1.5">
                               <Users className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }} />
@@ -230,6 +230,34 @@ function FleetSection() {
                               <span>{vehicle.luggage}</span>
                             </div>
                           )}
+                        </div>
+
+                        {/* Pricing Options */}
+                        <div className="flex-grow flex flex-col justify-end">
+                            {vehicle.pricingOptions && vehicle.pricingOptions.length > 0 ? (
+                              <div className="space-y-2 mb-2">
+                                {vehicle.pricingOptions.map((opt, i) => (
+                                  <div key={i} className="flex justify-between items-center border-b border-white/10 pb-1.5 last:border-0 last:pb-0">
+                                    <span className="text-white/60 text-xs">{opt.label}</span>
+                                    <span className="text-white font-semibold text-sm">{opt.price}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="space-y-2 mb-2">
+                                {[
+                                  { label: 'Hourly rate (minimum 3 hours)', price: '£75' },
+                                  { label: 'Day rate (8 hours)', price: '£600' },
+                                  { label: 'Heathrow to Central London', price: '£180' }
+                                ].map((opt, i) => (
+                                  <div key={i} className="flex justify-between items-center border-b border-white/10 pb-1.5 last:border-0 last:pb-0">
+                                    <span className="text-white/60 text-xs">{opt.label}</span>
+                                    <span className="text-white font-semibold text-sm">{opt.price}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <p className="text-white/40 text-[10px] italic mb-3">Prices subject to VAT</p>
                         </div>
 
                         {/* View / Book Link */}

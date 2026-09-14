@@ -11,6 +11,8 @@ import {
   PenSquare,
   BookOpen,
   CalendarDays,
+  Car,
+  MessageSquare,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -32,6 +34,12 @@ export const NAV_ITEMS = [
     icon: Calendar,
     label: "Confirmed Booking",
     path: "/admin/bookings",
+  },
+  {
+    id: "contact-leads",
+    icon: MessageSquare,
+    label: "Contact Leads",
+    path: "/admin/contact-leads",
   },
 
   // ===== VEHICLES =====
@@ -103,6 +111,22 @@ export const NAV_ITEMS = [
     label: "Add Blog",
     path: "/admin/add-blog",
   },
+
+  // ===== FLEETS =====
+  {
+    id: "all-fleets",
+    icon: Car,
+    label: "All Fleets",
+    path: "/admin/fleets",
+  },
+  {
+    id: "add-fleet",
+    icon: PenSquare,
+    label: "Add Fleet",
+    path: "/admin/add-fleet",
+  },
+  
+  // ===== EVENTS =====
   {
     id: "event-calendar",
     icon: CalendarDays,

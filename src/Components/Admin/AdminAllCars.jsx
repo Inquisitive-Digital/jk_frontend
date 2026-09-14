@@ -67,7 +67,7 @@ const VehicleCard = ({ vehicle, onEdit, onToggleStatus, onDelete }) => {
                             alt={vehicle.categoryName}
                             className="w-full h-full object-contain"
                             onError={(e) => {
-                                e.target.src = "https://via.placeholder.com/120x80?text=Car";
+                                e.target.src = "https://placehold.co/120x80?text=Car";
                             }}
                         />
                     ) : (
