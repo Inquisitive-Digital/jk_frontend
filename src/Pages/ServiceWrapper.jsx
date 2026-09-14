@@ -152,70 +152,70 @@ function ServiceWrapper() {
                     </script>
                 )}
             </Helmet>
-            {/* Hero Image Section */}
-            <div className="relative h-[52vw] min-h-[260px] md:h-[55vh] overflow-hidden">
-                <motion.img
-                    initial={{ scale: 1.1 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 1.2 }}
-                    src={getImageUrl(service.image?.url)}
-                    alt={service.title}
-                    className="w-full h-full object-cover"
-                />
+            {/* Page Header — Refined Title Section matching BlogWrapper */}
+            <header
+                className="pt-36 md:pt-40 pb-8 w-full text-center relative overflow-hidden"
+                style={{
+                    background: 'radial-gradient(circle at 50% 0%, rgba(215, 183, 94, 0.15) 0%, rgba(215, 183, 94, 0.05) 45%, transparent 100%)'
+                }}
+            >
+                <div className="max-w-6xl mx-auto px-4 md:px-8">
+                    {/* Category Label */}
+                    <motion.span
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="text-xs uppercase tracking-[0.3em] mb-4 md:mb-6 block font-medium"
+                        style={{ color: 'var(--color-primary)' }}
+                    >
+                        {service.category || 'Luxury Chauffeur'}
+                    </motion.span>
 
-                {/* Gradient Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/40 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a1a]/60 to-transparent" />
-
-                {/* Back Button */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="absolute top-20 sm:top-24 md:top-36 left-4 md:left-8"
-                >
-                    <Link
-                        to="/services"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 backdrop-blur-sm"
+                    {/* Main Title */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1, duration: 0.7 }}
+                        className="text-3xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-serif text-white leading-[1.15] tracking-tight"
                         style={{
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            color: 'white',
-                            border: '1px solid rgba(255,255,255,0.15)',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(215,183,94,0.2)';
-                            e.currentTarget.style.borderColor = 'var(--color-primary)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+                            fontFamily: "'Playfair Display', 'Georgia', serif"
                         }}
                     >
-                        <ArrowLeft className="w-4 h-4" />
-                        All Services
-                    </Link>
-                </motion.div>
-
-                {/* Title Overlay on Image */}
-                <div className="absolute bottom-5 md:bottom-10 left-0 right-0 px-4 md:px-8">
-                    <div className="max-w-7xl mx-auto">
-                        <motion.h1
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
-                        >
-                            {service.title}
-                        </motion.h1>
-                    </div>
+                        {service.title}
+                    </motion.h1>
                 </div>
-            </div>
+            </header>
 
-            {/* Content Section */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-14 lg:py-20">
-                <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+            {/* Main Content Section */}
+            <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6 pb-12 md:pb-20">
+                <div className="grid lg:grid-cols-3 gap-10 md:gap-16">
                     {/* Main Content — 2/3 */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="lg:col-span-2 space-y-8"
+                    >
+                        {/* Hero Image Showcase matching BlogWrapper */}
+                        {service.image?.url && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                                className="w-full mb-8 md:mb-12 rounded-2xl overflow-hidden shadow-2xl h-[260px] sm:h-[360px] md:h-[420px] lg:h-[480px] relative"
+                                style={{
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 20px rgba(215, 183, 94, 0.05)'
+                                }}
+                            >
+                                <img
+                                    src={getImageUrl(service.image?.url)}
+                                    alt={service.title}
+                                    className="w-full h-full object-cover"
+                                />
+                            </motion.div>
+                        )}
+
                         {/* Short Description */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -398,7 +398,7 @@ function ServiceWrapper() {
                             }
                         `}</style>
 
-                    </div>
+                    </motion.div>
 
                     {/* Sidebar — 1/3 */}
                     <motion.div
