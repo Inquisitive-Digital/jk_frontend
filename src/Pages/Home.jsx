@@ -12,7 +12,7 @@ import FAQSection from '../Components/home/FAQSection';
 import BlogSection from '../Components/home/BlogSection';
 import QuoteSuccessModal from '../Components/booking/QuoteSuccessModal';
 import JsonLd from '../seo/JsonLd';
-import { organizationSchema, faqSchema } from '../seo/schema';
+import { organizationSchema, faqSchema, webSiteSchema } from '../seo/schema';
 import { homeFaqs } from '../data/homeFaqs';
 
 function Home() {
@@ -26,7 +26,7 @@ function Home() {
 
     return (
         <>
-            <JsonLd data={[organizationSchema(), faqSchema(homeFaqs)]} />
+            <JsonLd data={[webSiteSchema(), organizationSchema(), faqSchema(homeFaqs)]} />
             <Helmet>
                 <title>Chauffeur Services in London | JK Executive Chauffeurs</title>
                 <meta name="description" content="Premium executive car hire & chauffeur service in London. Professional chauffeurs, luxury fleet, on-time airport transfers & corporate travel. Book now." />

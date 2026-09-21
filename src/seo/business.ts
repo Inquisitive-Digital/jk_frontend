@@ -24,5 +24,5 @@ export const BUSINESS = {
     "https://www.instagram.com/jkexecutivechauffeurs/",
     "https://www.linkedin.com/company/jk-executive-chauffeurs/",
   ],
-  priceRange: "$$",
+  priceRange: "££",
 };

@@ -90,12 +90,7 @@ function AboutUs() {
     return (
         <>
             <Helmet>
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                <script type="application/ld+json">
-                    {JSON.stringify(localBusinessSchema)}
-                </script>
+                <JsonLd data={[breadcrumbSchema(breadcrumbs), organizationSchema()]} />
                 
                 <title>About Us | JK Executive Chauffeurs London</title>
                 <meta name="description" content="Learn about JK Executive Chauffeurs — London's trusted luxury chauffeur company. 120+ professional chauffeurs, premium fleet & 5-star service." />

@@ -32,7 +32,7 @@ export interface BlogPostData {
 export function organizationSchema(): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": ["TaxiService", "LocalBusiness"],
     "@id": ORG_ID,
     name: BUSINESS.name,
     legalName: BUSINESS.legalName,
@@ -109,6 +109,20 @@ export function faqSchema(faqs: FAQItem[]): Record<string, unknown> | null {
         text: faq.answer,
       },
     })),
+  };
+}
+
+export function webSiteSchema(): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: BUSINESS.name,
+    url: SITE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
   };
 }
 
