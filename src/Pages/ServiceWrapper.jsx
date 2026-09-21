@@ -7,7 +7,8 @@ import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { serviceAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
 import InlineFAQSection from '../Components/home/InlineFAQSection';
-
+import JsonLd from '../seo/JsonLd';
+import { organizationSchema, faqSchema, breadcrumbSchema, serviceSchema } from '../seo/schema';
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
 function ServiceWrapper() {
@@ -85,72 +86,40 @@ function ServiceWrapper() {
         );
     }
 
-    const breadcrumbSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-            { '@type': 'ListItem', position: 2, name: 'Services', item: `${BASE_URL}/services` },
-            { '@type': 'ListItem', position: 3, name: service.title, item: `${BASE_URL}/services/${service.slug}` },
-        ],
-    };
+    const breadcrumbs = [
+        { name: 'Home', item: '/' },
+        { name: 'Services', item: '/services' },
+        { name: service.title, item: `/services/${service.slug}` },
+    ];
 
-    const serviceSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'Service',
+    const serviceData = {
         name: service.title,
         description: service.description,
-        url: `${BASE_URL}/services/${service.slug}`,
+        url: `/services/${service.slug}`,
         image: getImageUrl(service.image?.url),
-        provider: {
-            '@type': 'LocalBusiness',
-            name: 'JK Executive Chauffeurs',
-            url: BASE_URL,
-            telephone: '+442034759906',
-        },
-        areaServed: {
-            '@type': 'Place',
-            name: 'London, United Kingdom',
-        },
     };
 
-    // FAQ structured data — only built when FAQs exist
-    const faqSchema = service.faqs && service.faqs.length > 0
-        ? {
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: service.faqs.map((f) => ({
-                '@type': 'Question',
-                name: f.question,
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: f.answer,
-                },
-            })),
-          }
-        : null;
+    let customScriptData = null;
+    if (service.script) {
+        try {
+            customScriptData = JSON.parse(service.script);
+        } catch (e) {
+            console.error("Failed to parse custom service script:", e);
+        }
+    }
 
     return (
         <main className="overflow-x-hidden" style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+            <JsonLd data={[
+                organizationSchema(),
+                faqSchema(service.faqs),
+                breadcrumbSchema(breadcrumbs),
+                serviceSchema(serviceData),
+                customScriptData
+            ]} />
             <Helmet>
                 <title>{service.meta_title || service.title}</title>
                 <meta name="description" content={service.meta_description || service.description} />
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                <script type="application/ld+json">
-                    {JSON.stringify(serviceSchema)}
-                </script>
-                {faqSchema && (
-                    <script type="application/ld+json">
-                        {JSON.stringify(faqSchema)}
-                    </script>
-                )}
-                {service.script && (
-                    <script type="application/ld+json">
-                        {service.script}
-                    </script>
-                )}
             </Helmet>
             {/* Page Header — Refined Title Section matching BlogWrapper */}
             <header

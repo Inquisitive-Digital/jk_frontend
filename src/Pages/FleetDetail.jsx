@@ -10,7 +10,8 @@ import {
 import { fleetAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
 import InlineFAQSection from '../Components/home/InlineFAQSection';
-
+import JsonLd from '../seo/JsonLd';
+import { organizationSchema, faqSchema, breadcrumbSchema } from '../seo/schema';
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
 function FleetDetail() {
@@ -66,40 +67,22 @@ function FleetDetail() {
         );
     }
 
-    const breadcrumbSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-            { '@type': 'ListItem', position: 2, name: 'Our Fleet', item: `${BASE_URL}/fleet` },
-            { '@type': 'ListItem', position: 3, name: fleet.title, item: `${BASE_URL}/fleet/${fleet.slug}` },
-        ],
-    };
+    const breadcrumbs = [
+        { name: 'Home', item: '/' },
+        { name: 'Our Fleet', item: '/fleet' },
+        { name: fleet.title, item: `/fleet/${fleet.slug}` },
+    ];
 
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
+            <JsonLd data={[
+                organizationSchema(),
+                faqSchema(fleet.faqs),
+                breadcrumbSchema(breadcrumbs)
+            ]} />
             <Helmet>
                 <title>{fleet.seoTitle || fleet.title}</title>
                 <meta name="description" content={fleet.seoDescription || fleet.description} />
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                {fleet.faqs && fleet.faqs.length > 0 && (
-                    <script type="application/ld+json">
-                        {JSON.stringify({
-                            '@context': 'https://schema.org',
-                            '@type': 'FAQPage',
-                            mainEntity: fleet.faqs.map((f) => ({
-                                '@type': 'Question',
-                                name: f.question,
-                                acceptedAnswer: {
-                                    '@type': 'Answer',
-                                    text: f.answer,
-                                },
-                            })),
-                        })}
-                    </script>
-                )}
             </Helmet>
             {/* Hero Section */}
             <div

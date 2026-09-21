@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import { Helmet } from "react-helmet-async";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 
@@ -16,30 +15,10 @@ export default function InlineFAQSection({ faqs = [], title }) {
   const [openIndex, setOpenIndex] = useState(null);
   const toggle = (i) => setOpenIndex(openIndex === i ? null : i);
 
-  // Inject FAQPage JSON-LD for SEO
-  const faqSchema = useMemo(() => {
-    if (!faqs || faqs.length === 0) return null;
-    return {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faqs.map((faq) => ({
-        "@type": "Question",
-        name: faq.question,
-        acceptedAnswer: { "@type": "Answer", text: faq.answer },
-      })),
-    };
-  }, [faqs]);
-
   if (!faqs || faqs.length === 0) return null;
 
   return (
     <>
-      {faqSchema && (
-        <Helmet>
-          <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
-        </Helmet>
-      )}
-
       <section className="bg-[var(--color-dark)] py-12 md:py-20 px-6 md:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}

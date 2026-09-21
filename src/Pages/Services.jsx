@@ -5,27 +5,15 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { serviceAPI, getImageUrl } from '../Utils/api';
+import JsonLd from '../seo/JsonLd';
+import { organizationSchema, breadcrumbSchema } from '../seo/schema';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
-const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-        {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: BASE_URL,
-        },
-        {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Services',
-            item: `${BASE_URL}/services`,
-        },
-    ],
-};
+const breadcrumbs = [
+    { name: 'Home', item: '/' },
+    { name: 'Services', item: '/services' },
+];
 
 const PER_PAGE = 9;
 
@@ -96,7 +84,7 @@ function Services() {
         return () => observer.disconnect();
     }, [allServices.length]);
 
-    const itemListSchema = {
+    const itemListSchema = allServices.length > 0 ? {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         name: 'JK Executive Chauffeurs Services',
@@ -107,25 +95,18 @@ function Services() {
             url: `${BASE_URL}/services/${service.slug}`,
             image: getImageUrl(service.image?.url),
         })),
-    };
-
+    } : null;
 
     return (
         <>
+            <JsonLd data={[
+                organizationSchema(),
+                breadcrumbSchema(breadcrumbs),
+                itemListSchema
+            ]} />
             <Helmet>
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                {allServices.length > 0 && (
-                    <script type="application/ld+json">
-                        {JSON.stringify(itemListSchema)}
-                    </script>
-                )}
-
                 <title>Chauffeur Services in London – Executive Travel Solutions | JK Executive</title>
                 <meta name="description" content="Explore all our premium chauffeur services in London — airport transfers, corporate travel, weddings, events & more. Book online or call us today." />
-
-
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }}>
             {/* Hero Banner */}

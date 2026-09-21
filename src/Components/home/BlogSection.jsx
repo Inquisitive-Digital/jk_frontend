@@ -235,7 +235,7 @@ function BlogSection() {
             </div>
 
             {/* Custom CSS for hiding scrollbar */}
-            <style jsx>{`
+            <style jsx="true">{`
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;
                 }

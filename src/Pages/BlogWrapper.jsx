@@ -9,6 +9,8 @@ import Analytics from '../Utils/analytics';
 import InlineFAQSection from '../Components/home/InlineFAQSection';
 import FleetSection from '../Components/home/FleetSection';
 import TestimonialsSection from '../Components/home/TestimonialsSection';
+import JsonLd from '../seo/JsonLd';
+import { breadcrumbSchema, blogPostingSchema, faqSchema } from '../seo/schema';
 
 const BASE_URL = 'https://www.jkexecutivechauffeurs.com';
 
@@ -109,114 +111,46 @@ function BlogWrapper() {
 
     const heroSrc = getImageUrl(blog.heroImageUrl || blog.heroImage?.url);
 
-    const breadcrumbSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-            { '@type': 'ListItem', position: 2, name: 'Blog', item: `${BASE_URL}/blog` },
-            { '@type': 'ListItem', position: 3, name: blog.title, item: `${BASE_URL}/blog/${blog.slug}` },
-        ],
-    };
-
-    const blogPostingSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-            '@type': 'WebPage',
-            '@id': `${BASE_URL}/blog/${blog.slug}`,
-        },
-        headline: blog.title,
-        description: blog.excerpt || (blog.intro ? blog.intro.replace(/<[^>]+>/g, '').slice(0, 160) : ''),
-        image: heroSrc || `${BASE_URL}/logo.png`,
-        datePublished: blog.publishDate || blog.createdAt,
-        dateModified: blog.updatedAt || blog.createdAt,
-        author: {
-            '@type': 'Person',
-            name: blog.author || 'JK Executive Chauffeurs',
-        },
-        publisher: {
-            '@type': 'Organization',
-            name: 'JK Executive Chauffeurs',
-            url: BASE_URL,
-            logo: {
-                '@type': 'ImageObject',
-                url: `${BASE_URL}/logo.png`,
-            },
-        },
-        ...(blog.tags && blog.tags.length > 0 && { keywords: blog.tags.join(', ') }),
-    };
+    const breadcrumbs = [
+        { name: 'Home', item: '/' },
+        { name: 'Blog', item: '/blog' },
+        { name: blog.title, item: `/blog/${blog.slug}` },
+    ];
 
     const seoTitle = blog.seoTitle || blog.title;
     const seoDesc = blog.seoDescription || blog.excerpt || (blog.intro ? blog.intro.replace(/<[^>]+>/g, '').slice(0, 160) : '');
 
-    const articleSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        mainEntityOfPage: {
-            '@type': 'WebPage',
-            '@id': `${BASE_URL}/blog/${blog.slug}`,
-        },
-        headline: seoTitle,
+    const blogPostData = {
+        title: seoTitle,
         description: seoDesc,
-        image: heroSrc || `${BASE_URL}/logo.png`,
-        author: {
-            '@type': 'Person',
-            name: blog.author || 'JK Executive Chauffeurs',
-        },
-        publisher: {
-            '@type': 'Organization',
-            name: 'JK Executive Chauffeurs',
-            logo: {
-                '@type': 'ImageObject',
-                url: `${BASE_URL}/logo.png`,
-            },
-        },
+        slug: blog.slug,
         datePublished: blog.publishDate || blog.createdAt,
         dateModified: blog.updatedAt || blog.createdAt,
+        image: heroSrc,
+        authorName: blog.author,
     };
 
-    // FAQ structured data — only built when FAQs exist
-    const faqSchema = blog.faqs && blog.faqs.length > 0
-        ? {
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: blog.faqs.map((f) => ({
-                '@type': 'Question',
-                name: f.question,
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: f.answer,
-                },
-            })),
+    let customScriptData = null;
+    if (blog.script) {
+        try {
+            customScriptData = JSON.parse(blog.script);
+        } catch (e) {
+            console.error("Failed to parse custom blog script:", e);
         }
-        : null;
+    }
 
     return (
         <main className="overflow-x-hidden" style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
+            <JsonLd data={[
+                breadcrumbSchema(breadcrumbs),
+                blogPostingSchema(blogPostData),
+                faqSchema(blog.faqs),
+                customScriptData
+            ]} />
             <Helmet>
                 <title>{seoTitle}</title>
                 <meta name="description" content={seoDesc} />
                 <link rel="canonical" href={`${BASE_URL}/blog/${slug}`} />
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                <script type="application/ld+json">
-                    {JSON.stringify(blogPostingSchema)}
-                </script>
-                <script type="application/ld+json">
-                    {JSON.stringify(articleSchema)}
-                </script>
-                {faqSchema && (
-                    <script type="application/ld+json">
-                        {JSON.stringify(faqSchema)}
-                    </script>
-                )}
-                {blog.script && (
-                    <script type="application/ld+json">
-                        {blog.script}
-                    </script>
-                )}
             </Helmet>
             {/* Page Header — Refined Title Section */}
             <header
