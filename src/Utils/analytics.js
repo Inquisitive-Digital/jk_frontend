@@ -127,15 +127,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       return;
     }
 
-    await this.loadTrackingScripts();
+    // Defer 3rd party scripts (GTM + Meta Pixel) until after the page has
+    // finished loading. This prevents them from blocking LCP/FCP.
+    // We use 'load' event + a small delay to ensure the main content paints first.
+    const doInit = async () => {
+      await this.loadTrackingScripts();
+      this.gtmId = import.meta.env.VITE_GTM_ID || "GTM-WMZR9JNW";
+      this.pixelId = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
+      this.isInitialized = true;
+      console.log(
+        `[Analytics] Initialized → GTM(${this.gtmId}) | Pixel(${this.pixelId})`,
+      );
+    };
 
-    this.gtmId = import.meta.env.VITE_GTM_ID || "GTM-WMZR9JNW";
-    this.pixelId = import.meta.env.VITE_PIXEL_ID || "4021930454788333";
-    this.isInitialized = true;
-
-    console.log(
-      `[Analytics] Initialized → GTM(${this.gtmId}) | Pixel(${this.pixelId})`,
-    );
+    if (document.readyState === "complete") {
+      // Page already loaded (e.g. hot-reload) — delay by 3s to not block paint
+      setTimeout(doInit, 3000);
+    } else {
+      // Wait for full page load, then delay 3s more
+      window.addEventListener("load", () => setTimeout(doInit, 3000), { once: true });
+    }
   }
 
   track(eventName, data = {}) {

@@ -17,220 +17,9 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import StepNavBar from "./StepNavBar";
+import PhoneField, { COUNTRIES, DEFAULT_COUNTRY, validatePhone } from "./PhoneField";
 
-/**
- * UK Phone Number Validation (All UK numbers: mobile, landline, etc.)
- * Accepts formats: 07XXX XXXXXX, 020 XXXX XXXX, 01XXXXXXXXX, +44 XXXXXXXXXX
- * Returns { isValid: boolean, errorMessage: string }
- */
-const validateUkPhone = (phoneNumber, countryCode) => {
-  if (!phoneNumber || phoneNumber.trim() === "") {
-    return { isValid: false, errorMessage: "Phone number is required" };
-  }
-
-  // Strip all spaces, dashes, brackets, and parentheses
-  let cleaned = phoneNumber.replace(/[\s\-\(\)\[\]]/g, "");
-
-  // Only validate when UK country code is selected
-  if (countryCode === "+44") {
-    // Prepend country code if the number doesn't start with + or 0
-    if (!cleaned.startsWith("+") && !cleaned.startsWith("0")) {
-      cleaned = "+44" + cleaned;
-    }
-
-    // Check for double prefix like +440
-    if (cleaned.startsWith("+440")) {
-      return { isValid: false, errorMessage: "Invalid format: do not include both +44 and leading 0" };
-    }
-
-    // Handle international format (+44)
-    if (cleaned.startsWith("+44")) {
-      const digitsOnly = cleaned.slice(3); // Remove +44
-
-      // Must start with valid UK prefix (1, 2, 3, or 7)
-      if (!/^[1237]/.test(digitsOnly)) {
-        return { isValid: false, errorMessage: "Invalid UK number: must start with valid prefix" };
-      }
-
-      // Total should be 10 digits after +44
-      if (digitsOnly.length !== 10) {
-        return { isValid: false, errorMessage: "Invalid number length: UK numbers must have exactly 10 digits after +44" };
-      }
-
-      return { isValid: true, errorMessage: "" };
-    }
-
-    // Handle local format (starting with 0)
-    if (cleaned.startsWith("0")) {
-      // Must start with valid UK prefix (01, 02, 03, or 07)
-      if (!/^(01|02|03|07)/.test(cleaned)) {
-        return { isValid: false, errorMessage: "Invalid UK number: must start with valid prefix (01, 02, 03, or 07)" };
-      }
-
-      // Total should be 10-11 digits for UK numbers
-      if (cleaned.length < 10 || cleaned.length > 11) {
-        return { isValid: false, errorMessage: "Invalid number length: UK numbers must have 10-11 digits" };
-      }
-
-      return { isValid: true, errorMessage: "" };
-    }
-
-    // Doesn't start with valid prefix
-    return { isValid: false, errorMessage: "Number must start with 0 (UK local format) or +44 (international)" };
-  }
-
-  // India phone number validation (+91)
-  if (countryCode === "+91") {
-    // Handle international format (+91)
-    if (cleaned.startsWith("+91")) {
-      const digitsOnly = cleaned.slice(3); // Remove +91
-
-      // Indian numbers must have exactly 10 digits after +91
-      if (digitsOnly.length !== 10) {
-        return { isValid: false, errorMessage: "Invalid number length: Indian numbers must have exactly 10 digits after +91" };
-      }
-
-      // Must start with 6, 7, 8, or 9 (valid Indian mobile prefixes)
-      if (!/^[6789]/.test(digitsOnly)) {
-        return { isValid: false, errorMessage: "Invalid Indian number: must start with 6, 7, 8, or 9" };
-      }
-
-      return { isValid: true, errorMessage: "" };
-    }
-
-    // Handle local format (starting with 0)
-    if (cleaned.startsWith("0")) {
-      if (cleaned.length !== 11) {
-        return { isValid: false, errorMessage: "Invalid number length: Indian numbers must have 11 digits (including leading 0)" };
-      }
-
-      // Must start with valid prefix (06, 07, 08, or 09)
-      if (!/^(06|07|08|09)/.test(cleaned)) {
-        return { isValid: false, errorMessage: "Invalid Indian number: must start with 6, 7, 8, or 9" };
-      }
-
-      return { isValid: true, errorMessage: "" };
-    }
-
-    // Local format without leading 0 (10 digits)
-    if (cleaned.length === 10) {
-      // Must start with valid prefix (6, 7, 8, or 9)
-      if (!/^[6789]/.test(cleaned)) {
-        return { isValid: false, errorMessage: "Invalid Indian number: must start with 6, 7, 8, or 9" };
-      }
-
-      return { isValid: true, errorMessage: "" };
-    }
-
-    return { isValid: false, errorMessage: "Invalid number length: Indian numbers must have exactly 10 digits" };
-  }
-
-  // For other non-UK numbers, just basic validation
-  if (!/^\d+$/.test(cleaned)) {
-    return { isValid: false, errorMessage: "Phone number can only contain digits" };
-  }
-  if (cleaned.length < 7) {
-    return { isValid: false, errorMessage: "Phone number is too short" };
-  }
-
-  return { isValid: true, errorMessage: "" };
-};
-// Country codes data with flags
-const countryCodes = [
-  { code: "+44", country: "UK", flag: "🇬🇧" },
-  { code: "+1", country: "US", flag: "🇺🇸" },
-  { code: "+91", country: "IN", flag: "🇮🇳" },
-  { code: "+33", country: "FR", flag: "🇫🇷" },
-  { code: "+49", country: "DE", flag: "🇩🇪" },
-  { code: "+39", country: "IT", flag: "🇮🇹" },
-  { code: "+34", country: "ES", flag: "🇪🇸" },
-  { code: "+31", country: "NL", flag: "🇳🇱" },
-  { code: "+353", country: "IE", flag: "🇮🇪" },
-  { code: "+61", country: "AU", flag: "🇦🇺" },
-  { code: "+971", country: "AE", flag: "🇦🇪" },
-  { code: "+966", country: "SA", flag: "🇸🇦" },
-  { code: "+86", country: "CN", flag: "🇨🇳" },
-  { code: "+81", country: "JP", flag: "🇯🇵" },
-  { code: "+82", country: "KR", flag: "🇰🇷" },
-  { code: "+65", country: "SG", flag: "🇸🇬" },
-  { code: "+92", country: "PK", flag: "🇵🇰" },
-  { code: "+880", country: "BD", flag: "🇧🇩" },
-  { code: "+27", country: "ZA", flag: "🇿🇦" },
-  { code: "+234", country: "NG", flag: "🇳🇬" },
-];
-
-// Country Code Dropdown Component
-const CountryCodeDropdown = ({ value, onChange, id }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  const selectedCountry = countryCodes.find((c) => c.code === value) || countryCodes[0];
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        id={id}
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-3.5 border border-r-0 rounded-l-xl transition-colors min-w-[90px]"
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.06)',
-          borderColor: 'rgba(255,255,255,0.1)',
-          color: '#fff',
-        }}
-      >
-        <span className="text-xl">{selectedCountry.flag}</span>
-        <span className="text-sm font-medium">{selectedCountry.code}</span>
-        <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} style={{ color: 'rgba(255,255,255,0.4)' }} />
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 mt-1 rounded-xl shadow-xl z-50 w-48 max-h-60 overflow-y-auto"
-            style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', overscrollBehavior: 'contain' }}
-            onWheel={(e) => e.stopPropagation()}
-          >
-            {countryCodes.map((country) => (
-              <button
-                key={country.code}
-                type="button"
-                onClick={() => {
-                  onChange(country.code);
-                  setIsOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 transition-colors"
-                style={{
-                  backgroundColor: value === country.code ? 'rgba(215,183,94,0.1)' : 'transparent',
-                  color: value === country.code ? 'var(--color-primary)' : 'rgba(255,255,255,0.7)',
-                }}
-                onMouseEnter={(e) => { if (value !== country.code) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; }}
-                onMouseLeave={(e) => { if (value !== country.code) e.currentTarget.style.backgroundColor = 'transparent'; }}
-              >
-                <span className="text-xl">{country.flag}</span>
-                <span className="font-medium">{country.code}</span>
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>({country.country})</span>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+/* validateUkPhone removed — replaced by libphonenumber-js validatePhone from PhoneField */
 
 // Toggle Switch Component
 const ToggleSwitch = ({ checked, onChange, label, icon: Icon }) => (
@@ -332,49 +121,7 @@ const SelectField = ({ label, icon: Icon, required, options, error, ...props }) 
   </div>
 );
 
-// Phone Input Component
-const PhoneInput = ({ countryCode, onCountryCodeChange, phone, onPhoneChange, label, required, error }) => {
-  const handlePhoneChange = (e) => {
-    const value = e.target.value;
-    let digitsOnly = value.replace(/\D/g, '');
-
-    // Limit to 10 digits for Indian numbers
-    if (countryCode === "+91") {
-      digitsOnly = digitsOnly.slice(0, 10);
-    }
-
-    onPhoneChange(digitsOnly);
-  };
-
-  return (
-    <div className="space-y-2">
-      <label className="flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-        <Phone size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
-        {label}
-        {required && <span style={{ color: 'var(--color-primary)' }}>*</span>}
-      </label>
-      <div className="flex">
-        <CountryCodeDropdown value={countryCode} onChange={onCountryCodeChange} />
-        <input
-          type="tel"
-          value={phone}
-          onChange={handlePhoneChange}
-          placeholder="Enter phone number"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          maxLength={countryCode === "+91" ? 10 : undefined}
-          className="flex-1 px-4 py-3.5 border rounded-r-xl outline-none transition-all duration-200 placeholder:opacity-30 placeholder:text-white"
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.05)',
-            borderColor: error ? '#ef4444' : 'rgba(255,255,255,0.1)',
-            color: '#fff',
-          }}
-        />
-      </div>
-      {error && <p className="text-sm text-red-400">{error}</p>}
-    </div>
-  );
-};
+/* PhoneInput removed — replaced by <PhoneField> from PhoneField.jsx */
 
 // Counter Field Component (for passengers, luggage, children)
 const CounterField = ({ label, icon: Icon, required, value, onChange, min = 0, max = 10, error }) => {
@@ -434,13 +181,23 @@ const CounterField = ({ label, icon: Icon, required, value, onChange, min = 0, m
   );
 };
 
+// Stable module-level helper — converts a saved dial string like "+44" back to a country object.
+// Defined outside the component so it never causes stale-closure warnings in the useEffect dep array.
+const resolveCountry = (savedCode) => {
+  if (!savedCode) return DEFAULT_COUNTRY;
+  if (typeof savedCode === "object" && savedCode?.isoUpper) return savedCode;
+  const dialDigits = String(savedCode).replace("+", "");
+  return COUNTRIES.find((c) => c.dial === dialDigits) || DEFAULT_COUNTRY;
+};
+
 // Main UserDetails Component
 const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, onBack, isLoading = false }, ref) {
+
   const [formData, setFormData] = useState({
     firstName: data?.passengerDetails?.firstName || "",
     lastName: data?.passengerDetails?.lastName || "",
     email: data?.passengerDetails?.email || "",
-    countryCode: data?.passengerDetails?.countryCode || "+44",
+    countryObj: resolveCountry(data?.passengerDetails?.countryCode),
     phone: data?.passengerDetails?.phone || "",
     numberOfPassengers: data?.passengerDetails?.numberOfPassengers || 1,
     numberOfSuitcases: data?.passengerDetails?.numberOfSuitcases || 0,
@@ -448,7 +205,7 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
     isBookingForSomeoneElse: data?.passengerDetails?.isBookingForSomeoneElse || false,
     guestFirstName: data?.passengerDetails?.guestFirstName || "",
     guestLastName: data?.passengerDetails?.guestLastName || "",
-    guestCountryCode: data?.passengerDetails?.guestCountryCode || "+44",
+    guestCountryObj: resolveCountry(data?.passengerDetails?.guestCountryCode),
     guestPhone: data?.passengerDetails?.guestPhone || "",
     guestEmail: data?.passengerDetails?.guestEmail || "",
     isAirportPickup: data?.flightDetails?.isAirportPickup || false,
@@ -466,14 +223,14 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
       firstName: data?.passengerDetails?.firstName || prev.firstName,
       lastName: data?.passengerDetails?.lastName || prev.lastName,
       email: data?.passengerDetails?.email || prev.email,
-      countryCode: data?.passengerDetails?.countryCode || prev.countryCode,
+      countryObj: resolveCountry(data?.passengerDetails?.countryCode) || prev.countryObj,
       phone: data?.passengerDetails?.phone || prev.phone,
       numberOfPassengers: data?.passengerDetails?.numberOfPassengers || prev.numberOfPassengers,
       numberOfSuitcases: data?.passengerDetails?.numberOfSuitcases || prev.numberOfSuitcases,
       isBookingForSomeoneElse: data?.passengerDetails?.isBookingForSomeoneElse || prev.isBookingForSomeoneElse,
       guestFirstName: data?.passengerDetails?.guestFirstName || prev.guestFirstName,
       guestLastName: data?.passengerDetails?.guestLastName || prev.guestLastName,
-      guestCountryCode: data?.passengerDetails?.guestCountryCode || prev.guestCountryCode,
+      guestCountryObj: resolveCountry(data?.passengerDetails?.guestCountryCode) || prev.guestCountryObj,
       guestPhone: data?.passengerDetails?.guestPhone || prev.guestPhone,
       guestEmail: data?.passengerDetails?.guestEmail || prev.guestEmail,
       isAirportPickup: data?.flightDetails?.isAirportPickup || prev.isAirportPickup,
@@ -515,14 +272,11 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
       newErrors.email = "Please enter a valid email address";
     }
 
-    // Phone number validation with UK landline check
+    // Phone number validation via libphonenumber-js
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else {
-      const phoneValidation = validateUkPhone(formData.phone, formData.countryCode);
-      if (!phoneValidation.isValid) {
-        newErrors.phone = phoneValidation.errorMessage;
-      }
+    } else if (!validatePhone(formData.phone, formData.countryObj?.isoUpper || "GB")) {
+      newErrors.phone = "Please enter a valid phone number for the selected country";
     }
 
     // Validate passengers and suitcases against selected vehicle capacity
@@ -560,9 +314,8 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
       }
 
       if (formData.guestPhone.trim()) {
-        const guestPhoneValidation = validateUkPhone(formData.guestPhone, formData.guestCountryCode);
-        if (!guestPhoneValidation.isValid) {
-          newErrors.guestPhone = guestPhoneValidation.errorMessage;
+        if (!validatePhone(formData.guestPhone, formData.guestCountryObj?.isoUpper || "GB")) {
+          newErrors.guestPhone = "Please enter a valid phone number for the selected country";
         }
       }
     }
@@ -602,14 +355,11 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
       newErrors.email = "Please enter a valid email address";
     }
 
-    // Validate phone
+    // Validate phone via libphonenumber-js
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else {
-      const phoneValidation = validateUkPhone(formData.phone, formData.countryCode);
-      if (!phoneValidation.isValid) {
-        newErrors.phone = phoneValidation.errorMessage;
-      }
+    } else if (!validatePhone(formData.phone, formData.countryObj?.isoUpper || "GB")) {
+      newErrors.phone = "Please enter a valid phone number for the selected country";
     }
 
     // Validate passengers and suitcases against selected vehicle capacity
@@ -648,9 +398,8 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
       }
 
       if (formData.guestPhone.trim()) {
-        const guestPhoneValidation = validateUkPhone(formData.guestPhone, formData.guestCountryCode);
-        if (!guestPhoneValidation.isValid) {
-          newErrors.guestPhone = guestPhoneValidation.errorMessage;
+        if (!validatePhone(formData.guestPhone, formData.guestCountryObj?.isoUpper || "GB")) {
+          newErrors.guestPhone = "Please enter a valid phone number for the selected country";
         }
       }
     }
@@ -682,7 +431,7 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
-      countryCode: formData.countryCode,
+      countryCode: `+${formData.countryObj?.dial || "44"}`,
       phone: formData.phone,
       numberOfPassengers: formData.numberOfPassengers,
       numberOfSuitcases: formData.numberOfSuitcases,
@@ -690,7 +439,7 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
       isBookingForSomeoneElse: formData.isBookingForSomeoneElse,
       guestFirstName: formData.guestFirstName,
       guestLastName: formData.guestLastName,
-      guestCountryCode: formData.guestCountryCode,
+      guestCountryCode: `+${formData.guestCountryObj?.dial || "44"}`,
       guestPhone: formData.guestPhone,
       guestEmail: formData.guestEmail,
     };
@@ -777,11 +526,11 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
             </div>
 
             <div data-field="phone">
-              <PhoneInput
-                countryCode={formData.countryCode}
-                onCountryCodeChange={(code) => updateField("countryCode", code)}
-                phone={formData.phone}
-                onPhoneChange={(phone) => updateField("phone", phone)}
+              <PhoneField
+                country={formData.countryObj}
+                onCountryChange={(c) => updateField("countryObj", c)}
+                value={formData.phone}
+                onChange={(phone) => updateField("phone", phone)}
                 label="Contact Number"
                 required
                 error={errors.phone}
@@ -882,11 +631,11 @@ const UserDetails = forwardRef(function UserDetails({ data, updateData, onNext, 
                       />
                     </div>
 
-                    <PhoneInput
-                      countryCode={formData.guestCountryCode}
-                      onCountryCodeChange={(code) => updateField("guestCountryCode", code)}
-                      phone={formData.guestPhone}
-                      onPhoneChange={(phone) => updateField("guestPhone", phone)}
+                    <PhoneField
+                      country={formData.guestCountryObj}
+                      onCountryChange={(c) => updateField("guestCountryObj", c)}
+                      value={formData.guestPhone}
+                      onChange={(phone) => updateField("guestPhone", phone)}
                       label="Passenger's Contact Number"
                       error={errors.guestPhone}
                     />

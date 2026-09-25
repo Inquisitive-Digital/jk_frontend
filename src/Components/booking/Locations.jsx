@@ -150,7 +150,13 @@ const CustomTimePicker = ({ value, onChange, onClose, selectedDate, onTimeValida
   // Check if a time is before the minimum selectable time
   // Minimum = GMT now + 30 min, rounded UP to next 30-min slot (same as default)
   const isTimeInPast = (h, m, ampm) => {
-    const checkDate = selectedDate || new Date();
+    let checkDate;
+    if (typeof selectedDate === "string" && selectedDate.includes("-")) {
+      const [y, month, d] = selectedDate.split("-").map(Number);
+      checkDate = new Date(y, month - 1, d);
+    } else {
+      checkDate = selectedDate || new Date();
+    }
     const ukNow = getUKTime();
 
     // Only restrict today's times
@@ -337,7 +343,14 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   const wrapperRef = useRef(null);
   useClickOutside(wrapperRef, onClose);
 
-  const [currentDate, setCurrentDate] = useState(new Date(value || new Date()));
+  const [currentDate, setCurrentDate] = useState(() => {
+    if (!value) return new Date();
+    if (typeof value === "string") {
+      const [y, m, d] = value.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
+    return new Date(value);
+  });
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -359,7 +372,10 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
   const handleDayClick = (day) => {
     const selectedDate = new Date(year, month, day);
     if (selectedDate < today) return;
-    onChange(selectedDate);
+    
+    // Return exact YYYY-MM-DD string
+    const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    onChange(dateString);
     onClose();
   };
 
@@ -373,10 +389,19 @@ const CustomDatePicker = ({ value, onChange, onClose }) => {
 
   const isSelected = (day) => {
     if (!value) return false;
+    
+    let valYear, valMonth, valDay;
+    if (typeof value === "string") {
+      const [y, m, d] = value.split("-").map(Number);
+      valYear = y; valMonth = m - 1; valDay = d;
+    } else {
+      valYear = value.getFullYear(); valMonth = value.getMonth(); valDay = value.getDate();
+    }
+    
     return (
-      day === value.getDate() &&
-      month === value.getMonth() &&
-      year === value.getFullYear()
+      day === valDay &&
+      month === valMonth &&
+      year === valYear
     );
   };
 
@@ -736,7 +761,13 @@ function Locations({ data, updateData, onNext, isOnHome = false }) {
     }
 
     const ukNow = getUKTime();
-    const checkDate = data.pickupDate;
+    let checkDate;
+    if (typeof data.pickupDate === "string" && data.pickupDate.includes("-")) {
+      const [y, m, d] = data.pickupDate.split("-").map(Number);
+      checkDate = new Date(y, m - 1, d);
+    } else {
+      checkDate = data.pickupDate;
+    }
 
     // Only check if it's today
     const isToday = checkDate.toDateString() === ukNow.toDateString();
@@ -902,12 +933,18 @@ function Locations({ data, updateData, onNext, isOnHome = false }) {
                   <div className="flex items-center gap-2 overflow-hidden">
                     <Calendar size={14} className="text-[var(--color-primary)] shrink-0" />
                     <span className="text-xs truncate text-white">
-                      {data.pickupDate?.toLocaleDateString("en-GB", {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      }) || "Select Date"}
+                      {data.pickupDate
+                        ? (() => {
+                            const [y, m, d] = (typeof data.pickupDate === "string" ? data.pickupDate : data.pickupDate.toISOString().split("T")[0]).split("-").map(Number);
+                            const tempDate = new Date(y, m - 1, d);
+                            return tempDate.toLocaleDateString("en-GB", {
+                              weekday: "short",
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            });
+                          })()
+                        : "Select Date"}
                     </span>
                   </div>
                   <ChevronDown size={12} className="opacity-40 text-white" />

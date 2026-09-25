@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Loader2, ArrowRight } from 'lucide-react';
 import { eventAPI, getImageUrl } from '../Utils/api';
 import Analytics from '../Utils/analytics';
+import JsonLd from '../seo/JsonLd';
+import { organizationSchema, breadcrumbSchema } from '../seo/schema';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
@@ -70,14 +72,10 @@ function EventWrapper() {
 
     const heroSrc = getImageUrl(event.heroImage?.url);
 
-    const breadcrumbSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-            { '@type': 'ListItem', position: 2, name: event.title, item: `${BASE_URL}/events/${event.slug}` },
-        ],
-    };
+    const breadcrumbs = [
+        { name: 'Home', item: '/' },
+        { name: event.title, item: `/events/${event.slug}` },
+    ];
 
     const eventSchema = {
         '@context': 'https://schema.org',
@@ -119,15 +117,14 @@ function EventWrapper() {
 
     return (
         <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh' }} >
+            <JsonLd data={[
+                organizationSchema(),
+                breadcrumbSchema(breadcrumbs),
+                eventSchema
+            ]} />
             <Helmet>
                 <title>{seoTitle}</title>
                 <meta name="description" content={seoDesc} />
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                <script type="application/ld+json">
-                    {JSON.stringify(eventSchema)}
-                </script>
             </Helmet>
             {/* Hero Image Section */}
             <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
@@ -234,7 +231,7 @@ function EventWrapper() {
                                 {/* Card Image */}
                                 <div className="relative h-48 overflow-hidden">
                                     <img
-                                        src={getImageUrl(sportEvent.heroImage?.url, 'https://via.placeholder.com/800x600?text=Event')}
+                                        src={getImageUrl(sportEvent.heroImage?.url, 'https://placehold.co/800x600?text=Event')}
                                         alt={sportEvent.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />

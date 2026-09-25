@@ -5,17 +5,15 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Loader2, Users, Briefcase } from 'lucide-react';
 import { fleetAPI, getImageUrl } from '../Utils/api';
+import JsonLd from '../seo/JsonLd';
+import { organizationSchema, breadcrumbSchema } from '../seo/schema';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
-const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-        { '@type': 'ListItem', position: 2, name: 'Our Fleet', item: `${BASE_URL}/fleet` },
-    ],
-};
+const breadcrumbs = [
+    { name: 'Home', item: '/' },
+    { name: 'Our Fleet', item: '/fleet' },
+];
 
 const DESKTOP_PER_PAGE = 9;
 const MOBILE_INITIAL = 5;
@@ -71,7 +69,7 @@ function Fleet() {
         return pages;
     };
 
-    const itemListSchema = {
+    const itemListSchema = allFleet.length > 0 ? {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         name: 'JK Executive Chauffeurs — Our Fleet',
@@ -82,19 +80,16 @@ function Fleet() {
             url: `${BASE_URL}/fleet/${item.slug}`,
             image: getImageUrl(item.heroImage?.url),
         })),
-    };
+    } : null;
 
     return (
         <>
+            <JsonLd data={[
+                organizationSchema(),
+                breadcrumbSchema(breadcrumbs),
+                itemListSchema
+            ]} />
             <Helmet>
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                {allFleet.length > 0 && (
-                    <script type="application/ld+json">
-                        {JSON.stringify(itemListSchema)}
-                    </script>
-                )}
                 <title>Luxury Chauffeur Fleet in London – Explore Premium Vehicles | JK Executive</title>
                 <meta name="description" content="Browse our premium chauffeur fleet in London — Mercedes S/E/V Class, Rolls Royce, Range Rover & EV options. Find your perfect vehicle today." />
             </Helmet>
@@ -182,11 +177,11 @@ function Fleet() {
                                             {/* Image */}
                                             <div className="relative aspect-[16/10] rounded-t-xl overflow-hidden">
                                                 <img
-                                                    src={getImageUrl(item.heroImage?.url, 'https://via.placeholder.com/600x400?text=Vehicle')}
+                                                    src={getImageUrl(item.heroImage?.url, 'https://placehold.co/600x400?text=Vehicle')}
                                                     alt={item.title}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                     onError={(e) => {
-                                                        e.target.src = 'https://via.placeholder.com/600x400?text=Vehicle';
+                                                        e.target.src = 'https://placehold.co/600x400?text=Vehicle';
                                                     }}
                                                 />
                                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />

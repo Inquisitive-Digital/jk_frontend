@@ -9,31 +9,31 @@ const DIFFERENTIATORS = [
         id: 1,
         icon: CheckCircle,
         title: 'Reliable',
-        description: 'Punctuality is our promise. We ensure on-time arrivals for every journey, giving you the confidence to plan without worry.',
+        description: 'Punctuality is our promise. Our London chauffeurs ensure on-time arrivals for every journey, giving you the confidence to plan without worry.',
     },
     {
         id: 2,
         icon: Shield,
         title: 'Trustworthy',
-        description: 'Built on years of exceptional service and thousands of satisfied clients. Your journey is in experienced, professional hands.',
+        description: 'Built on years of exceptional executive chauffeur service and thousands of satisfied clients across London. Your journey is in experienced, professional hands.',
     },
     {
         id: 3,
         icon: Crown,
         title: 'Premium',
-        description: 'An exceptional fleet of luxury vehicles paired with professionally trained chauffeurs delivering first-class service.',
+        description: 'An exceptional fleet of luxury executive cars paired with professionally trained chauffeurs delivering first-class London chauffeur service.',
     },
     {
         id: 4,
         icon: Armchair,
         title: 'Comfort',
-        description: 'Spacious interiors, climate control, and complimentary amenities ensure a relaxing experience from door to door.',
+        description: 'Spacious interiors, climate control, and complimentary amenities ensure a relaxing executive car hire experience from door to door.',
     },
     {
         id: 5,
         icon: Award,
         title: 'Safe',
-        description: 'Your safety is paramount. Fully vetted drivers, maintained vehicles, and comprehensive insurance for complete peace of mind.',
+        description: 'Your safety is paramount. Fully vetted London drivers, maintained vehicles, and comprehensive insurance for complete peace of mind.',
     },
 ];
 

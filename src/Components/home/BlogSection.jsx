@@ -177,7 +177,7 @@ function BlogSection() {
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 loading="lazy"
                                                 onError={(e) => {
-                                                    e.target.src = 'https://via.placeholder.com/600x400?text=JK+Executive+Blog';
+                                                    e.target.src = 'https://placehold.co/600x400?text=JK+Executive+Blog';
                                                 }}
                                             />
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
@@ -235,7 +235,7 @@ function BlogSection() {
             </div>
 
             {/* Custom CSS for hiding scrollbar */}
-            <style jsx>{`
+            <style jsx="true">{`
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;
                 }

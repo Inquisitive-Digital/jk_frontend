@@ -9,74 +9,15 @@ import {
 } from 'lucide-react';
 import Analytics from '../Utils/analytics';
 import { fleetAPI, getImageUrl } from '../Utils/api';
+import JsonLd from '../seo/JsonLd';
+import { organizationSchema, breadcrumbSchema } from '../seo/schema';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
-const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-        { '@type': 'ListItem', position: 2, name: 'About Us', item: `${BASE_URL}/about` },
-    ],
-};
-
-const localBusinessSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
-    '@id': `${BASE_URL}/#localbusiness`,
-    name: 'JK Executive Chauffeurs',
-    description:
-        "London's premier executive chauffeur service. Over a decade of experience delivering luxury, safety, and punctuality for airport transfers, corporate travel, weddings, and events across the UK.",
-    url: BASE_URL,
-    telephone: '+442034759906',
-    priceRange: '££',
-    image: `${BASE_URL}/logo.png`,
-    foundingDate: '2019',
-    numberOfEmployees: {
-        '@type': 'QuantitativeValue',
-        value: 120,
-    },
-    address: {
-        '@type': 'PostalAddress',
-        addressLocality: 'Middlesex',
-        addressRegion: 'London',
-        addressCountry: 'GB',
-    },
-    geo: {
-        '@type': 'GeoCoordinates',
-        latitude: 51.4700,
-        longitude: -0.4543,
-    },
-    openingHoursSpecification: {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        opens: '00:00',
-        closes: '23:59',
-    },
-    areaServed: [
-        { '@type': 'Place', name: 'London' },
-        { '@type': 'Place', name: 'United Kingdom' },
-    ],
-    hasOfferCatalog: {
-        '@type': 'OfferCatalog',
-        name: 'Chauffeur Services',
-        itemListElement: [
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Airport Transfers' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Corporate & Business Travel' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Wedding Chauffeur' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Event Chauffeur' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Private Aviation Transfers' } },
-        ],
-    },
-    aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '5.0',
-        bestRating: '5',
-        worstRating: '1',
-        ratingCount: '200',
-    },
-};
+const breadcrumbs = [
+    { name: 'Home', item: '/' },
+    { name: 'About Us', item: '/about' },
+];
 
 function AboutUs() {
     const [fleetVehicles, setFleetVehicles] = useState([]);
@@ -149,12 +90,7 @@ function AboutUs() {
     return (
         <>
             <Helmet>
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                <script type="application/ld+json">
-                    {JSON.stringify(localBusinessSchema)}
-                </script>
+                <JsonLd data={[breadcrumbSchema(breadcrumbs), organizationSchema()]} />
                 
                 <title>About Us | JK Executive Chauffeurs London</title>
                 <meta name="description" content="Learn about JK Executive Chauffeurs — London's trusted luxury chauffeur company. 120+ professional chauffeurs, premium fleet & 5-star service." />
@@ -303,12 +239,12 @@ function AboutUs() {
                                     alt={fleetVehicles[0]?.title || 'JK Executive Chauffeurs luxury fleet'}
                                     className="w-full h-auto object-cover"
                                     onError={(e) => {
-                                        e.target.src = "https://via.placeholder.com/800x600?text=JK+Executive+Fleet";
+                                        e.target.src = "https://placehold.co/800x600?text=JK+Executive+Fleet";
                                     }}
                                 />
                             ) : (
                                 <img
-                                    src="https://via.placeholder.com/800x600?text=JK+Executive+Fleet"
+                                    src="https://placehold.co/800x600?text=JK+Executive+Fleet"
                                     alt="JK Executive Chauffeurs luxury fleet"
                                     className="w-full h-auto object-cover"
                                 />

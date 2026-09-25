@@ -6,17 +6,15 @@ import { motion } from 'framer-motion';
 import { Loader2, Calendar, User, ArrowRight } from 'lucide-react';
 import { blogAPI, getImageUrl } from '../Utils/api';
 import BlogCardSkeleton from '../Components/extras/BlogCardSkeleton';
+import JsonLd from '../seo/JsonLd';
+import { organizationSchema, breadcrumbSchema } from '../seo/schema';
 
 const BASE_URL = 'https://jkexecutivechauffeurs.com';
 
-const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${BASE_URL}/blog` },
-    ],
-};
+const breadcrumbs = [
+    { name: 'Home', item: '/' },
+    { name: 'Blog', item: '/blog' },
+];
 
 const ITEMS_PER_PAGE = 12;
 
@@ -75,12 +73,11 @@ function Blog() {
         });
     };
 
-    const blogFeedSchema = {
+    const blogFeedSchema = blogs.length > 0 ? {
         '@context': 'https://schema.org',
         '@type': 'Blog',
         name: 'JK Executive Chauffeurs Blog',
-        description:
-            'Stay updated with the latest from JK Executive Chauffeurs — events, tips, and luxury travel insights.',
+        description: 'Stay updated with the latest from JK Executive Chauffeurs — events, tips, and luxury travel insights.',
         url: `${BASE_URL}/blog`,
         publisher: {
             '@type': 'Organization',
@@ -104,19 +101,16 @@ function Blog() {
                 '@id': `${BASE_URL}/blog/${blog.slug}`,
             },
         })),
-    };
+    } : null;
 
     return (
         <>
+            <JsonLd data={[
+                organizationSchema(),
+                breadcrumbSchema(breadcrumbs),
+                blogFeedSchema
+            ]} />
             <Helmet>
-                <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
-                </script>
-                {blogs.length > 0 && (
-                    <script type="application/ld+json">
-                        {JSON.stringify(blogFeedSchema)}
-                    </script>
-                )}
                 <title>Chauffeur Service Blog | JK Executive Chauffeurs</title>
                 <meta name="description" content="Expert tips, travel guides & news from JK Executive Chauffeurs. Luxury travel in London made easy. Explore our latest chauffeur service articles." />
             </Helmet>

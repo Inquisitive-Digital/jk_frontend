@@ -106,12 +106,12 @@ function AboutSection() {
                                     alt={fleetVehicles[0]?.title || 'JK Executive Chauffeurs luxury fleet'}
                                     className="w-full h-auto object-cover grayscale-[0.2] brightness-[0.85] transition-transform duration-[800ms] ease-out group-hover:scale-[1.04]"
                                     onError={(e) => {
-                                        e.target.src = "https://via.placeholder.com/800x600?text=JK+Executive+Fleet";
+                                        e.target.src = "https://placehold.co/800x600?text=JK+Executive+Fleet";
                                     }}
                                 />
                             ) : (
                                 <img
-                                    src="https://via.placeholder.com/800x600?text=JK+Executive+Fleet"
+                                    src="https://placehold.co/800x600?text=JK+Executive+Fleet"
                                     alt="JK Executive Chauffeurs luxury fleet"
                                     className="w-full h-auto object-cover grayscale-[0.2] brightness-[0.85] transition-transform duration-[800ms] ease-out group-hover:scale-[1.04]"
                                 />

@@ -186,11 +186,20 @@ const BookingCard = ({ booking, onEdit, onDelete }) => {
                         <p className="text-xs text-gray-500">Date</p>
                         <p className="font-semibold text-gray-800 text-sm">
                             {booking.pickupDate
-                                ? new Date(booking.pickupDate).toLocaleDateString("en-GB", {
-                                    timeZone: "UTC",
-                                    day: "2-digit",
-                                    month: "short",
-                                })
+                                ? (() => {
+                                    if (typeof booking.pickupDate === "string" && booking.pickupDate.length === 10) {
+                                        const [y, m, d] = booking.pickupDate.split("-").map(Number);
+                                        return new Date(y, m - 1, d).toLocaleDateString("en-GB", {
+                                            day: "2-digit",
+                                            month: "short",
+                                        });
+                                    }
+                                    return new Date(booking.pickupDate).toLocaleDateString("en-GB", {
+                                        timeZone: "Europe/London",
+                                        day: "2-digit",
+                                        month: "short",
+                                    });
+                                })()
                                 : "N/A"}
                         </p>
                     </div>
