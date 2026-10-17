@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import HeroSection from '../Components/home/HeroSection';
 import AboutSection from '../Components/home/AboutSection';
 import ServicesSection from '../Components/home/ServicesSection';
+import AirportsSection from '../Components/home/AirportsSection';
 import FleetSection from '../Components/home/FleetSection';
 import WhySetsUsApart from '../Components/home/WhySetsUsApart';
 import TestimonialsSection from '../Components/home/TestimonialsSection';
@@ -28,7 +29,10 @@ function Home() {
         <>
             <JsonLd data={[webSiteSchema(), organizationSchema(), faqSchema(homeFaqs)]} />
             <Helmet>
-                <title>Chauffeur Services in London | JK Executive Chauffeurs</title>
+                <title>Executive Chauffeur Service London – Book 24/7 Today</title>
+                <meta name="title" content="Executive Chauffeur Service London – Book 24/7 Today" />
+                <meta property="og:title" content="Executive Chauffeur Service London – Book 24/7 Today" />
+                <meta name="twitter:title" content="Executive Chauffeur Service London – Book 24/7 Today" />
                 <meta name="description" content="Premium executive car hire & chauffeur service in London. Professional chauffeurs, luxury fleet, on-time airport transfers & corporate travel. Book now." />
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)' }}>
@@ -37,6 +41,7 @@ function Home() {
 
                 <FleetSection />
                 <ServicesSection />
+                <AirportsSection />
                 <WhySetsUsApart />
                 <TestimonialsSection />
                 <BlogSection />

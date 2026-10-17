@@ -35,6 +35,7 @@ const INITIAL_FORM = {
   category: "",
   seoTitle: "",
   seoDescription: "",
+  script: "",
   passengers: 0,
   luggage: 0,
   isActive: true,
@@ -789,6 +790,23 @@ function AdminAddFleet() {
                     placeholder="150–160 characters for best SEO results"
                     className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none resize-y overflow-y-auto text-sm" />
                   <p className="text-xs text-gray-400 mt-1">{formData.seoDescription.length} / 160 chars</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Custom SEO Schema (JSON-LD)
+                    <span className="ml-2 text-xs text-gray-400 font-normal">
+                      (Optional: Custom schema script without the &lt;script&gt; tags)
+                    </span>
+                  </label>
+                  <textarea
+                    name="script"
+                    value={formData.script}
+                    onChange={handleChange}
+                    onWheel={stopTextareaScroll}
+                    rows={4}
+                    placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "FAQPage"\n}`}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none resize-y overflow-y-auto text-sm font-mono bg-gray-50 text-gray-800"
+                  />
                 </div>
               </div>
             </div>
