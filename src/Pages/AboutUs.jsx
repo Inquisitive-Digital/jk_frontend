@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -89,11 +89,9 @@ function AboutUs() {
 
     return (
         <>
-            <Helmet>
-                <JsonLd data={[breadcrumbSchema(breadcrumbs), organizationSchema()]} />
-                
-                <title>About Us | JK Executive Chauffeurs London</title>
-                <meta name="description" content="Learn about JK Executive Chauffeurs — London's trusted luxury chauffeur company. 120+ professional chauffeurs, premium fleet & 5-star service." />
+            <JsonLd data={[breadcrumbSchema(breadcrumbs), organizationSchema()]} />
+            <Helmet><title>About Us | JK Executive Chauffeurs London</title>
+                <meta name="description" content="Learn about JK Executive Chauffeurs â€” London's trusted luxury chauffeur company. 120+ professional chauffeurs, premium fleet & 5-star service." />
             </Helmet>
             <main style={{ backgroundColor: 'var(--color-dark)', minHeight: '100vh', paddingTop: '100px' }}>
 
@@ -131,7 +129,7 @@ function AboutUs() {
                         </h1>
                         <p className="text-white/50 text-base md:text-lg leading-relaxed">
                             <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link> provides first-class chauffeur services across London and the United Kingdom.
-                            With over a decade of experience, we deliver luxury, safety, and punctuality for every journey — from
+                            With over a decade of experience, we deliver luxury, safety, and punctuality for every journey â€” from
                             airport transfers and corporate travel to weddings and special events.
                         </p>
                     </motion.div>
@@ -199,7 +197,7 @@ function AboutUs() {
                                 most trusted executive chauffeur services.
                             </p>
                             <p>
-                                We understand that for our clients — whether they are CEOs, celebrities, diplomats, or families —
+                                We understand that for our clients â€” whether they are CEOs, celebrities, diplomats, or families â€”
                                 the journey is just as important as the destination. Every detail matters, from the temperature of
                                 the cabin to the timing of the pickup.
                             </p>
@@ -214,7 +212,7 @@ function AboutUs() {
                                 vehicle and a simple philosophy: if the client is satisfied, we are happy. Today, with over
                                 120 professional chauffeurs, our team comes from professional backgrounds, fully licensed and
                                 security checked, with a thorough knowledge of London's airports and routes. First class is
-                                always the standard — and nothing is ever too much trouble.
+                                always the standard â€” and nothing is ever too much trouble.
                             </p>
                         </div>
                     </motion.div>
@@ -447,7 +445,7 @@ function AboutUs() {
                         Travel in Total <span style={{ color: 'var(--color-primary)' }}>Confidence</span>
                     </h2>
                     <p className="text-white/50 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-                        At <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link>, we believe true luxury isn't just about a smooth ride —
+                        At <Link to="/" style={{ color: '#C5A54D', textDecoration: 'none' }}>JK Executive Chauffeurs</Link>, we believe true luxury isn't just about a smooth ride â€”
                         it's knowing you can travel with complete privacy and peace of mind.
                     </p>
                 </motion.div>
@@ -472,7 +470,7 @@ function AboutUs() {
                         {
                             icon: Shield,
                             title: 'Extra Security if You Need It',
-                            description: 'For those requiring added protection, we offer close-protection chauffeur teams — blending comfort and security, delivered with the same courtesy you expect.',
+                            description: 'For those requiring added protection, we offer close-protection chauffeur teams â€” blending comfort and security, delivered with the same courtesy you expect.',
                         },
                     ].map((item, index) => (
                         <motion.div
@@ -540,11 +538,11 @@ function AboutUs() {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[
-                        { icon: Car, title: 'Corporate & Business Travel', description: 'Executive roadshows, meetings, and conferences — we make sure you are relaxed and on time.' },
+                        { icon: Car, title: 'Corporate & Business Travel', description: 'Executive roadshows, meetings, and conferences â€” we make sure you are relaxed and on time.' },
                         { icon: MapPin, title: 'Airport Transfers', description: 'Meet & greet service with live flight tracking and on-time transfers to any London airport.' },
-                        { icon: Star, title: 'Weddings & Events', description: 'Elegant vehicles for weddings, proms, and special occasions — adding a touch of luxury to your day.' },
+                        { icon: Star, title: 'Weddings & Events', description: 'Elegant vehicles for weddings, proms, and special occasions â€” adding a touch of luxury to your day.' },
                         { icon: Shield, title: 'Private Aviation & Tours', description: 'VIP transfers to/from private jets, and custom London sightseeing and shopping trips.' },
-                        { icon: Clock, title: '24/7 On-Demand', description: 'Hourly or daily hire at competitive rates — available one hour to all day, any time.' },
+                        { icon: Clock, title: '24/7 On-Demand', description: 'Hourly or daily hire at competitive rates â€” available one hour to all day, any time.' },
                     ].map((service, index) => (
                         <motion.div
                             key={index}
@@ -688,3 +686,4 @@ function AboutUs() {
 }
 
 export default AboutUs;
+
