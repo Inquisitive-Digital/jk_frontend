@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { useGoogleMaps } from "../Context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
@@ -41,6 +41,8 @@ function Booking() {
   const [clientSecret, setClientSecret] = useState(null);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [isTestMode, setIsTestMode] = useState(false);
+  const [presentmentCurrency, setPresentmentCurrency] = useState('gbp');
+  const [paymentCurrencyInfo, setPaymentCurrencyInfo] = useState(null);
   const userDetailsRef = useRef(null);
 
   // ── Payment failure tracking refs ──────────────────────────────
@@ -225,7 +227,7 @@ function Booking() {
 
   // Helper function to create payment intent and navigate to payment step
   // formData is passed directly from UserDetails so we don't rely on potentially-stale React state
-  const createPaymentIntentAndProceed = async (bookingId = null, formData = null) => {
+  const createPaymentIntentAndProceed = async (bookingId = null, formData = null, displayCurrency = null) => {
     const totalAmount = bookingData.selectedVehicle?.pricing?.totalPrice;
     const savedBookingId = bookingId || bookingData.savedBookingId;
 
@@ -271,7 +273,7 @@ function Booking() {
     try {
       const response = await paymentAPI.createPaymentIntent({
         amount: totalAmount,
-        currency: "gbp",
+        currency: displayCurrency || presentmentCurrency || 'gbp',
         bookingData: mergedBookingData,
         bookingId: savedBookingId,
       });
@@ -279,8 +281,16 @@ function Booking() {
       if (response.success) {
         setClientSecret(response.clientSecret);
         setIsTestMode(response.isTestMode || false);
-        setCurrentStep(4);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Store currency conversion info so Payment.jsx can display correct totals
+        setPaymentCurrencyInfo({
+          currency: response.currency  || 'gbp',
+          amount:   response.amount    || totalAmount,
+          symbol:   response.symbol    || '£',
+          rate:     response.exchangeRate || 1,
+        });
+        setPresentmentCurrency(response.currency || displayCurrency || 'gbp');
+        if (currentStep !== 4) setCurrentStep(4);
+        if (currentStep !== 4) window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         alert("Failed to initialize payment. Please try again.");
       }
@@ -289,6 +299,24 @@ function Booking() {
       alert("Something went wrong. Please try again.");
     }
   };
+  // Called by Payment.jsx when user picks a different currency
+  // Re-creates the Stripe PaymentIntent in the new currency without re-submitting the whole form
+  const handleCurrencyChange = async (newCurrency) => {
+    if (newCurrency === presentmentCurrency) return;
+    const bookingId = bookingData.savedBookingId;
+    if (!bookingId) return;
+    setIsLoadingPayment(true);
+    try {
+      await createPaymentIntentAndProceed(bookingId, null, newCurrency);
+      // createPaymentIntentAndProceed already calls setPresentmentCurrency + setPaymentCurrencyInfo
+      // But we stay on step 4 - patch setCurrentStep to avoid navigating away
+    } catch (err) {
+      console.error('Currency switch failed:', err);
+    } finally {
+      setIsLoadingPayment(false);
+    }
+  };
+
 
   const handlePaymentSuccess = async (paymentIntent) => {
     // 🔥 TRACK: Purchase — Stripe confirmed payment succeeded
@@ -509,6 +537,9 @@ function Booking() {
                     }}
                     isLoadingIntent={isLoadingPayment}
                     isTestMode={isTestMode}
+                    presentmentCurrency={presentmentCurrency}
+                    paymentCurrencyInfo={paymentCurrencyInfo}
+                    onCurrencyChange={handleCurrencyChange}
                   />
                 </motion.div>
               )}

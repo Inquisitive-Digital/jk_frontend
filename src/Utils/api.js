@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 import { toast } from "react-toastify";
 
 const Environment = {
@@ -250,6 +250,12 @@ export const paymentAPI = {
         const response = await api.get(`/api/payments/status/${paymentIntentId}`);
         return response.data;
     },
+
+    // Get live currency quotes for a given GBP amount (used by Step 4 currency selector)
+    getCurrencyQuotes: async (amount) => {
+        const response = await api.get('/api/payments/quotes?amount=' + amount);
+        return response.data;
+    },
 };
 
 // Booking APIs (called after payment is complete)
@@ -333,7 +339,7 @@ export const adminAPI = {
 
 // Service APIs
 export const serviceAPI = {
-    // Get all services (paginated, public — active only)
+    // Get all services (paginated, public â€” active only)
     getAllServices: async (page = 1, limit = 10) => {
         const response = await api.get("/api/services", { params: { page, limit } });
         return response.data;
@@ -351,7 +357,7 @@ export const serviceAPI = {
         return response.data;
     },
 
-    // ─── Admin only ──────────────────────────────────────────────────────────
+    // â”€â”€â”€ Admin only â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     // Get ALL services for admin panel (includes inactive)
     getAllAdmin: async (page = 1, limit = 20, search = "") => {
@@ -522,7 +528,7 @@ export const calendarEventAPI = {
         return response.data;
     },
 
-    // Bulk create calendar events (admin — seeding)
+    // Bulk create calendar events (admin â€” seeding)
     bulkCreate: async (events) => {
         const response = await api.post("/api/calendar-events/bulk", { events });
         return response.data;
@@ -531,7 +537,7 @@ export const calendarEventAPI = {
 
 // Blog APIs
 export const blogAPI = {
-    // Get all blogs (paginated, public — active only)
+    // Get all blogs (paginated, public â€” active only)
     getAll: async (page = 1, limit = 9) => {
         const response = await api.get("/api/blogs", { params: { page, limit } });
         return response.data;
@@ -543,7 +549,7 @@ export const blogAPI = {
         return response.data;
     },
 
-    // ─── Admin only ──────────────────────────────────────────────────────────
+    // â”€â”€â”€ Admin only â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     // Get ALL blogs for admin panel (includes inactive)
     getAllAdmin: async (page = 1, limit = 20, search = "") => {
@@ -592,13 +598,13 @@ export const blogAPI = {
 
 // Contact / Inquiry API
 export const contactAPI = {
-    // Submit contact form inquiry — sends email to admin
+    // Submit contact form inquiry â€” sends email to admin
     submitInquiry: async (data) => {
         const response = await api.post("/api/contact", data);
         return response.data;
     },
 
-    // Submit bulk / corporate quote request — sends email to admin
+    // Submit bulk / corporate quote request â€” sends email to admin
     submitBulkQuote: async (data) => {
         const response = await api.post("/api/contact/quote", data);
         return response.data;
@@ -610,7 +616,7 @@ export const contactAPI = {
         return response.data;
     },
 
-    // ─── Admin only ──────────────────────────────────────────────────────────
+    // â”€â”€â”€ Admin only â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     // Get all contact leads (Admin)
     getAllAdmin: async (page = 1, limit = 20, search = "") => {
